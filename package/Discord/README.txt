@@ -72,13 +72,8 @@ the Patch folder.
 
 UNINSTALL
 ---------
-Close the game, double-click Discord\Uninstall.exe and choose "Yes". It
-deletes Patch\Discord_RPC.rb, so the mod loader no longer loads the mod;
-the loader itself stays for your other mods. Then delete the Discord
-folder. Deleting Patch\Discord_RPC.rb and the Discord folder by hand does
-the same.
-If Windows warns that it protected your PC, click "More info" and then
-"Run anyway": the uninstaller is not signed.
+Close the game and delete Patch\Discord_RPC.rb and the Discord folder.
+The mod loader stays for your other mods.
 
 
 WHAT IT CHANGES
@@ -86,8 +81,8 @@ WHAT IT CHANGES
 The mod itself is Patch\Discord_RPC.rb, like any other Patch folder mod,
 and the community's mod loader runs it. Only its own files and your saves
 (see below) are changed, and Patch\Patch.rb is never touched.
-If you delete the Discord folder without uninstalling, the game still
-starts normally - the mod simply does nothing.
+If you delete only the Discord folder, the game still starts normally -
+the mod simply does nothing.
 
 Some trivia (enemies defeated, escapes, wipeouts, biggest hit, gold spent,
 items synthesized, requests, defeat scenes) is counted per save by the

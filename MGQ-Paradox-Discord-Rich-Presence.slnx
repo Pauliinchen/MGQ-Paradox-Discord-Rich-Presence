@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="MGQParadox.DiscordPresence/MGQParadox.DiscordPresence.csproj" />
-  <Project Path="MGQParadox.DiscordPresence.Setup/MGQParadox.DiscordPresence.Setup.csproj" />
 </Solution>

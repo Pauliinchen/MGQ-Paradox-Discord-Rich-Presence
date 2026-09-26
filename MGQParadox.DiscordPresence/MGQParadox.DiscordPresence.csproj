@@ -4,7 +4,7 @@
     Builds DiscordPresence.dll, which the game loads, and on publish the complete release layout
     in Shipping\ at the repository root (git-ignored), ready to copy into a game folder:
 
-      Discord\  DiscordPresence.dll  Uninstall.exe  Settings.ini  README.txt
+      Discord\  DiscordPresence.dll  Settings.ini  README.txt
       Patch\    Discord_RPC.rb
 
       dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.2.0
@@ -34,7 +34,6 @@
     <ModDir>$(PackageDir)Discord\</ModDir>
     <PatchDir>$(PackageDir)Patch\</PatchDir>
     <ZipFile>$(MSBuildProjectDirectory)\bin\$(Configuration)\MGQ-Paradox-Discord-RPC-$(Version).zip</ZipFile>
-    <SetupProject>..\MGQParadox.DiscordPresence.Setup\MGQParadox.DiscordPresence.Setup.csproj</SetupProject>
     <VsInstallerDir>$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer\</VsInstallerDir>
   </PropertyGroup>
 
@@ -55,19 +54,9 @@
     <PrependToPath Directory="$(VsInstallerDir)" />
   </Target>
 
-  <!--
-    The setup project is built from here rather than referenced, so nothing restores it on its
-    own. The restore runs under a session id of its own, which makes the build afterwards evaluate
-    the project anew and see the restored packages.
-  -->
   <Target Name="AssemblePackage" AfterTargets="Publish">
-    <MSBuild Projects="$(SetupProject)" Targets="Restore" Properties="Configuration=$(Configuration);MSBuildRestoreSessionId=$([System.Guid]::NewGuid())" />
-    <MSBuild Projects="$(SetupProject)" Targets="Build" Properties="Configuration=$(Configuration);Version=$(Version)">
-      <Output TaskParameter="TargetOutputs" ItemName="SetupExecutable" />
-    </MSBuild>
-
     <RemoveDir Directories="$(PackageDir)" />
-    <Copy SourceFiles="$(PublishDir)$(AssemblyName).dll;@(SetupExecutable);@(ShippedInModFolder)" DestinationFolder="$(ModDir)" />
+    <Copy SourceFiles="$(PublishDir)$(AssemblyName).dll;@(ShippedInModFolder)" DestinationFolder="$(ModDir)" />
     <Copy SourceFiles="@(ShippedInPatchFolder)" DestinationFolder="$(PatchDir)" />
     <Message Importance="high" Text="$(MSBuildProjectName) -> $(PackageDir)" />
   </Target>

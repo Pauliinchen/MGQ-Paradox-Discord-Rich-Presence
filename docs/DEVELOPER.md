@@ -6,7 +6,6 @@
 MGQ-Paradox-Discord-Rich-Presence.slnx   Visual Studio solution
 GameScript/Discord_RPC.rb                Ruby, runs inside the game
 MGQParadox.DiscordPresence/              C# NativeAOT project -> DiscordPresence.dll, and the package
-MGQParadox.DiscordPresence.Setup/        C# project -> Uninstall.exe
 package/                                 static files shipped as-is
 Shipping/                                publish output, git-ignored
 docs/DEVELOPER.md                        this file
@@ -46,26 +45,16 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `Discord/DiscordIpcClient.cs` | Discord's local named-pipe protocol. `Opcode.cs` holds the frame kinds. |
 | `Discord/Activity.cs`, `Discord/Json.cs` | The activity and its JSON, with Discord's field limits. |
 
-**`MGQParadox.DiscordPresence.Setup/`** builds the uninstaller `Uninstall.exe` (.NET Framework 4.8 with WinForms), which ships in `Discord/`. Installing needs no program. `ModFolder.cs` and `Log.cs` are linked in from the DLL project.
-
-| Path | What it is |
-|---|---|
-| `Program.cs` | Entry point. No argument asks first and reports in dialogs; `--silent` uninstalls without them. |
-| `Uninstaller.cs` | The dialogs and the uninstall flow. `SetupMode.cs` holds its modes. |
-| `GameFolder.cs` | The game folder around the mod folder: layout check, paths, whether the game runs. |
-| `PatchLoader.cs` | The loader block the earlier versions added to `Patch/Patch.rb`: finding and removing it, safe write. |
-| `NWPatchChecksum.cs` | The checksum the game verifies on line 1 of `Patch.rb`. |
-
 **`package/Discord/`:** `Settings.ini` (`client_id`, and the options `nsfw` and `all_saves`, which the game script reads and writes) and the player `README.txt`.
 
 ## Build and test
 
 You need the .NET 10 SDK and the Visual Studio workload **Desktop development with C++**, whose linker NativeAOT uses.
 
-Everything is in the projects; there is no separate build script. Publishing the DLL project assembles the complete release layout in `Shipping/` at the repository root, building the setup project along the way. Copy its content into a game folder to install or update the mod there:
+Everything is in the projects; there is no separate build script. Publishing the DLL project assembles the complete release layout in `Shipping/` at the repository root. Copy its content into a game folder to install or update the mod there:
 
 ```
-Discord/  DiscordPresence.dll  Uninstall.exe  Settings.ini  README.txt
+Discord/  DiscordPresence.dll  Settings.ini  README.txt
 Patch/    Discord_RPC.rb
 ```
 
@@ -79,7 +68,7 @@ Patch/    Discord_RPC.rb
 - **Every publish replaces `Shipping/`.** Close the game before copying it over an install: `DiscordPresence.dll` is locked while the game runs.
 - **Visual Studio:** open the `.slnx`. The shipped files appear in the DLL project under `Shipped`.
 - **Game folder for testing:** it needs the community's mod loader (see [How it hooks in](#how-it-hooks-in)). Then every change only needs a publish, a copy and a game restart.
-- **Logs:** `DiscordPresence.log` (DLL and uninstaller) and `InGame.log` (in-game errors). Set `DEBUG = true` in `Discord_RPC.rb` to log every status write.
+- **Logs:** `DiscordPresence.log` (the DLL) and `InGame.log` (in-game errors). Set `DEBUG = true` in `Discord_RPC.rb` to log every status write.
 
 ## Conventions
 
@@ -106,14 +95,7 @@ The mod requires the community's mod loader, a replacement `Patch.rb` from [*Pat
 They appended a block (`# >>> MGQ Discord RPC` … `# <<< MGQ Discord RPC`) to `Patch.rb` that loads `Discord/rpc.rb`, and shipped `DiscordPatcher.bat` next to `Game.exe`. Their hooks use the same alias names, so loaded next to `Discord_RPC.rb`, each hook would call itself until the stack overflows.
 
 - **At start-up** `MGQ_Discord.hookable?` deletes `Discord/rpc.rb`. The block runs *after* the mod loader, which sits above it in `Patch.rb`, so on the very first start after extracting the new zip it already finds nothing to load. The hooks are skipped (and `InGame.log` says why) when `Graphics` already has `mgq_discord_update`, from another copy of this script or an earlier version, or when `rpc.rb` cannot be deleted *and* `Patch.rb` still holds the block that would load it. A leftover `rpc.rb` with no block to load it only gets a log line.
-- **Uninstalling** deletes `Patch/Discord_RPC.rb`, `Discord/rpc.rb` and the old `DiscordPatcher.bat`, then removes the block from `Patch.rb` and recomputes line 1. Their `Patch.rb.backup` goes too when it matches the cleaned file. `Patch.rb` is written last, through a temporary file, so a failure never leaves it half changed. The mod loader stays for the other mods.
-
-**The checksum:**
-1. For every line after the first, strip digits and whitespace. Both are ASCII-only, like Ruby 1.9's `\d` and `\s`.
-2. Sum the codepoints into `n`.
-3. The checksum is `n * <last character of Math.sqrt(n).to_s>`.
-
-Ruby's `Float#to_s` prints the *shortest* round-tripping decimal, and `x.0` for integral values. .NET's `"R"` format gives 17 digits and a different last digit, which makes the game exit on launch. `NWPatchChecksum.FormatLikeRuby` replicates Ruby.
+- **The block itself stays** in `Patch.rb`, with nothing left to load, until the next translation update or a fresh download of the community's `Patch.rb` replaces the file. The mod never writes `Patch.rb`, so there is no uninstaller: uninstalling is deleting `Patch/Discord_RPC.rb` and `Discord/`.
 
 ## Runtime
 

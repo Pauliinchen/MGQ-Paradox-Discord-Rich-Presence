@@ -2,6 +2,7 @@
 //  ModFolder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-27: Left the uninstaller out of the folder's contents, it is gone
 //      Paulinchen  2026-09-26: Removed the game script's file name, the script lives in the Patch folder now
 //      Paulinchen  2026-09-25: Created
 //
@@ -13,7 +14,7 @@ using System.IO;
 namespace MGQParadox.DiscordPresence;
 
 /// <summary>
-/// The Discord folder next to Game.exe, which holds the DLL, the uninstaller and everything they read or write.
+/// The Discord folder next to Game.exe, which holds the DLL and everything it reads or writes.
 /// </summary>
 internal static class ModFolder
 {

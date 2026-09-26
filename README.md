@@ -85,20 +85,15 @@ A translation update replaces `Patch\Patch.rb` and with it the mod loader, so no
 
 ### Uninstall
 
-Close the game, double-click **`Discord\Uninstall.exe`** and choose **Yes**. It deletes `Patch\Discord_RPC.rb`, so the mod loader no longer loads the mod; the loader itself stays for your other mods. Then delete the `Discord` folder.
-
-Deleting `Patch\Discord_RPC.rb` and the `Discord` folder by hand does the same.
-
-> [!NOTE]
-> Windows may warn that it protected your PC, because the uninstaller is not signed. Click **More info → Run anyway**. Its source code is in this repository.
+Close the game and delete `Patch\Discord_RPC.rb` and the `Discord` folder. The mod loader stays for your other mods.
 
 ## What it changes
 
 The mod is a regular **Patch folder mod** ("Type 1"), `Patch\Discord_RPC.rb`, like the community's mods on the [MGQ wiki](https://mgq.miraheze.org/wiki/Paradox_mods). The community's mod loader runs it, and it works next to the other mods.
 
 - **Only its own files** (`Discord\` and `Patch\Discord_RPC.rb`) **and your saves** are changed. `Patch\Patch.rb` is never touched.
-- **Uninstalling** deletes `Patch\Discord_RPC.rb`. The mod loader stays for your other mods.
-- If you delete the `Discord` folder without uninstalling, the game still starts normally, and the mod simply does nothing.
+- **Uninstalling** is deleting those files. The mod loader stays for your other mods.
+- If you delete only the `Discord` folder, the game still starts normally, and the mod simply does nothing.
 - **Your saves** get the mod's [per-save counters](#per-save-statistics) added, and nothing else. They load the same with or without the mod; without it, the game ignores the counters.
 
 ## Per-save statistics
