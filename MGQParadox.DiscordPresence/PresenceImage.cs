@@ -2,6 +2,7 @@
 //  PresenceImage.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Always showed the application icon, dropping large_image from Settings.ini
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -28,29 +29,11 @@ internal static class PresenceImage
     private static readonly Regex IconPattern = new("\"icon\"\\s*:\\s*\"([0-9a-zA-Z_]+)\"");
 
     /// <summary>
-    /// Picks the picture: the one set in Settings.ini, otherwise the application icon.
+    /// Looks up the picture, the application icon.
     /// </summary>
     /// <param name="clientId">The Discord application the presence is shown for.</param>
-    /// <returns>An asset key or https address, or <see langword="null"/> when there is none.</returns>
+    /// <returns>The icon's address, or <see langword="null"/> when the application has no icon or Discord is unreachable.</returns>
     public static string? Resolve(string clientId)
-    {
-        var configured = Settings.LargeImage;
-
-        if (!string.IsNullOrEmpty(configured))
-        {
-            Log.Write($"large_image from Settings.ini: {configured}");
-            return configured;
-        }
-
-        return LookUpAppIcon(clientId);
-    }
-
-    /// <summary>
-    /// Looks up the address of the application icon.
-    /// </summary>
-    /// <param name="clientId">The Discord application.</param>
-    /// <returns>The address, or <see langword="null"/> when the application has no icon or Discord is unreachable.</returns>
-    private static string? LookUpAppIcon(string clientId)
     {
         try
         {
@@ -63,7 +46,7 @@ internal static class PresenceImage
             }
 
             var url = $"https://cdn.discordapp.com/app-icons/{clientId}/{match.Groups[1].Value}.png?size=512";
-            Log.Write($"large_image = app icon {url}");
+            Log.Write($"picture = app icon {url}");
             return url;
         }
         catch (Exception ex)

@@ -2,6 +2,7 @@
 //  Settings.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Dropped large_image, the picture is always the application icon
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -26,11 +27,6 @@ internal static class Settings
     /// The Discord application the presence is shown for.
     /// </summary>
     public static string? ClientId => Read("client_id");
-
-    /// <summary>
-    /// An Art Asset key or https address that replaces the application icon on the profile.
-    /// </summary>
-    public static string? LargeImage => Read("large_image");
 
     /// <summary>
     /// Looks up one <c>key = value</c> line.

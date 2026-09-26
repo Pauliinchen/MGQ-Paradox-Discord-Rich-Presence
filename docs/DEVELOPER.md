@@ -34,7 +34,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `Exports.cs` | The functions `Discord_RPC.rb` calls: `presence_start` and `presence_update`. Nothing may throw out of them. |
 | `PresenceLoop.cs` | The DLL's own thread: rate limit, trivia rotation, reconnecting to Discord. |
 | `ActivityBuilder.cs` | Builds the Discord activity. **All user-visible texts on the C# side live here.** New or changed ones also go into [Activities.md](Activities.md) under the version they ship in. |
-| `PresenceImage.cs` | Picks the picture: `large_image` from `Settings.ini`, or the application icon. |
+| `PresenceImage.cs` | Looks up the picture, the application icon. |
 | `ModFolder.cs` | The `Discord` folder, which the game script finds the DLL in. |
 | `Log.cs`, `Settings.cs` | `DiscordPresence.log` and `Settings.ini` in that folder. |
 | `NativeMethods.cs` | Lets the DLL find its own folder. |
@@ -52,7 +52,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `PatchLoader.cs` | The loader block the earlier versions added to `Patch/Patch.rb`: finding and removing it, safe write. |
 | `NWPatchChecksum.cs` | The checksum the game verifies on line 1 of `Patch.rb`. |
 
-**`package/Discord/`:** `Settings.ini` (`client_id`, optional `large_image`) and the player `README.txt`.
+**`package/Discord/`:** `Settings.ini` (`client_id`) and the player `README.txt`.
 
 ## Build and test
 
