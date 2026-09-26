@@ -4,6 +4,7 @@
 
 ```
 MGQ-Paradox-Discord-Rich-Presence.slnx   Visual Studio solution
+Directory.Build.targets                  puts vswhere.exe on the PATH, which the NativeAOT link needs
 GameScript/Discord_RPC.rb                Ruby, runs inside the game
 MGQParadox.DiscordPresence/              C# NativeAOT project -> DiscordPresence.dll, and the package
 package/                                 static files shipped as-is

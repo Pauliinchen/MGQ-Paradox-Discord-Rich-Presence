@@ -1,115 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    Builds DiscordPresence.dll, which the game loads, and on publish the complete release layout
-    in Shipping\ at the repository root (git-ignored), ready to copy into a game folder:
-
-      Discord\  DiscordPresence.dll  Settings.ini  README.txt
-      Patch\    Discord_RPC.rb
-
-      dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.3.0
-
-    Release publishes also zip it:  bin\Release\MGQ-Paradox-Discord-RPC-<Version>.zip
-
-    NativeAOT for 32-bit Windows, because the game is a 32-bit process and can only load a native
-    DLL of its own kind. Players need no .NET installed. Building needs the Visual Studio workload
-    "Desktop development with C++" for the linker.
-  -->
+  <!-- Publish assembles the release layout in Shipping\, see docs/DEVELOPER.md. -->
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <OutputType>Library</OutputType>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>DiscordPresence</AssemblyName>
     <RootNamespace>MGQParadox.DiscordPresence</RootNamespace>
     <Product>Monster Girl Quest! Paradox RPG Discord Rich Presence</Product>
-    <Version>0.0.0-dev</Version>                                 <!-- releases: -p:Version=1.3.0 -->
+    <Version>0.0.0-dev</Version>
 
+    <!-- The game is a 32-bit process and only loads a native DLL of its own kind. -->
     <PublishAot>true</PublishAot>
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
     <InvariantGlobalization>true</InvariantGlobalization>
 
-    <PackageDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', 'Shipping'))</PackageDir>
-    <ModDir>$(PackageDir)Discord\</ModDir>
-    <PatchDir>$(PackageDir)Patch\</PatchDir>
+    <PackageDir>$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory), .., Shipping))</PackageDir>
     <ZipFile>$(MSBuildProjectDirectory)\bin\$(Configuration)\MGQ-Paradox-Discord-RPC-$(Version).zip</ZipFile>
-    <VsInstallerDir>$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer\</VsInstallerDir>
   </PropertyGroup>
 
-  <!-- Shipped as-is: shown in the project, copied into the package on publish. -->
   <ItemGroup>
-    <ShippedInModFolder Include="..\package\Discord\*" />
-    <ShippedInPatchFolder Include="..\GameScript\Discord_RPC.rb" />
+    <ModFile Include="..\package\Discord\*" />
+    <PatchFile Include="..\GameScript\Discord_RPC.rb" />
 
-    <None Include="..\GameScript\Discord_RPC.rb" Link="Shipped\Patch\Discord_RPC.rb" />
-    <None Include="..\package\Discord\*" Link="Shipped\Discord\%(Filename)%(Extension)" />
+    <None Include="@(ModFile)" Link="Shipped\Discord\%(Filename)%(Extension)" />
+    <None Include="@(PatchFile)" Link="Shipped\Patch\%(Filename)%(Extension)" />
   </ItemGroup>
-
-  <!--
-    Visual Studio 18's vcvarsall.bat calls vswhere.exe by name, which is only on the PATH inside a
-    developer prompt. Without it the NativeAOT link step cannot find the linker.
-  -->
-  <Target Name="PutVsWhereOnPath" BeforeTargets="PrepareForPublish" Condition="Exists('$(VsInstallerDir)vswhere.exe')">
-    <PrependToPath Directory="$(VsInstallerDir)" />
-  </Target>
 
   <Target Name="AssemblePackage" AfterTargets="Publish">
     <RemoveDir Directories="$(PackageDir)" />
-    <Copy SourceFiles="$(PublishDir)$(AssemblyName).dll;@(ShippedInModFolder)" DestinationFolder="$(ModDir)" />
-    <Copy SourceFiles="@(ShippedInPatchFolder)" DestinationFolder="$(PatchDir)" />
+    <Copy SourceFiles="$(PublishDir)$(AssemblyName).dll;@(ModFile)" DestinationFolder="$(PackageDir)Discord" />
+    <Copy SourceFiles="@(PatchFile)" DestinationFolder="$(PackageDir)Patch" />
     <Message Importance="high" Text="$(MSBuildProjectName) -> $(PackageDir)" />
   </Target>
 
   <Target Name="ZipPackage" AfterTargets="AssemblePackage" Condition="'$(Configuration)' == 'Release'">
-    <ZipWithForwardSlashes SourceDirectory="$(PackageDir)" DestinationFile="$(ZipFile)" />
-    <Message Importance="high" Text="$(MSBuildProjectName) -> $(ZipFile)" />
+    <ZipDirectory SourceDirectory="$(PackageDir)" DestinationFile="$(ZipFile)" Overwrite="true" />
   </Target>
-
-  <UsingTask TaskName="PrependToPath" TaskFactory="RoslynCodeTaskFactory"
-             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <Directory ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Code Type="Fragment" Language="cs"><![CDATA[
-        var path = Environment.GetEnvironmentVariable("PATH") ?? "";
-        if (path.IndexOf(Directory.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase) < 0)
-            Environment.SetEnvironmentVariable("PATH", Directory + ";" + path);
-      ]]></Code>
-    </Task>
-  </UsingTask>
-
-  <!--
-    MSBuild's own ZipDirectory (and Compress-Archive) can write "\" into entry names,
-    which some unzip tools extract as a file literally named "Patch\Discord_RPC.rb".
-    The zip spec wants "/", so entries are written by hand.
-  -->
-  <UsingTask TaskName="ZipWithForwardSlashes" TaskFactory="RoslynCodeTaskFactory"
-             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <SourceDirectory ParameterType="System.String" Required="true" />
-      <DestinationFile ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System.IO" />
-      <Using Namespace="System.IO.Compression" />
-      <Code Type="Fragment" Language="cs"><![CDATA[
-        string root = Path.GetFullPath(SourceDirectory).TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
-        if (File.Exists(DestinationFile)) File.Delete(DestinationFile);
-        using (var fs = File.Create(DestinationFile))
-        using (var zip = new ZipArchive(fs, ZipArchiveMode.Create))
-        {
-            foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-            {
-                var entry = zip.CreateEntry(file.Substring(root.Length).Replace('\\', '/'), CompressionLevel.Optimal);
-                using (var target = entry.Open())
-                using (var source = File.OpenRead(file))
-                    source.CopyTo(target);
-            }
-        }
-      ]]></Code>
-    </Task>
-  </UsingTask>
 
 </Project>
