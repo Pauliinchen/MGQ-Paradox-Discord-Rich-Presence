@@ -7,7 +7,7 @@
       Discord\  DiscordPresence.dll  Settings.ini  README.txt
       Patch\    Discord_RPC.rb
 
-      dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.2.0
+      dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.3.0
 
     Release publishes also zip it:  bin\Release\MGQ-Paradox-Discord-RPC-<Version>.zip
 
@@ -24,7 +24,7 @@
     <AssemblyName>DiscordPresence</AssemblyName>
     <RootNamespace>MGQParadox.DiscordPresence</RootNamespace>
     <Product>Monster Girl Quest! Paradox RPG Discord Rich Presence</Product>
-    <Version>0.0.0-dev</Version>                                 <!-- releases: -p:Version=1.2.0 -->
+    <Version>0.0.0-dev</Version>                                 <!-- releases: -p:Version=1.3.0 -->
 
     <PublishAot>true</PublishAot>
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>

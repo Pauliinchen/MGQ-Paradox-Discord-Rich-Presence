@@ -3,8 +3,8 @@ Monster Girl Quest! Paradox RPG - Discord Rich Presence
 
 Shows what you're doing in Monster Girl Quest! Paradox RPG on your
 Discord profile: where you are and what you're doing (exploring,
-traveling, in combat, who you're talking to, idle, Labyrinth of Chaos
-floor and rare points),
+traveling, in combat, setting up camp, who you're talking to, idle,
+Labyrinth of Chaos floor and rare points),
 rotating trivia about your playthrough (the music that's playing
 included), and your party leader's level, race and class when someone
 hovers the picture. Requests, defeat scenes and battle fucks only show if
@@ -40,7 +40,8 @@ INSTALL
    Settings > Activity Privacy.
 
 Updating works the same way: close the game and extract the new download
-over the old one.
+over the old one. Versions before 1.3 also left Discord\Uninstall.exe,
+which is no longer used; you can delete it.
 
 
 OPTIONS
@@ -97,7 +98,8 @@ changes, and they load the same without the mod, which then ignores the
 counters. Counting starts when you install the mod; anything that
 happened earlier isn't counted. Everything else (battles fought, gold,
 playtime, companions and so on) is read from the save itself and covers
-the whole playthrough.
+the whole playthrough, except affection, which the game shares between
+all your saves.
 
 Earlier versions kept the counters in Discord\Stats\. Loading a save
 takes its numbers over once; after you've saved each save, you can

@@ -13,8 +13,9 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 | Anywhere | `<Location> - Exploring . . .` / `In combat!` / `In menu . . .` |
 | World map | `Traveling the world - On foot . . .` / `Sailing . . .` / `Flying . . .` |
 | Pocket Castle | `Pocket Castle - Currently in crafting hell...` and other rotating lines |
+| Setting up camp | `<Location> - Setting up for Camp . . .` |
 | In a conversation | `<Location> - Talking to <Name> . . .` |
-| No button pressed for a minute | `<Location> - Idle . . .`, except in battles, the Pocket Castle and the Labyrinth of Chaos |
+| No button pressed for a minute | `<Location> - Idle . . .`, except in battles, at camp, in conversations, the Pocket Castle and the Labyrinth of Chaos |
 | Labyrinth of Chaos | `Labyrinth of Chaos <Normal/Carnage> (<Biome>) - Floor <X> \| <Y> Rare Points!` |
 | In a request (NSFW) | `Pocket Castle - In a request with <Companion> for the <Nth> time!` |
 | After losing a battle (NSFW) | `<Location> - Raped by <Monster girl> for the <Nth> time!` |
@@ -63,7 +64,7 @@ Nothing else needs to be installed.
    ```
 3. Start the game as usual.
 
-**Updating** works the same way: close the game and extract the new zip over the old one.
+**Updating** works the same way: close the game and extract the new zip over the old one. Versions before 1.3 also left `Discord\Uninstall.exe`, which is no longer used; you can delete it.
 
 ### Options
 

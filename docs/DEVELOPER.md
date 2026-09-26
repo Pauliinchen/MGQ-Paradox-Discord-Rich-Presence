@@ -9,6 +9,7 @@ MGQParadox.DiscordPresence/              C# NativeAOT project -> DiscordPresence
 package/                                 static files shipped as-is
 Shipping/                                publish output, git-ignored
 docs/DEVELOPER.md                        this file
+docs/Activities.md                       every line Discord shows, by the release that added it
 .github/workflows/release.yml            builds and attaches the zip on release
 ```
 
@@ -22,6 +23,8 @@ docs/DEVELOPER.md                        this file
 | `GameState` | Everything read from the game: scene, area, vehicle, Labyrinth of Chaos, mastery. |
 | `Requests` | Which novel scene is a request, and who plays it. |
 | `DefeatScenes` | The scene after a lost battle, and which monster girl won. |
+| `Battlefucks` | A running battle fuck, and which battlefucker Luka faces. |
+| `Conversations` | Who the player is talking to, from the name boxes of the messages. |
 | `Trivia` | The second Discord line. **All trivia texts live here**, one named method per line, rotating in the order of `LINES`. Every new or changed line also goes into [Activities.md](Activities.md) under the version it ships in. |
 | `Statistics` | The counts the trivia shows: `SaveStats`, or the game's own across all saves when the Statistics option says so. |
 | `SaveStats` | The per-save counters, see [Per-save statistics](#per-save-statistics-savestats). |
@@ -61,7 +64,7 @@ Patch/    Discord_RPC.rb
 - **Publish, not build:** only a publish runs NativeAOT, so a plain build gives no usable DLL.
 
   ```powershell
-  dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.2.0
+  dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.3.0
   ```
 
 - **Release publishes** also zip it: `bin/Release/MGQ-Paradox-Discord-RPC-<Version>.zip`.
@@ -145,7 +148,7 @@ Requests are counted from the `Game_Novel#setup` hook, defeat scenes from the `B
 
 **Earlier versions** kept the six library counters in `Discord/Stats/<save file name>.txt`: `key=value` lines plus `fingerprint=<save_count>:<frames_on_save>`. `SaveStats.import_legacy`, called from the `DataManager.load_game_without_rescue` hook, takes them over while the loaded save has no `@mgq_discord_stats` yet and the fingerprint matches.
 
-**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, `Game_Novel#setup`, `BattleManager.change_novel_scene`, the `DataManager` save/autosave/backup-save/load methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
+**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, `Game_Novel#setup`, `Game_Message#add`, `Game_Interpreter#command_117`, `BattleManager.change_novel_scene`, the `DataManager` save/autosave/backup-save/load methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
 
 ## Options
 
