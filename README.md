@@ -30,12 +30,13 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - Who in your party has the highest stat, and who has mastered the most jobs and races
 - The last item you used, and on whom
 - The music that's playing, named like in Kagetsumugi's jukebox
+- The three companions with the most affection
 - Gold carried and spent, items synthesized, companions recruited, your Ilias or Alice choice, the deepest Labyrinth of Chaos floor, and more
 - How many requests you made, and to whom the most (NSFW)
 - How often you were raped after losing, and by whom the most (NSFW)
 - How many battle fucks you won (NSFW)
 
-Defeats, escapes, wipeouts, syntheses, gold spent, the biggest hit and battle fucks won count across all your saves, or only the save you're playing if you [choose so](#options). Everything else belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).
+Defeats, escapes, wipeouts, syntheses, gold spent, the biggest hit and battle fucks won count across all your saves, or only the save you're playing if you [choose so](#options). Affection is the game's own, which all your saves share. Everything else belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).
 
 **NSFW** lines only show when you turn them on, see [Options](#options).
 

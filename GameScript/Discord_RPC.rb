@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Published who the player is talking to during a conversation
+#      Paulinchen  2026-09-26: Added the companions with the most affection to the trivia
+#                            - Published who the player is talking to during a conversation
 #                            - Added the battle fucks won to the trivia
 #                            - Published a running battle fuck, with the monster girl who challenged Luka
 #                            - Published whether the camp music plays
@@ -804,6 +805,9 @@ module MGQ_Discord
     # Number of base parameters an actor has.
     PARAM_COUNT = 8
 
+    # Companions the affection line names at most.
+    TOP_AFFECTION_COUNT = 3
+
     # Name and comment by the value of the game's difficulty variable.
     DIFFICULTIES = {
       -2 => ["Very Easy", "Here for the story, and that's fine"],
@@ -835,6 +839,7 @@ module MGQ_Discord
     LINES = [
       :dead_party_members,
       :recruited_members,
+      :most_affection,
       :battles_fought,
       :difficulty,
       :playtime,
@@ -900,14 +905,41 @@ module MGQ_Discord
 
     # How many companions have joined, Luka not counted.
     #
+    # @return [String] the line
+    def self.recruited_members
+      "Has recruited #{companions.size} party members this playthrough!"
+    end
+
+    # The recruited companions with the most affection, up to TOP_AFFECTION_COUNT.
+    #
+    # The game reads affection from $game_global_system, which all saves share.
+    #
+    # @return [String, nil] the line, nil while no companion has any affection
+    def self.most_affection
+      ranked = companions.map { |actor| [actor.name, actor.actor.love.to_i] }
+                         .select { |_, love| love > 0 }
+                         .sort_by { |_, love| -love }.first(TOP_AFFECTION_COUNT)
+      return nil if ranked.empty?
+
+      "Most affection with #{listed(ranked.map { |name, love| "#{name} (#{NumberFormat.grouped(love)})" })}!"
+    end
+
+    # Every companion who has joined, Luka left out.
+    #
     # Read from the permanent roster, since include_members returns only the temporary party
     # during story sections like the Chaos domain.
     #
-    # @return [String] the line
-    def self.recruited_members
-      roster = $game_party.instance_variable_get(:@include_actors).map { |id| $game_actors[id] }
-      count = roster.reject { |actor| actor.luca? }.size
-      "Has recruited #{count} party members this playthrough!"
+    # @return [Array<Game_Actor>] the companions
+    def self.companions
+      $game_party.instance_variable_get(:@include_actors).map { |id| $game_actors[id] }.reject { |actor| actor.luca? }
+    end
+
+    # Joins items the way a sentence lists them: "A", "A and B", "A, B and C".
+    #
+    # @param items [Array<String>] the items
+    # @return [String] the list
+    def self.listed(items)
+      items.size < 2 ? items.join : "#{items[0..-2].join(', ')} and #{items[-1]}"
     end
 
     # How many battles this save has fought.

@@ -27,6 +27,7 @@ The Statistics option also switches *Battlefucks won* between the game's counts 
 
 | Activity | Text | When |
 |---|---|---|
+| Most affection | `Most affection with <Companion> (<N>), <Companion> (<N>) and <Companion> (<N>)!` | The three recruited companions with the most affection, fewer while fewer have any. Affection is the game's own, shared by all saves. Comes after *Recruited members*. |
 | Battlefucks won (NSFW) | `Has won <N> battlefuck(s)!` | From the first battle fuck won, counted by the game itself: across all saves, or per save with the Statistics option on *This save*. Comes after *Most raped by*. |
 
 ## 1.2
