@@ -92,7 +92,8 @@ Some trivia (enemies defeated, escapes, wipeouts, biggest hit, gold spent,
 items synthesized, requests, defeat scenes) is counted per save by the
 mod itself, because the game doesn't count those per save. The first six
 show the game's counts across all saves unless you set [Discord]
-Statistics to This save.
+Statistics to This save. Battle fucks won are counted by the game itself,
+across all saves or, with This save, for the save you're playing.
 
 The mod keeps these counters inside your saves, so copies, the autosave
 and the game's backup save carry them along. Nothing else in your saves

@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Published a running battle fuck, with the monster girl who challenged Luka
+#      Paulinchen  2026-09-26: Added the battle fucks won to the trivia
+#                            - Published a running battle fuck, with the monster girl who challenged Luka
 #                            - Published whether the camp music plays
 #                            - Kept the per-save counters inside the save, taking over the earlier versions' files once
 #                            - Added an option to count the trivia across all saves instead of per save
@@ -786,6 +787,7 @@ module MGQ_Discord
       :most_requested,
       :times_raped,
       :most_raped_by,
+      :battlefucks_won,
       :gold_carried,
     ]
 
@@ -1028,6 +1030,14 @@ module MGQ_Discord
       "Raped by #{monster} the most, #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && monster
     end
 
+    # How many battle fucks were won, in this save or all saves.
+    #
+    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
+    def self.battlefucks_won
+      count = Statistics.battlefucks_won
+      "Has won #{NumberFormat.counted(count, 'battlefuck')}!" if Options.nsfw? && count > 0
+    end
+
     # How much gold the party carries.
     #
     # @return [String] the line
@@ -1054,6 +1064,14 @@ module MGQ_Discord
     def self.[](key)
       all_saves = ALL_SAVES[key]
       Options.all_saves? && all_saves ? $game_library.send(all_saves).to_i : SaveStats[key]
+    end
+
+    # The game counts battle fucks won per save itself, so unlike the others this count covers the
+    # time before the mod was installed too.
+    #
+    # @return [Integer] the battle fucks won, from $game_library across all saves when the option says so
+    def self.battlefucks_won
+      Options.all_saves? ? $game_library.battlefuck_win.to_i : $game_variables[NWConst::Var::BATTLEFUCKER_DEFEAT].to_i
     end
   end
 

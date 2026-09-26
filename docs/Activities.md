@@ -13,12 +13,20 @@ When you add or change an activity, add it under the version it will ship in.
 
 ## 1.3
 
+The Statistics option also switches *Battlefucks won* between the game's counts across all saves (default) and per save.
+
 ### Line 1
 
 | Activity | Text | When |
 |---|---|---|
 | Camp | `<Location> - Setting up for Camp . . .` / `Traveling the world - Setting up for Camp . . .` | While the camp music (*Camping*) plays, except in battles, the Pocket Castle and the Labyrinth of Chaos. Shown instead of idle. |
 | Battle fuck (NSFW) | `<Location> - Currently Battlefucking <Monster girl>!` | From accepting a battle fuck until it is over, the scene after a win included. Replays in the Recollection Room don't show. |
+
+### Trivia
+
+| Activity | Text | When |
+|---|---|---|
+| Battlefucks won (NSFW) | `Has won <N> battlefuck(s)!` | From the first battle fuck won, counted by the game itself: across all saves, or per save with the Statistics option on *This save*. Comes after *Most raped by*. |
 
 ## 1.2
 

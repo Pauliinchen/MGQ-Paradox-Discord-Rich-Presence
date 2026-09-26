@@ -32,8 +32,9 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - Gold carried and spent, items synthesized, companions recruited, your Ilias or Alice choice, the deepest Labyrinth of Chaos floor, and more
 - How many requests you made, and to whom the most (NSFW)
 - How often you were raped after losing, and by whom the most (NSFW)
+- How many battle fucks you won (NSFW)
 
-Defeats, escapes, wipeouts, syntheses, gold spent and the biggest hit count across all your saves, or only the save you're playing if you [choose so](#options). Everything else belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).
+Defeats, escapes, wipeouts, syntheses, gold spent, the biggest hit and battle fucks won count across all your saves, or only the save you're playing if you [choose so](#options). Everything else belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).
 
 **NSFW** lines only show when you turn them on, see [Options](#options).
 
@@ -70,9 +71,9 @@ The mod adds two options to the game: in the community's Mod Config Menu (`Patch
 - **Off** (default): Discord never mentions requests, defeat scenes or battle fucks.
 - **On**: Discord shows a request, defeat scene or battle fuck while it plays, and their counters in the trivia. Requests and defeat scenes are counted either way, so turning it on later shows the full count since you installed the mod.
 
-**`[Discord] Statistics`**, for enemies defeated, escapes, wipeouts, items synthesized, gold spent and the biggest hit:
+**`[Discord] Statistics`**, for enemies defeated, escapes, wipeouts, items synthesized, gold spent, the biggest hit and battle fucks won:
 - **All saves** (default): the game's own counts, across every save and from before you installed the mod.
-- **This save**: counted by the mod for the save you're playing, see [Per-save statistics](#per-save-statistics).
+- **This save**: counted by the mod for the save you're playing, see [Per-save statistics](#per-save-statistics). Battle fucks won are the game's own count for the save.
 
 The options are the same for every save. They are kept as `nsfw` and `all_saves` (`0` or `1`) in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
 
@@ -104,7 +105,7 @@ The trivia comes from two places:
 
 | Read from your save | Counted by the mod |
 |---|---|
-| Battles fought, gold carried, playtime, difficulty, companions recruited, deepest Labyrinth of Chaos floor, your Ilias or Alice choice, top stat, mastered jobs and races | Enemies defeated, escapes, wipeouts, items synthesized, gold spent in shops, biggest hit, requests, defeat scenes |
+| Battles fought, gold carried, playtime, difficulty, companions recruited, deepest Labyrinth of Chaos floor, your Ilias or Alice choice, top stat, mastered jobs and races, battle fucks won | Enemies defeated, escapes, wipeouts, items synthesized, gold spent in shops, biggest hit, requests, defeat scenes |
 | Covers your **whole playthrough** and shows up right away, even on old saves. | Covers only the time **since you installed the mod**. |
 
 The game counts most of the second group only **across all saves combined**. To show them per playthrough, the mod counts these events itself for each save (the [Statistics option](#options) shows the game's counts across all saves instead):
