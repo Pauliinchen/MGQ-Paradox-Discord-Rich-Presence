@@ -17,6 +17,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 | Labyrinth of Chaos | `Labyrinth of Chaos <Normal/Carnage> (<Biome>) - Floor <X> \| <Y> Rare Points!` |
 | In a request (NSFW) | `Pocket Castle - In a request with <Companion> for the <Nth> time!` |
 | After losing a battle (NSFW) | `<Location> - Raped by <Monster girl> for the <Nth> time!` |
+| In a battle fuck (NSFW) | `<Location> - Currently Battlefucking <Monster girl>!` |
 
 **Hover the picture** to see your party leader: `Party leader: <Name> Lv <X> | Race: <Race> Lv <Y> | Class: <Job> Lv <Z>`
 
@@ -66,8 +67,8 @@ Nothing else needs to be installed.
 The mod adds two options to the game: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise.
 
 **`[Discord] NSFW`**
-- **Off** (default): Discord never mentions requests or defeat scenes.
-- **On**: Discord shows a request or defeat scene while it plays, and their counters in the trivia. Requests and defeat scenes are counted either way, so turning it on later shows the full count since you installed the mod.
+- **Off** (default): Discord never mentions requests, defeat scenes or battle fucks.
+- **On**: Discord shows a request, defeat scene or battle fuck while it plays, and their counters in the trivia. Requests and defeat scenes are counted either way, so turning it on later shows the full count since you installed the mod.
 
 **`[Discord] Statistics`**, for enemies defeated, escapes, wipeouts, items synthesized, gold spent and the biggest hit:
 - **All saves** (default): the game's own counts, across every save and from before you installed the mod.

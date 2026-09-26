@@ -18,6 +18,7 @@ When you add or change an activity, add it under the version it will ship in.
 | Activity | Text | When |
 |---|---|---|
 | Camp | `<Location> - Setting up for Camp . . .` / `Traveling the world - Setting up for Camp . . .` | While the camp music (*Camping*) plays, except in battles, the Pocket Castle and the Labyrinth of Chaos. Shown instead of idle. |
+| Battle fuck (NSFW) | `<Location> - Currently Battlefucking <Monster girl>!` | From accepting a battle fuck until it is over, the scene after a win included. Replays in the Recollection Room don't show. |
 
 ## 1.2
 

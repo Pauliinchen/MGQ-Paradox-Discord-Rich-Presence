@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Read whether the camp music plays
+//      Paulinchen  2026-09-26: Read who plays a running battle fuck
+//                            - Read whether the camp music plays
 //                            - Read who plays a running request or defeat scene, and how often it happened
 //                            - Read when the player last pressed a button
 //                            - Named the game script by its new file name
@@ -57,6 +58,7 @@ internal sealed class GameStatus
         "menu" => Scene.Menu,
         "request" => Scene.Request,
         "defeat_scene" => Scene.DefeatScene,
+        "battlefuck" => Scene.Battlefuck,
         _ => Scene.Map,
     };
 
@@ -124,6 +126,11 @@ internal sealed class GameStatus
     /// How many defeat scenes this save saw of <see cref="RapedBy"/>, the running one included.
     /// </summary>
     public int RapedCount => Count("raped_count");
+
+    /// <summary>
+    /// The monster girl of the running battle fuck, only set in <see cref="Scene.Battlefuck"/>.
+    /// </summary>
+    public string BattlefuckPartner => Value("battlefuck_with");
 
     /// <summary>
     /// Name of the party leader.

@@ -6,8 +6,8 @@ Discord profile: where you are and what you're doing (exploring,
 traveling, in combat, idle, Labyrinth of Chaos floor and rare points),
 rotating trivia about your playthrough (the music that's playing
 included), and your party leader's level, race and class when someone
-hovers the picture. Requests and defeat scenes only show if you turn on
-the NSFW option (see OPTIONS).
+hovers the picture. Requests, defeat scenes and battle fucks only show if
+you turn on the NSFW option (see OPTIONS).
 
 
 REQUIREMENT
@@ -47,9 +47,9 @@ OPTIONS
 The mod adds two options to the game: in the Mod Config Menu if you have
 it installed, in the game's own Config menu otherwise.
 
-[Discord] NSFW: Off (the default) never mentions requests or defeat
-scenes on Discord. On shows a request or defeat scene while it plays, and
-how often they happened.
+[Discord] NSFW: Off (the default) never mentions requests, defeat scenes
+or battle fucks on Discord. On shows a request, defeat scene or battle
+fuck while it plays, and how often they happened.
 
 [Discord] Statistics: All saves (the default) shows the game's own counts
 of enemies defeated, escapes, wipeouts, items synthesized, gold spent and

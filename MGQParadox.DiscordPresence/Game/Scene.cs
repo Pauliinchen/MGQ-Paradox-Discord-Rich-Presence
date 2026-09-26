@@ -2,7 +2,8 @@
 //  Scene.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Added the running request and the running defeat scene
+//      Paulinchen  2026-09-26: Added the running battle fuck
+//                            - Added the running request and the running defeat scene
 //                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
@@ -49,4 +50,9 @@ internal enum Scene
     /// A defeat scene after a lost battle, reported only with the NSFW option on.
     /// </summary>
     DefeatScene,
+
+    /// <summary>
+    /// A battle fuck on the map, reported only with the NSFW option on.
+    /// </summary>
+    Battlefuck,
 }

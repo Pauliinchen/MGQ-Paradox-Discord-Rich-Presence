@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Published whether the camp music plays
+#      Paulinchen  2026-09-26: Published a running battle fuck, with the monster girl who challenged Luka
+#                            - Published whether the camp music plays
 #                            - Kept the per-save counters inside the save, taking over the earlier versions' files once
 #                            - Added an option to count the trivia across all saves instead of per save
 #                            - Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
@@ -201,7 +202,7 @@ module MGQ_Discord
     # File inside the mod folder, shared with DiscordPresence.dll and edited by players too.
     FILE = "Settings.ini"
 
-    # Whether requests and defeat scenes show on Discord, 0 or 1.
+    # Whether requests, defeat scenes and battle fucks show on Discord, 0 or 1.
     NSFW = :mod_discord_nsfw
 
     # Whether the trivia counts across all saves (1) or per save (0).
@@ -218,10 +219,10 @@ module MGQ_Discord
     MENU = {
       NSFW => {
         :name   => "[Discord] NSFW",
-        :help   => "Show requests and defeat scenes, and how often they happened, on Discord.",
+        :help   => "Show requests, defeat scenes and battle fucks on Discord.",
         :values => {
-          0 => ["Off", "Discord never mentions requests or defeat scenes."],
-          1 => ["On",  "Discord shows a running request or defeat scene, and their counters."],
+          0 => ["Off", "Discord never mentions requests, defeat scenes or battle fucks."],
+          1 => ["On",  "Discord shows a running request, defeat scene or battle fuck, and their counters."],
         },
       },
       ALL_SAVES => {
@@ -251,7 +252,7 @@ module MGQ_Discord
       end
     end
 
-    # @return [Boolean] whether requests and defeat scenes show on Discord
+    # @return [Boolean] whether requests, defeat scenes and battle fucks show on Discord
     def self.nsfw?
       self[NSFW] == 1
     end
@@ -466,7 +467,7 @@ module MGQ_Discord
     # The world map's name is untranslated kanji, so a menu opened there stays "travel" rather
     # than naming the map.
     #
-    # @return [String] "title", "battle", "request", "defeat_scene", "travel", "map" or "menu"
+    # @return [String] "title", "battle", "request", "defeat_scene", "battlefuck", "travel", "map" or "menu"
     def self.scene
       scene = SceneManager.scene
       return "title" if scene.nil?
@@ -476,6 +477,7 @@ module MGQ_Discord
       return "title"   if name =~ /Title/
       return "request" if Options.nsfw? && Requests.current
       return "defeat_scene" if Options.nsfw? && DefeatScenes.current
+      return "battlefuck" if Options.nsfw? && Battlefucks.current
       return "travel"  if on_world_map?
       return "map"    if name =~ /Map/
       "menu"
@@ -665,6 +667,58 @@ module MGQ_Discord
     # @return [Boolean]
     def self.skipped?(event_id)
       !$game_novel.interpreter.instance_variable_get(:@list).equal?($data_common_events[event_id].list)
+    end
+  end
+
+  # Battle fucks: sex matches a monster girl challenges Luka to. They play as a common event on the
+  # map, not as a battle, and last until that common event returns, the scene after a win included.
+  module Battlefucks
+    # How the Recollection Room names the common event that starts a battle fuck.
+    SCENE_NAME = "BF"
+
+    # Remembers the battle fuck an interpreter is about to play. Called from the
+    # Game_Interpreter#command_117 hook.
+    #
+    # @param interpreter [Game_Interpreter] the interpreter calling the common event
+    # @param event_id [Integer] the common event it calls
+    # @return [Boolean] whether the common event starts a battle fuck
+    def self.starting(interpreter, event_id)
+      return false if $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
+
+      monster = monsters[event_id]
+      @running = [monster, interpreter, $game_map] if monster
+      !monster.nil?
+    end
+
+    # Forgets the battle fuck once its common event returned. Called from the
+    # Game_Interpreter#command_117 hook.
+    def self.finished
+      @running = nil
+    end
+
+    # Names the monster girl of the running battle fuck.
+    #
+    # Loading a save or going back to the title abandons the interpreter without returning from the
+    # common event, which the new $game_map and the stopped interpreter give away.
+    #
+    # @return [String, nil] the monster girl, nil while none runs
+    def self.current
+      monster, interpreter, map = @running
+      monster if map && map.equal?($game_map) && interpreter.running?
+    end
+
+    # Monster girls by the common events starting their battle fucks, read from the Recollection
+    # Room once, without the form in brackets: "Sara (Human)" counts as Sara.
+    #
+    # @return [Hash{Integer => String}] the monster girls by common event
+    def self.monsters
+      @monsters ||= NWConst::Library::H_SCENE_ITEMS.values.each_with_object({}) do |character, names|
+        name = character[:name].to_s.sub(/\s*[(（].*\z/m, "")
+
+        (character[:items] || {}).each_value do |item|
+          names[item[:common]] ||= name if item[:name].to_s == SCENE_NAME
+        end
+      end
     end
   end
 
@@ -1137,6 +1191,8 @@ module MGQ_Discord
         fields["raped_count"] = SaveStats.count_for(:rapes, monster)
       end
 
+      fields["battlefuck_with"] = Battlefucks.current if scene == "battlefuck"
+
       if (labyrinth = GameState.labyrinth)
         fields["loc_floor"] = labyrinth.floor
         fields["loc_type"] = labyrinth.kind
@@ -1240,6 +1296,21 @@ if MGQ_Discord.hookable?
     end
   rescue => e
     MGQ_Discord::Log.write("novel hook FAILED: #{e.class}: #{e.message}")
+  end
+
+  # A map event calls the common event of a battle fuck, which returns once the battle fuck is over.
+  begin
+    class Game_Interpreter
+      alias mgq_discord_command_117 command_117
+      def command_117
+        started = MGQ_Discord::Battlefucks.starting(self, @params[0]) rescue false
+        mgq_discord_command_117
+      ensure
+        MGQ_Discord::Battlefucks.finished if started
+      end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("battle fuck hook FAILED: #{e.class}: #{e.message}")
   end
 
   # A lost battle sets up its defeat scene here, after asking whether to skip it.
