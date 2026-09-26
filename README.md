@@ -92,7 +92,7 @@ Deleting `Patch\Discord_RPC.rb` and the `Discord` folder by hand does the same.
 
 The mod is a regular **Patch folder mod** ("Type 1"), `Patch\Discord_RPC.rb`, like the community's mods on the [MGQ wiki](https://mgq.miraheze.org/wiki/Paradox_mods). The community's mod loader runs it, and it works next to the other mods.
 
-- **Nothing outside its own files**, `Discord\` and `Patch\Discord_RPC.rb`, and your saves is changed. `Patch\Patch.rb` is never touched.
+- **Only its own files** (`Discord\` and `Patch\Discord_RPC.rb`) **and your saves** are changed. `Patch\Patch.rb` is never touched.
 - **Uninstalling** deletes `Patch\Discord_RPC.rb`. The mod loader stays for your other mods.
 - If you delete the `Discord` folder without uninstalling, the game still starts normally, and the mod simply does nothing.
 - **Your saves** get the mod's [per-save counters](#per-save-statistics) added, and nothing else. They load the same with or without the mod; without it, the game ignores the counters.

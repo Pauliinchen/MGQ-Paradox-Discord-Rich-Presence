@@ -3,9 +3,11 @@ Monster Girl Quest! Paradox RPG - Discord Rich Presence
 
 Shows what you're doing in Monster Girl Quest! Paradox RPG on your
 Discord profile: where you are and what you're doing (exploring,
-traveling, in combat, Labyrinth of Chaos floor and rare points), rotating
-trivia about your playthrough, and your party leader's level, race and
-class when someone hovers the picture.
+traveling, in combat, idle, Labyrinth of Chaos floor and rare points),
+rotating trivia about your playthrough (the music that's playing
+included), and your party leader's level, race and class when someone
+hovers the picture. Requests and defeat scenes only show if you turn on
+the NSFW option (see OPTIONS).
 
 
 REQUIREMENT
@@ -78,8 +80,8 @@ If Windows warns that it protected your PC, click "More info" and then
 WHAT IT CHANGES
 ---------------
 The mod itself is Patch\Discord_RPC.rb, like any other Patch folder mod,
-and the community's mod loader runs it. Nothing outside its own files is
-changed, and Patch\Patch.rb is never touched.
+and the community's mod loader runs it. Only its own files and your saves
+(see below) are changed, and Patch\Patch.rb is never touched.
 If you delete the Discord folder without uninstalling, the game still
 starts normally - the mod simply does nothing.
 
@@ -88,16 +90,18 @@ items synthesized, requests, defeat scenes) is counted per save by the
 mod itself, because the game doesn't count those per save. The first six
 show the game's counts across all saves unless you set [Discord]
 Statistics to This save.
+
 The mod keeps these counters inside your saves, so copies, the autosave
 and the game's backup save carry them along. Nothing else in your saves
-changes, and they load the same without the mod, which then ignores
-the counters. Counting starts when you install the mod; anything that
+changes, and they load the same without the mod, which then ignores the
+counters. Counting starts when you install the mod; anything that
 happened earlier isn't counted. Everything else (battles fought, gold,
 playtime, companions and so on) is read from the save itself and covers
 the whole playthrough.
+
 Earlier versions kept the counters in Discord\Stats\. Loading a save
-takes its numbers over once; after you've saved each save, you can delete
-that folder.
+takes its numbers over once; after you've saved each save, you can
+delete that folder.
 
 
 TROUBLESHOOTING
