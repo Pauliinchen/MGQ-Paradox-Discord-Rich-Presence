@@ -92,10 +92,10 @@ Deleting `Patch\Discord_RPC.rb` and the `Discord` folder by hand does the same.
 
 The mod is a regular **Patch folder mod** ("Type 1"), `Patch\Discord_RPC.rb`, like the community's mods on the [MGQ wiki](https://mgq.miraheze.org/wiki/Paradox_mods). The community's mod loader runs it, and it works next to the other mods.
 
-- **Nothing outside its own files**, `Discord\` and `Patch\Discord_RPC.rb`, is changed. `Patch\Patch.rb` is never touched.
+- **Nothing outside its own files**, `Discord\` and `Patch\Discord_RPC.rb`, and your saves is changed. `Patch\Patch.rb` is never touched.
 - **Uninstalling** deletes `Patch\Discord_RPC.rb`. The mod loader stays for your other mods.
 - If you delete the `Discord` folder without uninstalling, the game still starts normally, and the mod simply does nothing.
-- **Your save files are never changed**, and they load the same with or without the mod.
+- **Your saves** get the mod's [per-save counters](#per-save-statistics) added, and nothing else. They load the same with or without the mod; without it, the game ignores the counters.
 
 ## Per-save statistics
 
@@ -108,10 +108,9 @@ The trivia comes from two places:
 
 The game counts most of the second group only **across all saves combined**. To show them per playthrough, the mod counts these events itself for each save (the [Statistics option](#options) shows the game's counts across all saves instead):
 
-- **When counting starts:** from the first time you save with the mod installed. Until then, these counters are 0, and a line stays hidden until it has counted something. Earlier numbers can't be recovered.
-- **Where they're stored:** in `Discord\Stats\`, one small file per save slot plus one for the autosave. Never inside the save file itself.
-- **Copied or replaced saves:** each stats file is tied to one exact save. A save replaced or copied outside the game starts over at 0.
-- **The game's backup save** (`SaveBackup.rvdata2`) isn't tracked. Loading it starts these counters at 0.
+- **When counting starts:** as soon as you play with the mod installed. Until a counter has counted something, its line stays hidden. Earlier numbers can't be recovered.
+- **Where they're stored:** inside your save, like everything else the game keeps. Saving keeps them, and copied saves, the autosave and the game's backup save carry them along.
+- **Earlier versions** kept these counters in `Discord\Stats\`. Loading a save takes its numbers over once; after you've saved each of your saves, you can delete that folder.
 
 ## Troubleshooting
 

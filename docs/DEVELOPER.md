@@ -153,21 +153,13 @@ The variable `Labyrinth of Chaos: Type` is *not* normal vs. Carnage: it held 9 o
 - `addition_purchase_gold`
 - `set_party_damage_record_actor`
 
-Requests are counted from the `Game_Novel#setup` hook, defeat scenes from the `BattleManager.change_novel_scene` hook, each in total (`requests`, `rapes`) and per character (`request.<Companion>`, `raped_by.<Monster girl>` lines in the same file, see `SaveStats::TALLY_PREFIXES`), whether or not the NSFW option is on.
+Requests are counted from the `Game_Novel#setup` hook, defeat scenes from the `BattleManager.change_novel_scene` hook, each in total (`requests`, `rapes`) and per character (`SaveStats.tally`), whether or not the NSFW option is on.
 
-**Storage.** Deliberately *not* in the save file, so that uninstalling leaves no trace and saves are identical with or without the mod:
-- `DataManager.save_game_without_rescue(index)` → writes `Discord/Stats/SaveNN.txt`.
-- `DataManager.auto_save_game_without_rescue(index)` → writes `Discord/Stats/AutoSave01.txt`. Autosaves have their own method, so without this hook, loading one would start every counter at 0.
-- `DataManager.load_game_without_rescue(index)` → reads that file.
-- `DataManager.setup_new_game` → resets the counters.
+**Storage.** In `$game_system`, as the instance variable `@mgq_discord_stats`: `{ :counts => { key => total }, :tallies => { key => { character => count } } }`. `Game_System` has no custom `marshal_dump`, so the game writes the variable with every save, autosave and backup save and reads it back on load, and a new game gets a new `$game_system` that starts at 0. Without the mod the variable is loaded along and never read.
 
-**Fingerprint.** Each stats file stores `save_count:frames_on_save` (both from `$game_system`, and both set in `on_before_save`). On load, the file is only used if the fingerprint matches, so a save that was replaced or copied outside the game starts fresh instead of showing another run's numbers.
+**Earlier versions** kept the six library counters in `Discord/Stats/<save file name>.txt`: `key=value` lines plus `fingerprint=<save_count>:<frames_on_save>`. `SaveStats.import_legacy`, called from the `DataManager.load_game_without_rescue` hook, takes them over while the loaded save has no `@mgq_discord_stats` yet and the fingerprint matches.
 
-**Known gaps:**
-- The save *backup* (`Save/SaveBackup.rvdata2`) has no stats file.
-- A backup loaded later starts at 0.
-
-**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, `Game_Novel#setup`, `BattleManager.change_novel_scene`, the `DataManager` save/autosave/backup-save/load/new-game methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
+**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, `Game_Novel#setup`, `BattleManager.change_novel_scene`, the `DataManager` save/autosave/backup-save/load methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
 
 ## Options
 

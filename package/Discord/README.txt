@@ -83,17 +83,21 @@ changed, and Patch\Patch.rb is never touched.
 If you delete the Discord folder without uninstalling, the game still
 starts normally - the mod simply does nothing.
 
-Your save files are never changed. Some trivia (enemies defeated, escapes,
-wipeouts, biggest hit, gold spent, items synthesized, requests, defeat
-scenes) is counted per save by the mod itself, because the game doesn't
-count those per save. The first six show the game's counts across all
-saves unless you set [Discord] Statistics to This save.
-Those counters are kept in Discord\Stats\ (one small file per save slot),
-so deleting the Discord folder removes them too. A save starts counting
-the first time you save it with the mod installed; before that, and for
-anything that happened earlier, these counters are 0. Everything else
-(battles fought, gold, playtime, companions and so on) is read from the
-save itself and covers the whole playthrough.
+Some trivia (enemies defeated, escapes, wipeouts, biggest hit, gold spent,
+items synthesized, requests, defeat scenes) is counted per save by the
+mod itself, because the game doesn't count those per save. The first six
+show the game's counts across all saves unless you set [Discord]
+Statistics to This save.
+The mod keeps these counters inside your saves, so copies, the autosave
+and the game's backup save carry them along. Nothing else in your saves
+changes, and they load the same without the mod, which then ignores
+the counters. Counting starts when you install the mod; anything that
+happened earlier isn't counted. Everything else (battles fought, gold,
+playtime, companions and so on) is read from the save itself and covers
+the whole playthrough.
+Earlier versions kept the counters in Discord\Stats\. Loading a save
+takes its numbers over once; after you've saved each save, you can delete
+that folder.
 
 
 TROUBLESHOOTING

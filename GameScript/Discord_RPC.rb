@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Added an option to count the trivia across all saves instead of per save
+#      Paulinchen  2026-09-26: Kept the per-save counters inside the save, taking over the earlier versions' files once
+#                            - Added an option to count the trivia across all saves instead of per save
 #                            - Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
 #                            - Counted the requests per save, in total and per character, and published a running one
 #                            - Counted the defeat scenes per save, in total and per monster girl, and published a running one
@@ -990,126 +991,97 @@ module MGQ_Discord
   # Counters the mod keeps per save: ones the game only keeps across all saves, the requests and
   # the defeat scenes.
   #
-  # Stored in Discord/Stats instead of the save files, so saves load the same without the mod.
+  # Kept in $game_system, so the game saves, loads, copies and backs them up with everything else,
+  # and a new game starts them at 0. The game ignores them when a save is loaded without the mod.
   module SaveStats
-    # Folder inside the mod folder that holds one file per save.
-    DIR = "Stats"
+    # Instance variable of $game_system that holds the counters.
+    VARIABLE = :@mgq_discord_stats
 
-    # Every counter, in the order they are stored.
-    KEYS = [:defeat, :escape, :lose, :synthesize, :gold_spent, :best_hit, :requests, :rapes]
+    # Folder inside the mod folder where the earlier versions kept the counters, one file per save.
+    LEGACY_DIR = "Stats"
 
-    # Counters kept per character too, by the key of their total, with the start of their keys in a
-    # stats file: "request.Alice=3".
-    TALLY_PREFIXES = { :requests => "request.", :rapes => "raped_by." }
-
-    @counts = {}
-    @tallies = {}
+    # The counters the earlier versions kept.
+    LEGACY_KEYS = [:defeat, :escape, :lose, :synthesize, :gold_spent, :best_hit]
 
     # @param key [Symbol] the counter
     # @return [Integer] its value, 0 until it counted something
     def self.[](key)
-      @counts[key] || 0
+      counts[key] || 0
     end
 
     # @param key [Symbol] the counter
     # @param amount [Integer] what to add
     def self.add(key, amount)
-      @counts[key] = self[key] + amount.to_i
+      counts[key] = self[key] + amount.to_i
     end
 
     # @param key [Symbol] the counter
     # @param value [Integer] a new candidate for the highest value
     def self.keep_highest(key, value)
-      @counts[key] = [self[key], value.to_i].max
+      counts[key] = [self[key], value.to_i].max
     end
 
     # Counts one, in total and for a character.
     #
-    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @param key [Symbol] the counter
     # @param character [String] the character
     def self.add_for(key, character)
       add(key, 1)
       tally(key)[character] = count_for(key, character) + 1
     end
 
-    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @param key [Symbol] the counter
     # @param character [String] the character
     # @return [Integer] the count for them, 0 until the first
     def self.count_for(key, character)
       tally(key)[character] || 0
     end
 
-    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @param key [Symbol] the counter
     # @return [Array(String, Integer), nil] the character with the highest count and that count, nil before the first
     def self.top(key)
       tally(key).max_by { |_, count| count }
     end
 
-    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @param key [Symbol] the counter
     # @return [Hash{String => Integer}] its counts by character
     def self.tally(key)
-      @tallies[key] ||= {}
+      stored[:tallies][key] ||= {}
     end
 
-    # Starts every counter over, for a new game.
-    def self.reset
-      @counts = {}
-      @tallies = {}
+    # @return [Hash{Symbol => Integer}] the totals by counter
+    def self.counts
+      stored[:counts]
     end
 
-    # Writes the counters for a save that was just written.
+    # The counters of the loaded save, added to it on first use.
+    #
+    # @return [Hash] :counts with the totals, :tallies with the counts per character
+    def self.stored
+      $game_system.instance_variable_get(VARIABLE) ||
+        $game_system.instance_variable_set(VARIABLE, { :counts => {}, :tallies => {} })
+    end
+
+    # Takes over the counters an earlier version kept in LEGACY_DIR for a save that was just loaded.
+    #
+    # Runs until the save holds counters of its own. A file whose fingerprint does not match was
+    # written for another save in the same slot and is ignored.
     #
     # @param index [Integer] the save slot
-    def self.store(index)
-      dir = MGQ_Discord.path(DIR)
-      Dir.mkdir(dir) unless File.directory?(dir)
+    def self.import_legacy(index)
+      return if $game_system.instance_variable_get(VARIABLE)
 
-      body = "fingerprint=#{fingerprint}\n" + KEYS.map { |key| "#{key}=#{self[key]}\n" }.join
-      TALLY_PREFIXES.each do |key, prefix|
-        body += tally(key).map { |character, count| "#{prefix}#{character}=#{count}\n" }.join
-      end
-      File.open(file_for(index), "wb") { |file| file.write(body) }
-    end
-
-    # Reads the counters for a save that was just loaded.
-    #
-    # A file whose fingerprint does not match belongs to another playthrough and is ignored.
-    #
-    # @param index [Integer] the save slot
-    def self.restore(index)
-      reset
-      path = file_for(index)
+      path = MGQ_Discord.path("#{LEGACY_DIR}/#{File.basename(DataManager.make_filename(index), '.rvdata2')}.txt")
       return unless File.exist?(path)
 
-      # Read as UTF-8, a character name read as bytes would never equal the same name from the game.
-      stored = {}
-      File.open(path, "rb") { |file| file.read }.force_encoding("UTF-8").each_line do |line|
+      legacy = {}
+      File.open(path, "rb") { |file| file.read }.each_line do |line|
         key, value = line.chomp.split("=", 2)
-        stored[key] = value if value
+        legacy[key] = value if value
       end
-      return unless stored["fingerprint"] == fingerprint
+      return unless legacy["fingerprint"] == "#{$game_system.save_count}:#{$game_system.instance_variable_get(:@frames_on_save)}"
 
-      KEYS.each { |key| @counts[key] = stored[key.to_s].to_i }
-      TALLY_PREFIXES.each do |key, prefix|
-        stored.each { |name, value| tally(key)[name[prefix.size..-1]] = value.to_i if name.start_with?(prefix) }
-      end
-    end
-
-    # Names the counter file of a save: Save/Save03.rvdata2 becomes Discord/Stats/Save03.txt.
-    #
-    # @param index [Integer] the save slot
-    # @return [String] the full path
-    def self.file_for(index)
-      MGQ_Discord.path("#{DIR}/#{File.basename(DataManager.make_filename(index), '.rvdata2')}.txt")
-    end
-
-    # Ties a counter file to one exact save.
-    #
-    # A save replaced or copied outside the game gets another fingerprint, so its counters start over.
-    #
-    # @return [String] the fingerprint of the loaded save
-    def self.fingerprint
-      "#{$game_system.save_count}:#{$game_system.instance_variable_get(:@frames_on_save)}"
+      LEGACY_KEYS.each { |key| counts[key] = legacy[key.to_s].to_i }
     end
   end
 
@@ -1270,38 +1242,24 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("defeat scene hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # Saving, loading and starting a new game keep the per-save counters in step with the save slots.
-  # Saving also leaves the mod's options out of the save file.
+  # Saving leaves the mod's options out of the save file, and loading takes over the per-save
+  # counters an earlier version kept for the save.
   begin
     module DataManager
       class << self
         alias mgq_discord_save_game_without_rescue save_game_without_rescue
         def save_game_without_rescue(index)
-          result = MGQ_Discord::Options.left_out_of_save { mgq_discord_save_game_without_rescue(index) }
-          begin
-            MGQ_Discord::SaveStats.store(index)
-          rescue => e
-            MGQ_Discord::Log.write("stats save failed: #{e.class}: #{e.message}")
-          end
-          result
+          MGQ_Discord::Options.left_out_of_save { mgq_discord_save_game_without_rescue(index) }
         end
 
         alias mgq_discord_load_game_without_rescue load_game_without_rescue
         def load_game_without_rescue(index)
           result = mgq_discord_load_game_without_rescue(index)
           begin
-            MGQ_Discord::SaveStats.restore(index)
+            MGQ_Discord::SaveStats.import_legacy(index)
           rescue => e
-            MGQ_Discord::SaveStats.reset rescue nil
-            MGQ_Discord::Log.write("stats load failed: #{e.class}: #{e.message}")
+            MGQ_Discord::Log.write("stats import failed: #{e.class}: #{e.message}")
           end
-          result
-        end
-
-        alias mgq_discord_setup_new_game setup_new_game
-        def setup_new_game(*args)
-          result = mgq_discord_setup_new_game(*args)
-          MGQ_Discord::SaveStats.reset rescue nil
           result
         end
       end
@@ -1310,20 +1268,13 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("save/load hooks FAILED: #{e.class}: #{e.message}")
   end
 
-  # Autosaves bypass save_game_without_rescue. Without their own counter file, loading one would
-  # start every counter at 0.
+  # Autosaves bypass save_game_without_rescue.
   begin
     module DataManager
       class << self
         alias mgq_discord_auto_save_game_without_rescue auto_save_game_without_rescue
         def auto_save_game_without_rescue(index)
-          result = MGQ_Discord::Options.left_out_of_save { mgq_discord_auto_save_game_without_rescue(index) }
-          begin
-            MGQ_Discord::SaveStats.store(index)
-          rescue => e
-            MGQ_Discord::Log.write("stats autosave failed: #{e.class}: #{e.message}")
-          end
-          result
+          MGQ_Discord::Options.left_out_of_save { mgq_discord_auto_save_game_without_rescue(index) }
         end
       end
     end
@@ -1331,7 +1282,7 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("autosave hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # The backup save bypasses both, and has no counter file.
+  # The backup save bypasses both.
   begin
     module DataManager
       class << self
