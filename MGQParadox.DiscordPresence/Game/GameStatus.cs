@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Read when the player last pressed a button
+//      Paulinchen  2026-09-26: Read who plays a running request and how often they were requested
+//                            - Read when the player last pressed a button
 //                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
@@ -53,6 +54,7 @@ internal sealed class GameStatus
         "battle" => Scene.Battle,
         "travel" => Scene.Travel,
         "menu" => Scene.Menu,
+        "request" => Scene.Request,
         _ => Scene.Map,
     };
 
@@ -95,6 +97,16 @@ internal sealed class GameStatus
     /// Rare points collected in the Labyrinth of Chaos, already formatted.
     /// </summary>
     public string LabyrinthRarePoints => Value("loc_rare");
+
+    /// <summary>
+    /// Who plays the running request, only set in <see cref="Scene.Request"/>.
+    /// </summary>
+    public string RequestCharacter => Value("request_with");
+
+    /// <summary>
+    /// How many requests this save made to <see cref="RequestCharacter"/>, the running one included.
+    /// </summary>
+    public int RequestCount => Count("request_count");
 
     /// <summary>
     /// Name of the party leader.
@@ -169,6 +181,14 @@ internal sealed class GameStatus
         long.TryParse(Value(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var seconds) && seconds > 0
             ? seconds
             : null;
+
+    /// <summary>
+    /// Looks up a published count.
+    /// </summary>
+    /// <param name="key">The key Discord_RPC.rb published it under.</param>
+    /// <returns>The count, or 0 when absent or invalid.</returns>
+    private int Count(string key) =>
+        int.TryParse(Value(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var count) ? count : 0;
 
     /// <summary>
     /// Collects <c>trivia0</c>, <c>trivia1</c> and so on up to the first gap.

@@ -3,6 +3,7 @@
 #
 #  Changelog:
 #      Paulinchen  2026-09-26: Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
+#                            - Counted the requests per save, in total and per character, and published a running one
 #                            - Published the time of the last button press, so Discord can show when the player is idle
 #                            - Added the music that is playing to the trivia
 #                            - Moved into the Patch folder, where the community's mod loader picks it up
@@ -196,7 +197,7 @@ module MGQ_Discord
     # File inside the mod folder, shared with DiscordPresence.dll and edited by players too.
     FILE = "Settings.ini"
 
-    # Whether NSFW activities show on Discord, 0 or 1.
+    # Whether requests show on Discord, 0 or 1.
     NSFW = :mod_discord_nsfw
 
     # Every option by its key in $game_system.conf, with its key in FILE.
@@ -217,17 +218,17 @@ module MGQ_Discord
         :key  => NSFW,
         :name => "[Discord] NSFW",
         :sub  => true,
-        :help => "Show NSFW activities on Discord.\r\n←/→ Toggle",
+        :help => "Show requests and how often you made them on Discord.\r\n←/→ Toggle",
       })
       config::DATA[NSFW] = [0, 1]
       config::DATA_TEXT[NSFW] = {
-        0 => {:name => "Off", :help => "Discord shows nothing NSFW."},
-        1 => {:name => "On",  :help => "Discord shows NSFW activities."},
+        0 => {:name => "Off", :help => "Discord never mentions requests."},
+        1 => {:name => "On",  :help => "Discord shows a running request and the request counters."},
       }
       config::DEFAULT[NSFW] = 0
     end
 
-    # @return [Boolean] whether NSFW activities show on Discord
+    # @return [Boolean] whether requests show on Discord
     def self.nsfw?
       self[NSFW] == 1
     end
@@ -434,15 +435,16 @@ module MGQ_Discord
     # The world map's name is untranslated kanji, so a menu opened there stays "travel" rather
     # than naming the map.
     #
-    # @return [String] "title", "battle", "travel", "map" or "menu"
+    # @return [String] "title", "battle", "request", "travel", "map" or "menu"
     def self.scene
       scene = SceneManager.scene
       return "title" if scene.nil?
 
       name = scene.class.name.to_s
-      return "battle" if name =~ /Battle/
-      return "title"  if name =~ /Title/
-      return "travel" if on_world_map?
+      return "battle"  if name =~ /Battle/
+      return "title"   if name =~ /Title/
+      return "request" if Options.nsfw? && Requests.current
+      return "travel"  if on_world_map?
       return "map"    if name =~ /Map/
       "menu"
     rescue
@@ -513,6 +515,74 @@ module MGQ_Discord
     end
   end
 
+  # Requests: scenes a recruited monster plays when the player asks her to, in the Pocket Castle
+  # or aboard the MS Fish. They are counted with or without the NSFW option, only showing them
+  # depends on it.
+  module Requests
+    # How the Recollection Room names a request: "Request 1 (...)", "Plea 2 (...)" and so on.
+    # Its defeat, battle and story scenes are named otherwise.
+    SCENE_NAME = /Request|Plea|Beg|Enticement|おねだり/
+
+    # Counts a novel scene that just started, if it is a request. Called from the Game_Novel#setup hook.
+    #
+    # @param event_id [Integer] the common event the scene plays
+    def self.started(event_id)
+      character = character_of(event_id)
+      SaveStats.add_for(:requests, character) if character
+    end
+
+    # @return [String, nil] who plays the running request, nil while none runs
+    def self.current
+      $game_novel && $game_novel.running? ? character_of($game_novel.event_id) : nil
+    end
+
+    # Names who plays a request.
+    #
+    # The Recollection Room replays requests through the same novel scenes, with the game's
+    # LIBRARY_H_MEMORY switch on.
+    #
+    # @param event_id [Integer] the common event a novel scene plays
+    # @return [String, nil] the character, nil for any other scene and for a replay
+    def self.character_of(event_id)
+      return nil if $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
+
+      characters[event_id]
+    end
+
+    # Characters by the common events of their requests, read from the Recollection Room once.
+    #
+    # A request is named after the companion who plays it, falling back to the Recollection Room's
+    # entry without the form in brackets: "Alice (Small)" and "Alice (Adult)" both count as Alice.
+    #
+    # @return [Hash{Integer => String}] the characters by common event
+    def self.characters
+      @characters ||= NWConst::Library::H_SCENE_ITEMS.values.each_with_object({}) do |character, names|
+        entry = character[:name].to_s.sub(/\s*[(（].*\z/m, "")
+
+        (character[:items] || {}).each_value do |item|
+          names[item[:common]] ||= companion_of(item) || entry if item[:name].to_s =~ SCENE_NAME
+        end
+      end
+    end
+
+    # Names the companion a request belongs to.
+    #
+    # Most requests unlock at a companion's affection, which the game keeps in variable
+    # ACTOR_REL_BASE + her actor id. The name comes from the database, since looking her up in
+    # $game_actors would add her to the save.
+    #
+    # @param item [Hash] the request's entry in the Recollection Room
+    # @return [String, nil] the companion's name, nil when the request unlocks otherwise
+    def self.companion_of(item)
+      condition = item[:condition] || {}
+      return nil unless condition[:type] == 1
+
+      actor_id = condition[:id].to_i - NWConst::Var::ACTOR_REL_BASE
+      actor = actor_id > 0 && $data_actors[actor_id]
+      actor && !actor.name.to_s.empty? ? actor.name.to_s : nil
+    end
+  end
+
   # The second Discord line. The presence shows one of these at a time.
   module Trivia
     # Seconds the lines are kept before they are worked out again.
@@ -573,6 +643,8 @@ module MGQ_Discord
       :gold_spent,
       :items_synthesized,
       :deepest_labyrinth_floor,
+      :requests_made,
+      :most_requested,
       :gold_carried,
     ]
 
@@ -783,6 +855,22 @@ module MGQ_Discord
       "Has reached floor #{floor} in the Labyrinth of Chaos!" if floor > 0
     end
 
+    # How many requests this save has made.
+    #
+    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
+    def self.requests_made
+      count = SaveStats[:requests]
+      "Has made #{NumberFormat.counted(count, 'request')}!" if Options.nsfw? && count > 0
+    end
+
+    # Who this save has made the most requests to.
+    #
+    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
+    def self.most_requested
+      character, count = SaveStats.top(:requests)
+      "Has requested #{character} the most, #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && character
+    end
+
     # How much gold the party carries.
     #
     # @return [String] the line
@@ -791,7 +879,7 @@ module MGQ_Discord
     end
   end
 
-  # Counters the game only keeps across all saves, kept per save.
+  # Counters the mod keeps per save: ones the game only keeps across all saves, and the requests.
   #
   # Stored in Discord/Stats instead of the save files, so saves load the same without the mod.
   module SaveStats
@@ -799,9 +887,14 @@ module MGQ_Discord
     DIR = "Stats"
 
     # Every counter, in the order they are stored.
-    KEYS = [:defeat, :escape, :lose, :synthesize, :gold_spent, :best_hit]
+    KEYS = [:defeat, :escape, :lose, :synthesize, :gold_spent, :best_hit, :requests]
+
+    # Counters kept per character too, by the key of their total, with the start of their keys in a
+    # stats file: "request.Alice=3".
+    TALLY_PREFIXES = { :requests => "request." }
 
     @counts = {}
+    @tallies = {}
 
     # @param key [Symbol] the counter
     # @return [Integer] its value, 0 until it counted something
@@ -821,9 +914,38 @@ module MGQ_Discord
       @counts[key] = [self[key], value.to_i].max
     end
 
+    # Counts one, in total and for a character.
+    #
+    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @param character [String] the character
+    def self.add_for(key, character)
+      add(key, 1)
+      tally(key)[character] = count_for(key, character) + 1
+    end
+
+    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @param character [String] the character
+    # @return [Integer] the count for them, 0 until the first
+    def self.count_for(key, character)
+      tally(key)[character] || 0
+    end
+
+    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @return [Array(String, Integer), nil] the character with the highest count and that count, nil before the first
+    def self.top(key)
+      tally(key).max_by { |_, count| count }
+    end
+
+    # @param key [Symbol] the counter, one of TALLY_PREFIXES
+    # @return [Hash{String => Integer}] its counts by character
+    def self.tally(key)
+      @tallies[key] ||= {}
+    end
+
     # Starts every counter over, for a new game.
     def self.reset
       @counts = {}
+      @tallies = {}
     end
 
     # Writes the counters for a save that was just written.
@@ -834,6 +956,9 @@ module MGQ_Discord
       Dir.mkdir(dir) unless File.directory?(dir)
 
       body = "fingerprint=#{fingerprint}\n" + KEYS.map { |key| "#{key}=#{self[key]}\n" }.join
+      TALLY_PREFIXES.each do |key, prefix|
+        body += tally(key).map { |character, count| "#{prefix}#{character}=#{count}\n" }.join
+      end
       File.open(file_for(index), "wb") { |file| file.write(body) }
     end
 
@@ -847,14 +972,18 @@ module MGQ_Discord
       path = file_for(index)
       return unless File.exist?(path)
 
+      # Read as UTF-8, a character name read as bytes would never equal the same name from the game.
       stored = {}
-      File.open(path, "rb") { |file| file.read }.each_line do |line|
+      File.open(path, "rb") { |file| file.read }.force_encoding("UTF-8").each_line do |line|
         key, value = line.chomp.split("=", 2)
         stored[key] = value if value
       end
       return unless stored["fingerprint"] == fingerprint
 
       KEYS.each { |key| @counts[key] = stored[key.to_s].to_i }
+      TALLY_PREFIXES.each do |key, prefix|
+        stored.each { |name, value| tally(key)[name[prefix.size..-1]] = value.to_i if name.start_with?(prefix) }
+      end
     end
 
     # Names the counter file of a save: Save/Save03.rvdata2 becomes Discord/Stats/Save03.txt.
@@ -900,6 +1029,11 @@ module MGQ_Discord
 
       fields["vehicle"] = GameState.vehicle if scene == "travel"
       fields["overworld"] = 1 if scene == "battle" && GameState.on_world_map?
+
+      if scene == "request" && (character = Requests.current)
+        fields["request_with"] = character
+        fields["request_count"] = SaveStats.count_for(:requests, character)
+      end
 
       if (labyrinth = GameState.labyrinth)
         fields["loc_floor"] = labyrinth.floor
@@ -989,6 +1123,20 @@ if MGQ_Discord.hookable?
     end
   rescue => e
     MGQ_Discord::Log.write("item_apply hook FAILED: #{e.class}: #{e.message}")
+  end
+
+  # Requests play as novel scenes, and the Recollection Room replays them the same way.
+  begin
+    class Game_Novel
+      alias mgq_discord_setup setup
+      def setup(event_id)
+        result = mgq_discord_setup(event_id)
+        MGQ_Discord::Requests.started(event_id) rescue nil
+        result
+      end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("novel hook FAILED: #{e.class}: #{e.message}")
   end
 
   # Saving, loading and starting a new game keep the per-save counters in step with the save slots.

@@ -2,13 +2,15 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Showed the player as idle after a minute without a button press
+//      Paulinchen  2026-09-26: Showed a running request, with who plays it and how often they were requested
+//                            - Showed the player as idle after a minute without a button press
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using MGQParadox.DiscordPresence.Discord;
 using MGQParadox.DiscordPresence.Game;
 
@@ -28,6 +30,11 @@ internal static class ActivityBuilder
     /// Name of the home base, as it appears in map names.
     /// </summary>
     private const string PocketCastleName = "Pocket Castle";
+
+    /// <summary>
+    /// What the world map is called, since its own name is untranslated kanji.
+    /// </summary>
+    private const string WorldMapName = "Traveling the world";
 
     /// <summary>
     /// What the player is shown doing after <see cref="IdleAfter"/> without a button press.
@@ -101,6 +108,11 @@ internal static class ActivityBuilder
     /// </remarks>
     private static string DetailsOf(GameStatus status, int pocketCastleIndex)
     {
+        if (status.Scene == Scene.Request)
+        {
+            return WithPlace(status, $"In a request with {status.RequestCharacter} for the {Ordinal(status.RequestCount)} time!");
+        }
+
         if (status.IsInLabyrinth)
         {
             return LabyrinthDetailsOf(status);
@@ -108,12 +120,12 @@ internal static class ActivityBuilder
 
         if (status.Scene == Scene.Travel)
         {
-            return $"Traveling the world - {(IsIdle(status) ? IdleText : TravelText(status.Vehicle))}";
+            return $"{WorldMapName} - {(IsIdle(status) ? IdleText : TravelText(status.Vehicle))}";
         }
 
         if (status.Scene == Scene.Battle && status.IsOnWorldMap)
         {
-            return $"Traveling the world - {StateText(Scene.Battle)}";
+            return $"{WorldMapName} - {StateText(Scene.Battle)}";
         }
 
         if (status.Scene != Scene.Battle && Mentions(status.Area, PocketCastleName))
@@ -154,6 +166,24 @@ internal static class ActivityBuilder
             : string.Empty;
 
         return $"{LabyrinthName} {status.LabyrinthType}{biome} - Floor {status.LabyrinthFloor} | {status.LabyrinthRarePoints} Rare Points!";
+    }
+
+    /// <summary>
+    /// Puts the place in front of what happens there.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <param name="happening">What happens.</param>
+    /// <returns>The first line.</returns>
+    /// <remarks>
+    /// Every room of the Pocket Castle has a name of its own, so the place is the castle as a whole.
+    /// </remarks>
+    private static string WithPlace(GameStatus status, string happening)
+    {
+        var place = status.IsOnWorldMap ? WorldMapName
+            : Mentions(status.Area, PocketCastleName) ? PocketCastleName
+            : status.Area;
+
+        return place.Length > 0 ? $"{place} - {happening}" : happening;
     }
 
     /// <summary>
@@ -224,6 +254,28 @@ internal static class ActivityBuilder
     /// <returns>The name with its level.</returns>
     private static string WithLevel(string name, string level) =>
         level.Length > 0 ? $"{name} Lv {level}" : name;
+
+    /// <summary>
+    /// Writes a count as an ordinal: 1st, 2nd, 3rd, 4th, 11th, 1,021st.
+    /// </summary>
+    /// <param name="number">The count.</param>
+    /// <returns>The ordinal, with thousands grouped like the trivia.</returns>
+    private static string Ordinal(int number)
+    {
+        var suffix = (number % 100) switch
+        {
+            11 or 12 or 13 => "th",
+            _ => (number % 10) switch
+            {
+                1 => "st",
+                2 => "nd",
+                3 => "rd",
+                _ => "th",
+            },
+        };
+
+        return number.ToString("N0", CultureInfo.InvariantCulture) + suffix;
+    }
 
     /// <summary>
     /// Reports whether a map name contains a place name, ignoring case.

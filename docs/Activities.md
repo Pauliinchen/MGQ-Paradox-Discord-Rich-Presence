@@ -20,12 +20,15 @@ When you add or change an activity, add it under the version it will ship in.
 | Activity | Text | When |
 |---|---|---|
 | Idle | `<Location> - Idle . . .` / `Traveling the world - Idle . . .` | No button pressed for 1 minute, also while the game is in the background. Never in battles, the Pocket Castle, the Labyrinth of Chaos or at the title screen. |
+| Request (NSFW) | `Pocket Castle - In a request with <Companion> for the <Nth> time!` / `<Location> - ...` | While a request plays, in the Pocket Castle or aboard the MS Fish. Replays in the Recollection Room don't count. The count is per save and includes the running request. |
 
 ### Trivia
 
 | Activity | Text | When |
 |---|---|---|
 | Music playing | `Currently vibing to <Track>!` | While music plays that the jukebox's music room names (227 of the 234 tracks). Comes after *Last item used*. |
+| Requests made (NSFW) | `Has made <N> request(s)!` | Per save, from the first request. Comes after *Deepest floor*. |
+| Most requested (NSFW) | `Has requested <Companion> the most, <N> time(s)!` | Per save, from the first request. Comes after *Requests made*. |
 
 ## 1.1.1
 

@@ -21,6 +21,7 @@ docs/DEVELOPER.md                        this file
 | `Options` | The mod's options in the game's menus, see [Options](#options). |
 | `NumberFormat` | Thousands separators, counted nouns, the game's large-number style. |
 | `GameState` | Everything read from the game: scene, area, vehicle, Labyrinth of Chaos, mastery. |
+| `Requests` | Which novel scene is a request, and who plays it. |
 | `Trivia` | The second Discord line. **All trivia texts live here**, one named method per line, rotating in the order of `LINES`. Every new or changed line also goes into [Activities.md](Activities.md) under the version it ships in. |
 | `SaveStats` | The per-save counters, see [Per-save statistics](#per-save-statistics-savestats). |
 | `StatusText` | The `key=value` status. The keys are shared with `Game/GameStatus.cs`. |
@@ -134,6 +135,7 @@ Ruby's `Float#to_s` prints the *shortest* round-tripping decimal, and `x.0` for 
 | Difficulty | `$game_variables[NWConst::Var::CURRENT_DIFFICULTY]` (-2..4) |
 | Idle | `Input.press?` on every button, published as `last_input` (Unix seconds); the DLL compares it with its own clock, so a game frozen in the background turns idle too |
 | Music playing | `RPG::BGM.last.name`, named through `NWConst::Library::BGM_SCENE_ITEMS` (the jukebox's music room, 227 of the 234 BGM files) |
+| Requests | Map events start them with the script call `call_novel_scene(<common event>)`, which ends in `Game_Novel#setup`. A scene is a request when the Recollection Room (`NWConst::Library::H_SCENE_ITEMS`) lists its common event under a name matching `Requests::SCENE_NAME`; the character is the companion whose affection unlocks it (condition on variable `NWConst::Var::ACTOR_REL_BASE` (3000) + actor id, named from `$data_actors`), or else the entry's name without its form in brackets. The Recollection Room replays through the same method with switch `NWConst::Sw::LIBRARY_H_MEMORY` (443) on, which excludes replays. A running one is `$game_novel.running?` with `$game_novel.event_id`. |
 | Switches (looked up by name in `$data_system`) | `Ilias Chosen`, `Alice Chosen`, `Within Chaos Labyrinth` |
 | Variables (looked up by name in `$data_system`) | `Chaos Labyrinth Current LV` (floor), `Labyrinth of Chaos Rare Value`, `Carnage Labyrinth of Chaos Current Floor` (> 0 counts as Carnage; **unverified**) |
 
@@ -148,6 +150,8 @@ The variable `Labyrinth of Chaos: Type` is *not* normal vs. Carnage: it held 9 o
 - `addition_purchase_gold`
 - `set_party_damage_record_actor`
 
+Requests are counted from the `Game_Novel#setup` hook, in total (`requests`) and per companion (`request.<Companion>` lines in the same file, see `SaveStats::TALLY_PREFIXES`), whether or not the NSFW option is on.
+
 **Storage.** Deliberately *not* in the save file, so that uninstalling leaves no trace and saves are identical with or without the mod:
 - `DataManager.save_game_without_rescue(index)` → writes `Discord/Stats/SaveNN.txt`.
 - `DataManager.auto_save_game_without_rescue(index)` → writes `Discord/Stats/AutoSave01.txt`. Autosaves have their own method, so without this hook, loading one would start every counter at 0.
@@ -160,7 +164,7 @@ The variable `Labyrinth of Chaos: Type` is *not* normal vs. Carnage: it held 9 o
 - The save *backup* (`Save/SaveBackup.rvdata2`) has no stats file.
 - A backup loaded later starts at 0.
 
-**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, the `DataManager` save/autosave/backup-save/load/new-game methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
+**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, `Game_Novel#setup`, the `DataManager` save/autosave/backup-save/load/new-game methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
 
 ## Options
 

@@ -2,7 +2,8 @@
 //  Scene.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Named the game script by its new file name
+//      Paulinchen  2026-09-26: Added the running request
+//                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -38,4 +39,9 @@ internal enum Scene
     /// Any menu outside the world map.
     /// </summary>
     Menu,
+
+    /// <summary>
+    /// A request playing, reported only with the NSFW option on.
+    /// </summary>
+    Request,
 }
