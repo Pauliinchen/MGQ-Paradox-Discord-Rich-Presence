@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Showed a running request or defeat scene, with who plays it and how often it happened
+//      Paulinchen  2026-09-26: Showed the player setting up for camp while the camp music plays
+//                            - Showed a running request or defeat scene, with who plays it and how often it happened
 //                            - Showed the player as idle after a minute without a button press
 //      Paulinchen  2026-09-25: Created
 //
@@ -40,6 +41,11 @@ internal static class ActivityBuilder
     /// What the player is shown doing after <see cref="IdleAfter"/> without a button press.
     /// </summary>
     private const string IdleText = "Idle . . .";
+
+    /// <summary>
+    /// What the player is shown doing while the camp music plays.
+    /// </summary>
+    private const string CampText = "Setting up for Camp . . .";
 
     /// <summary>
     /// Time without a button press after which the player counts as idle.
@@ -103,8 +109,8 @@ internal static class ActivityBuilder
     /// <returns>The first line.</returns>
     /// <remarks>
     /// The world map's own name is untranslated kanji, so a fight there names the journey instead.
-    /// Battles, the Labyrinth and the Pocket Castle never show idle, since auto-battle and their own
-    /// lines say more than it would.
+    /// Battles, the Labyrinth, the Pocket Castle and camp never show idle, since auto-battle and their
+    /// own lines say more than it would.
     /// </remarks>
     private static string DetailsOf(GameStatus status, int pocketCastleIndex)
     {
@@ -121,6 +127,13 @@ internal static class ActivityBuilder
         if (status.IsInLabyrinth)
         {
             return LabyrinthDetailsOf(status);
+        }
+
+        if (status.IsCamping && status.Scene != Scene.Battle && !Mentions(status.Area, PocketCastleName))
+        {
+            var place = status.Scene == Scene.Travel ? WorldMapName : status.Area;
+
+            return place.Length > 0 ? $"{place} - {CampText}" : CampText;
         }
 
         if (status.Scene == Scene.Travel)

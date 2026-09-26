@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Kept the per-save counters inside the save, taking over the earlier versions' files once
+#      Paulinchen  2026-09-26: Published whether the camp music plays
+#                            - Kept the per-save counters inside the save, taking over the earlier versions' files once
 #                            - Added an option to count the trivia across all saves instead of per save
 #                            - Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
 #                            - Counted the requests per save, in total and per character, and published a running one
@@ -389,6 +390,9 @@ module MGQ_Discord
     # Every button of the game's Input module, keyboard and gamepad alike.
     BUTTONS = [:DOWN, :LEFT, :RIGHT, :UP, :A, :B, :C, :X, :Y, :Z, :L, :R, :SHIFT, :CTRL, :ALT]
 
+    # BGM file of the camp music, "Camping" in the jukebox's music room.
+    CAMP_BGM = "yaei"
+
     # Jobs and races an actor has taken to their maximum level.
     class Mastery < Struct.new(:jobs, :races)
       # @return [Integer] jobs and races together
@@ -477,6 +481,17 @@ module MGQ_Discord
       "menu"
     rescue
       "map"
+    end
+
+    # Reports whether the camp music plays, which the game starts while the party sets up camp.
+    #
+    # RPG::BGM.last is the game's own record of the music started last, emptied when it stops.
+    #
+    # @return [Boolean]
+    def self.camping?
+      File.basename(RPG::BGM.last.name.to_s, ".*").casecmp(CAMP_BGM) == 0
+    rescue
+      false
     end
 
     # Tells how the party crosses the world map.
@@ -1110,6 +1125,7 @@ module MGQ_Discord
 
       fields["vehicle"] = GameState.vehicle if scene == "travel"
       fields["overworld"] = 1 if (scene == "battle" || scene == "defeat_scene") && GameState.on_world_map?
+      fields["camping"] = 1 if GameState.camping?
 
       if scene == "request" && (character = Requests.current)
         fields["request_with"] = character

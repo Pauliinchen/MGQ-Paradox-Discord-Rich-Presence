@@ -11,6 +11,14 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
+## 1.3
+
+### Line 1
+
+| Activity | Text | When |
+|---|---|---|
+| Camp | `<Location> - Setting up for Camp . . .` / `Traveling the world - Setting up for Camp . . .` | While the camp music (*Camping*) plays, except in battles, the Pocket Castle and the Labyrinth of Chaos. Shown instead of idle. |
+
 ## 1.2
 
 *NSFW* activities only show with the mod's NSFW option on, which is off by default. It is in the Mod Config Menu when that is installed, in the game's Config menu otherwise.

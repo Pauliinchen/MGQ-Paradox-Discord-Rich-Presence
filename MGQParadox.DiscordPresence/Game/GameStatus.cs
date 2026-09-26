@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Read who plays a running request or defeat scene, and how often it happened
+//      Paulinchen  2026-09-26: Read whether the camp music plays
+//                            - Read who plays a running request or defeat scene, and how often it happened
 //                            - Read when the player last pressed a button
 //                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
@@ -78,6 +79,11 @@ internal sealed class GameStatus
     /// Whether a fight takes place on the world map.
     /// </summary>
     public bool IsOnWorldMap => Value("overworld") == "1";
+
+    /// <summary>
+    /// Whether the camp music plays.
+    /// </summary>
+    public bool IsCamping => Value("camping") == "1";
 
     /// <summary>
     /// Whether the party is inside the Labyrinth of Chaos.
