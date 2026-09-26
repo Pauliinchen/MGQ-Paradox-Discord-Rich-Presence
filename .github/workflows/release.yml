@@ -1,0 +1,33 @@
+# Publishing a release on GitHub (tag e.g. v1.0.0) builds the mod and attaches
+# MGQ-Paradox-Discord-RPC-<version>.zip to that release. Nothing to upload by hand.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write   # needed to attach the zip to the release
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      # The runner's Visual Studio brings the C++ linker NativeAOT needs for the DLL.
+      - name: Publish (Release publishes also zip the package)
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.release.tag_name }}".TrimStart("v")
+          dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=$version
+
+      - name: Attach zip to the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" (Get-ChildItem MGQParadox.DiscordPresence/bin/Release/*.zip).FullName --clobber

@@ -1,0 +1,9 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+
+# runtime files, in case the game is ever pointed at this folder while testing
+*.log
+Stats/

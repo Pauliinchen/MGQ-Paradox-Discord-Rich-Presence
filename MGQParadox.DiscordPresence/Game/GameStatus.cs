@@ -1,0 +1,174 @@
+//----------------------------------------------------------------
+//  GameStatus.cs
+//
+//  Changelog:
+//      Paulinchen  2026-09-25: Created
+//
+//----------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
+namespace MGQParadox.DiscordPresence.Game;
+
+/// <summary>
+/// One snapshot of the game, as GameScript/rpc.rb published it.
+/// </summary>
+internal sealed class GameStatus
+{
+    /// <summary>
+    /// The published values by key.
+    /// </summary>
+    private readonly Dictionary<string, string> _values;
+
+    /// <summary>
+    /// Creates a snapshot over parsed values.
+    /// </summary>
+    /// <param name="values">The published values by key.</param>
+    private GameStatus(Dictionary<string, string> values)
+    {
+        _values = values;
+        Trivia = ReadTrivia();
+    }
+
+    /// <summary>
+    /// Start of the game session in Unix seconds, <see langword="null"/> when unknown.
+    /// </summary>
+    public long? StartedAt =>
+        long.TryParse(Value("start"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var start) && start > 0
+            ? start
+            : null;
+
+    /// <summary>
+    /// What the game is showing.
+    /// </summary>
+    public Scene Scene => Value("scene").ToLowerInvariant() switch
+    {
+        "title" => Scene.Title,
+        "battle" => Scene.Battle,
+        "travel" => Scene.Travel,
+        "menu" => Scene.Menu,
+        _ => Scene.Map,
+    };
+
+    /// <summary>
+    /// How the party crosses the world map, only meaningful in <see cref="Scene.Travel"/>.
+    /// </summary>
+    public Vehicle Vehicle => Value("vehicle") switch
+    {
+        "sea" => Vehicle.Sea,
+        "air" => Vehicle.Air,
+        _ => Vehicle.Foot,
+    };
+
+    /// <summary>
+    /// Name of the current map.
+    /// </summary>
+    public string Area => Value("area");
+
+    /// <summary>
+    /// Whether a fight takes place on the world map.
+    /// </summary>
+    public bool IsOnWorldMap => Value("overworld") == "1";
+
+    /// <summary>
+    /// Whether the party is inside the Labyrinth of Chaos.
+    /// </summary>
+    public bool IsInLabyrinth => LabyrinthFloor.Length > 0;
+
+    /// <summary>
+    /// Current Labyrinth of Chaos floor.
+    /// </summary>
+    public string LabyrinthFloor => Value("loc_floor");
+
+    /// <summary>
+    /// Kind of Labyrinth of Chaos run, "Normal" or "Carnage".
+    /// </summary>
+    public string LabyrinthType => Value("loc_type");
+
+    /// <summary>
+    /// Rare points collected in the Labyrinth of Chaos, already formatted.
+    /// </summary>
+    public string LabyrinthRarePoints => Value("loc_rare");
+
+    /// <summary>
+    /// Name of the party leader.
+    /// </summary>
+    public string LeaderName => Value("leader");
+
+    /// <summary>
+    /// Personal level of the party leader.
+    /// </summary>
+    public string LeaderLevel => Value("level");
+
+    /// <summary>
+    /// Job of the party leader.
+    /// </summary>
+    public string ClassName => Value("class");
+
+    /// <summary>
+    /// Job level of the party leader.
+    /// </summary>
+    public string ClassLevel => Value("class_level");
+
+    /// <summary>
+    /// Race of the party leader.
+    /// </summary>
+    public string RaceName => Value("race");
+
+    /// <summary>
+    /// Race level of the party leader.
+    /// </summary>
+    public string RaceLevel => Value("race_level");
+
+    /// <summary>
+    /// The trivia lines that currently apply, in the order rpc.rb lists them.
+    /// </summary>
+    public IReadOnlyList<string> Trivia { get; }
+
+    /// <summary>
+    /// Parses the published text.
+    /// </summary>
+    /// <param name="text">The <c>key=value</c> lines.</param>
+    /// <returns>The snapshot, or <see langword="null"/> when the text holds no value at all.</returns>
+    public static GameStatus? Parse(string text)
+    {
+        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var line in text.Split('\n'))
+        {
+            var separator = line.IndexOf('=');
+
+            if (separator > 0)
+            {
+                values[line.Substring(0, separator).Trim()] = line.Substring(separator + 1).Trim();
+            }
+        }
+
+        return values.Count > 0 ? new GameStatus(values) : null;
+    }
+
+    /// <summary>
+    /// Looks up a published value.
+    /// </summary>
+    /// <param name="key">The key rpc.rb published it under.</param>
+    /// <returns>The value, or an empty string when absent.</returns>
+    private string Value(string key) => _values.TryGetValue(key, out var value) ? value : string.Empty;
+
+    /// <summary>
+    /// Collects <c>trivia0</c>, <c>trivia1</c> and so on up to the first gap.
+    /// </summary>
+    /// <returns>The trivia lines.</returns>
+    private List<string> ReadTrivia()
+    {
+        var trivia = new List<string>();
+
+        for (var index = 0; Value($"trivia{index}") is { Length: > 0 } line; index++)
+        {
+            trivia.Add(line);
+        }
+
+        return trivia;
+    }
+}
