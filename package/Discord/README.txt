@@ -12,6 +12,9 @@ the NSFW option (see OPTIONS).
 
 REQUIREMENT
 -----------
+Monster Girl Quest! Paradox RPG 2.x or 3.x (tested on 2.x and 3.06) with
+the English translation.
+
 This is a Patch folder mod ("Type 1"), so the community's mod loader must
 be installed: download "Patch.rb (enable Type 1 mods)" from the MGQ wiki
 and put it into your Patch folder. If you already use other Patch folder
