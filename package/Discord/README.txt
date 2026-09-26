@@ -39,13 +39,21 @@ over the old one.
 
 OPTIONS
 -------
-The mod adds "[Discord] NSFW" to the game's options: in the Mod Config
-Menu if you have it installed, in the game's own Config menu otherwise.
-Off (the default) never mentions requests or defeat scenes on Discord. On
-shows a request or defeat scene while it plays, and how often they
-happened. The option is the same
-for every save and is kept in Discord\Settings.ini (nsfw = 0 or 1), not
-in your saves. Updating the mod resets it to off.
+The mod adds two options to the game: in the Mod Config Menu if you have
+it installed, in the game's own Config menu otherwise.
+
+[Discord] NSFW: Off (the default) never mentions requests or defeat
+scenes on Discord. On shows a request or defeat scene while it plays, and
+how often they happened.
+
+[Discord] Statistics: All saves (the default) shows the game's own counts
+of enemies defeated, escapes, wipeouts, items synthesized, gold spent and
+the biggest hit across every save. This save counts them for the save
+you're playing instead, since you installed the mod.
+
+The options are the same for every save and are kept in
+Discord\Settings.ini (nsfw and all_saves, 0 or 1), not in your saves.
+Updating the mod resets them.
 
 
 AFTER UPDATING THE TRANSLATION
@@ -77,8 +85,9 @@ starts normally - the mod simply does nothing.
 
 Your save files are never changed. Some trivia (enemies defeated, escapes,
 wipeouts, biggest hit, gold spent, items synthesized, requests, defeat
-scenes) is counted
-per save by the mod itself, because the game doesn't count those per save.
+scenes) is counted per save by the mod itself, because the game doesn't
+count those per save. The first six show the game's counts across all
+saves unless you set [Discord] Statistics to This save.
 Those counters are kept in Discord\Stats\ (one small file per save slot),
 so deleting the Discord folder removes them too. A save starts counting
 the first time you save it with the mod installed; before that, and for

@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
+#      Paulinchen  2026-09-26: Added an option to count the trivia across all saves instead of per save
+#                            - Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
 #                            - Counted the requests per save, in total and per character, and published a running one
 #                            - Counted the defeat scenes per save, in total and per monster girl, and published a running one
 #                            - Published the time of the last button press, so Discord can show when the player is idle
@@ -201,11 +202,35 @@ module MGQ_Discord
     # Whether requests and defeat scenes show on Discord, 0 or 1.
     NSFW = :mod_discord_nsfw
 
+    # Whether the trivia counts across all saves (1) or per save (0).
+    ALL_SAVES = :mod_discord_all_saves
+
     # Every option by its key in $game_system.conf, with its key in FILE.
-    NAMES = { NSFW => "nsfw" }
+    NAMES = { NSFW => "nsfw", ALL_SAVES => "all_saves" }
 
     # Every option, by its key in $game_system.conf.
     KEYS = NAMES.keys
+
+    # How each option shows in the menu: its name, its help, and a name and help per value. The
+    # first value is the default.
+    MENU = {
+      NSFW => {
+        :name   => "[Discord] NSFW",
+        :help   => "Show requests and defeat scenes, and how often they happened, on Discord.",
+        :values => {
+          0 => ["Off", "Discord never mentions requests or defeat scenes."],
+          1 => ["On",  "Discord shows a running request or defeat scene, and their counters."],
+        },
+      },
+      ALL_SAVES => {
+        :name   => "[Discord] Statistics",
+        :help   => "Count the trivia per save or across all saves.",
+        :values => {
+          1 => ["All saves", "The game's own counts across every save."],
+          0 => ["This save", "Counted by the mod for the loaded save, since the mod was installed."],
+        },
+      },
+    }
 
     # Adds the options to the menu.
     #
@@ -215,23 +240,23 @@ module MGQ_Discord
       config = NWConst::Config
       menu = config.const_defined?(:MOD_CONTENTS) ? config::MOD_CONTENTS : config::CONTENTS
 
-      menu.insert(-2, {
-        :key  => NSFW,
-        :name => "[Discord] NSFW",
-        :sub  => true,
-        :help => "Show requests and defeat scenes, and how often they happened, on Discord.\r\n←/→ Toggle",
-      })
-      config::DATA[NSFW] = [0, 1]
-      config::DATA_TEXT[NSFW] = {
-        0 => {:name => "Off", :help => "Discord never mentions requests or defeat scenes."},
-        1 => {:name => "On",  :help => "Discord shows a running request or defeat scene, and their counters."},
-      }
-      config::DEFAULT[NSFW] = 0
+      MENU.each do |key, option|
+        menu.insert(-2, { :key => key, :name => option[:name], :sub => true, :help => "#{option[:help]}\r\n←/→ Toggle" })
+        config::DATA[key] = option[:values].keys
+        config::DATA_TEXT[key] = {}
+        option[:values].each { |value, (name, help)| config::DATA_TEXT[key][value] = { :name => name, :help => help } }
+        config::DEFAULT[key] = option[:values].keys.first
+      end
     end
 
     # @return [Boolean] whether requests and defeat scenes show on Discord
     def self.nsfw?
       self[NSFW] == 1
+    end
+
+    # @return [Boolean] whether the trivia counts across all saves instead of per save
+    def self.all_saves?
+      self[ALL_SAVES] == 1
     end
 
     # @param key [Symbol] the option
@@ -827,27 +852,27 @@ module MGQ_Discord
       "#{actor.name} has mastered #{mastery.jobs} Jobs and #{mastery.races} Races already!"
     end
 
-    # How many enemies this save has defeated.
+    # How many enemies were defeated, in this save or all saves.
     #
     # @return [String, nil] the line, nil when it does not apply
     def self.enemies_defeated
-      count = SaveStats[:defeat]
+      count = Statistics[:defeat]
       "Has defeated #{NumberFormat.counted(count, 'enemy', 'enemies')}!" if count > 0
     end
 
-    # How many battles this save has run away from.
+    # How many battles were run away from, in this save or all saves.
     #
     # @return [String, nil] the line, nil when it does not apply
     def self.battles_escaped
-      count = SaveStats[:escape]
+      count = Statistics[:escape]
       "Has run away from #{NumberFormat.counted(count, 'battle')}!" if count > 0
     end
 
-    # How often this save's party was wiped out.
+    # How often the party was wiped out, in this save or all saves.
     #
     # @return [String, nil] the line, nil when it does not apply
     def self.wipeouts
-      count = SaveStats[:lose]
+      count = Statistics[:lose]
       "Has been wiped out #{NumberFormat.counted(count, 'time')}!" if count > 0
     end
 
@@ -869,27 +894,27 @@ module MGQ_Discord
       @top_stat = best && "#{best.name} has the highest #{Vocab.param(param_id)} (#{NumberFormat.large(best.param(param_id))}) in the party!"
     end
 
-    # The biggest hit this save has dealt.
+    # The biggest hit dealt, in this save or all saves.
     #
     # @return [String, nil] the line, nil when it does not apply
     def self.biggest_hit
-      damage = SaveStats[:best_hit]
+      damage = Statistics[:best_hit]
       "Biggest hit dealt: #{NumberFormat.large(damage)} damage!" if damage > 0
     end
 
-    # How much gold this save has spent in shops.
+    # How much gold was spent in shops, in this save or all saves.
     #
     # @return [String, nil] the line, nil when it does not apply
     def self.gold_spent
-      gold = SaveStats[:gold_spent]
+      gold = Statistics[:gold_spent]
       "Has spent #{NumberFormat.grouped(gold)} gold in shops!" if gold > 0
     end
 
-    # How many items this save has synthesized.
+    # How many items were synthesized, in this save or all saves.
     #
     # @return [String, nil] the line, nil when it does not apply
     def self.items_synthesized
-      count = SaveStats[:synthesize]
+      count = Statistics[:synthesize]
       "Has synthesized #{NumberFormat.counted(count, 'item')}!" if count > 0
     end
 
@@ -938,6 +963,27 @@ module MGQ_Discord
     # @return [String] the line
     def self.gold_carried
       "Currently carrying #{NumberFormat.grouped($game_party.gold)} gold!"
+    end
+  end
+
+  # The counts behind the trivia, per save or across all saves as the statistics option says.
+  module Statistics
+    # The game's own count across all saves, by the SaveStats counter it matches. The requests and
+    # defeat scenes have none, so they stay per save.
+    ALL_SAVES = {
+      :defeat     => :party_defeat,
+      :escape     => :party_escape,
+      :lose       => :party_lose,
+      :synthesize => :party_synthesize,
+      :gold_spent => :purchase_gold,
+      :best_hit   => :party_damage_record_actor,
+    }
+
+    # @param key [Symbol] the SaveStats counter
+    # @return [Integer] its count, from $game_library across all saves when the option says so
+    def self.[](key)
+      all_saves = ALL_SAVES[key]
+      Options.all_saves? && all_saves ? $game_library.send(all_saves).to_i : SaveStats[key]
     end
   end
 

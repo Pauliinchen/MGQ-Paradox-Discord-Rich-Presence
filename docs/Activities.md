@@ -15,6 +15,8 @@ When you add or change an activity, add it under the version it will ship in.
 
 *NSFW* activities only show with the mod's NSFW option on, which is off by default. It is in the Mod Config Menu when that is installed, in the game's Config menu otherwise.
 
+The Statistics option, next to it, switches *Enemies defeated*, *Battles escaped*, *Wipeouts*, *Biggest hit*, *Gold spent* and *Items synthesized* between the game's own counts across all saves (default) and the mod's per-save counts.
+
 ### Line 1
 
 | Activity | Text | When |

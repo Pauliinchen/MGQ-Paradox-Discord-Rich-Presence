@@ -24,6 +24,7 @@ docs/DEVELOPER.md                        this file
 | `Requests` | Which novel scene is a request, and who plays it. |
 | `DefeatScenes` | The scene after a lost battle, and which monster girl won. |
 | `Trivia` | The second Discord line. **All trivia texts live here**, one named method per line, rotating in the order of `LINES`. Every new or changed line also goes into [Activities.md](Activities.md) under the version it ships in. |
+| `Statistics` | The counts the trivia shows: `SaveStats`, or the game's own across all saves when the Statistics option says so. |
 | `SaveStats` | The per-save counters, see [Per-save statistics](#per-save-statistics-savestats). |
 | `StatusText` | The `key=value` status. The keys are shared with `Game/GameStatus.cs`. |
 | `Presence` | Calls `DiscordPresence.dll` through `Win32API`. |
@@ -55,7 +56,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `PatchLoader.cs` | The loader block the earlier versions added to `Patch/Patch.rb`: finding and removing it, safe write. |
 | `NWPatchChecksum.cs` | The checksum the game verifies on line 1 of `Patch.rb`. |
 
-**`package/Discord/`:** `Settings.ini` (`client_id`, and `nsfw`, which the game script reads and writes) and the player `README.txt`.
+**`package/Discord/`:** `Settings.ini` (`client_id`, and the options `nsfw` and `all_saves`, which the game script reads and writes) and the player `README.txt`.
 
 ## Build and test
 
@@ -132,7 +133,7 @@ Ruby's `Float#to_s` prints the *shortest* round-tripping decimal, and `x.0` for 
 | Levels | `actor.base_level` / `class_level` / `tribe_level`; the race is `actor.tribe` |
 | World map | `$game_map.overworld?` (tileset mode 0), except inside the LoC |
 | Battles fought | `$game_system.battle_count` (per save) |
-| Defeats, escapes, wipeouts, synthesis, gold spent, biggest hit | `SaveStats` in `Discord_RPC.rb` (per save; see below). **Not** `$game_library.party_*`, which is shared by all saves. |
+| Defeats, escapes, wipeouts, synthesis, gold spent, biggest hit | `SaveStats` in `Discord_RPC.rb` (per save; see below). With the Statistics option on *All saves*, `Statistics` reads `$game_library.party_defeat`, `party_escape`, `party_lose`, `party_synthesize`, `purchase_gold` and `party_damage_record_actor` instead, which are shared by all saves. |
 | Difficulty | `$game_variables[NWConst::Var::CURRENT_DIFFICULTY]` (-2..4) |
 | Idle | `Input.press?` on every button, published as `last_input` (Unix seconds); the DLL compares it with its own clock, so a game frozen in the background turns idle too |
 | Music playing | `RPG::BGM.last.name`, named through `NWConst::Library::BGM_SCENE_ITEMS` (the jukebox's music room, 227 of the 234 BGM files) |
@@ -170,9 +171,9 @@ Requests are counted from the `Game_Novel#setup` hook, defeat scenes from the `B
 
 ## Options
 
-`Options.register` adds each option to `NWConst::Config`: to `MOD_CONTENTS` when the community's Mod Config Menu (`Patch/0_ModConfigMenu.rb`) defined it, which the loader's file name order runs first, to the game's own `CONTENTS` otherwise. Both menus read `DATA`, `DATA_TEXT` and `DEFAULT` and store the value in `$game_system.conf`.
+`Options::MENU` describes each option's name, help and values (the first is the default). `Options.register` adds them to `NWConst::Config`: to `MOD_CONTENTS` when the community's Mod Config Menu (`Patch/0_ModConfigMenu.rb`) defined it, which the loader's file name order runs first, to the game's own `CONTENTS` otherwise. Both menus read `DATA`, `DATA_TEXT` and `DEFAULT` and store the value in `$game_system.conf`.
 
 `$game_system.conf` is part of every save, but the options are meant to be the same for all saves and saves must stay untouched. So:
-- **`Discord/Settings.ini`** holds them under short keys (`nsfw = 1`, mapped in `Options::NAMES`), next to the DLL's settings. `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
+- **`Discord/Settings.ini`** holds them under short keys (`nsfw = 0`, `all_saves = 1`, mapped in `Options::NAMES`), next to the DLL's settings. `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
 - **`Options.sync`** runs before every publish. A new `$game_system.conf` (a save loaded, a new game, the title screen) gets the stored values; any other difference was made in a menu and is stored.
 - **`Options.left_out_of_save`** wraps the save, autosave and backup-save methods and takes the options out of `$game_system.conf` while the game writes the file.
