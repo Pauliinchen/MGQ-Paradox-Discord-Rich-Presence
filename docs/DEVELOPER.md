@@ -8,6 +8,7 @@ GameScript/rpc.rb                        Ruby, runs inside the game
 MGQParadox.DiscordPresence/              C# NativeAOT project -> DiscordPresence.dll, and the package
 MGQParadox.DiscordPresence.Setup/        C# project -> DiscordPresenceSetup.exe
 package/                                 static files shipped as-is
+Shipping/                                publish output, git-ignored
 docs/DEVELOPER.md                        this file
 .github/workflows/release.yml            builds and attaches the zip on release
 ```
@@ -57,7 +58,7 @@ The game hooks follow the module at the end of the file.
 
 You need the .NET 10 SDK and the Visual Studio workload **Desktop development with C++**, whose linker NativeAOT uses.
 
-Everything is in the projects; there is no separate build script. Publishing the DLL project assembles the complete release layout in `MGQParadox.DiscordPresence/bin/<Configuration>/package/`, building the setup project along the way:
+Everything is in the projects; there is no separate build script. Publishing the DLL project assembles the complete release layout in `Shipping/` at the repository root, building the setup project along the way. Copy its content into a game folder to install or update the mod there:
 
 ```
 DiscordPatcher.bat
@@ -71,19 +72,9 @@ Discord/  DiscordPresence.dll  DiscordPresenceSetup.exe  rpc.rb  Settings.ini  R
   ```
 
 - **Release publishes** also zip it: `bin/Release/MGQ-Paradox-Discord-RPC-<Version>.zip`.
-- **Deploy to your game on every publish:** create `MGQParadox.DiscordPresence/MGQParadox.DiscordPresence.csproj.user` (git-ignored; Visual Studio loads it automatically):
-
-  ```xml
-  <Project>
-    <PropertyGroup>
-      <GameDir>C:\path\to\your\game folder</GameDir>
-    </PropertyGroup>
-  </Project>
-  ```
-
-  Close the game before publishing: `DiscordPresence.dll` is locked while it runs.
+- **Every publish replaces `Shipping/`.** Close the game before copying it over an install: `DiscordPresence.dll` is locked while the game runs.
 - **Visual Studio:** open the `.slnx`. The shipped files appear in the DLL project under `Shipped`.
-- **First time in a game folder:** run `DiscordPatcher.bat` there once to install the loader. After that, changes to `rpc.rb` only need a game restart.
+- **First time in a game folder:** run `DiscordPatcher.bat` there once to install the loader. After that, changes to `rpc.rb` only need a publish, a copy and a game restart.
 - **Logs:** `DiscordPresence.log` (DLL and setup) and `InGame.log` (in-game errors). Set `DEBUG = true` in `rpc.rb` to log every status write.
 
 ## Conventions

@@ -102,7 +102,7 @@ To build locally, you need the .NET 10 SDK and the Visual Studio workload *Deskt
 dotnet publish MGQParadox.DiscordPresence -c Release
 ```
 
-This builds the release package and zips it. See [docs/DEVELOPER.md](docs/DEVELOPER.md) for the code layout, how the mod hooks into the game, and which game data it reads.
+This puts the finished mod into the `Shipping` folder: copy its content into your game folder and continue with step 3 of the [installation](#installation). It also zips it. See [docs/DEVELOPER.md](docs/DEVELOPER.md) for the code layout, how the mod hooks into the game, and which game data it reads.
 
 ## Disclaimer
 

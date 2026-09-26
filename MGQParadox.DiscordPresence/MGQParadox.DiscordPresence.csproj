@@ -2,7 +2,7 @@
 
   <!--
     Builds DiscordPresence.dll, which the game loads, and on publish the complete release layout
-    in bin\<Configuration>\package\ :
+    in Shipping\ at the repository root (git-ignored), ready to copy into a game folder:
 
       DiscordPatcher.bat
       Discord\  DiscordPresence.dll  DiscordPresenceSetup.exe  rpc.rb  Settings.ini  README.txt
@@ -10,10 +10,6 @@
       dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.2.0
 
     Release publishes also zip it:  bin\Release\MGQ-Paradox-Discord-RPC-<Version>.zip
-    If GameDir is set, every publish copies the package into that game folder.
-    Set it per user in MGQParadox.DiscordPresence.csproj.user (git-ignored):
-
-      <Project><PropertyGroup><GameDir>C:\Games\MGQ Paradox</GameDir></PropertyGroup></Project>
 
     NativeAOT for 32-bit Windows, because the game is a 32-bit process and can only load a native
     DLL of its own kind. Players need no .NET installed. Building needs the Visual Studio workload
@@ -34,7 +30,7 @@
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
     <InvariantGlobalization>true</InvariantGlobalization>
 
-    <PackageDir>$(MSBuildProjectDirectory)\bin\$(Configuration)\package\</PackageDir>
+    <PackageDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', 'Shipping'))</PackageDir>
     <ModDir>$(PackageDir)Discord\</ModDir>
     <ZipFile>$(MSBuildProjectDirectory)\bin\$(Configuration)\MGQ-Paradox-Discord-RPC-$(Version).zip</ZipFile>
     <SetupProject>..\MGQParadox.DiscordPresence.Setup\MGQParadox.DiscordPresence.Setup.csproj</SetupProject>
@@ -80,16 +76,6 @@
   <Target Name="ZipPackage" AfterTargets="AssemblePackage" Condition="'$(Configuration)' == 'Release'">
     <ZipWithForwardSlashes SourceDirectory="$(PackageDir)" DestinationFile="$(ZipFile)" />
     <Message Importance="high" Text="$(MSBuildProjectName) -> $(ZipFile)" />
-  </Target>
-
-  <Target Name="DeployToGame" AfterTargets="AssemblePackage" Condition="'$(GameDir)' != ''">
-    <Error Condition="!Exists('$(GameDir)\Game.exe')" Text="GameDir '$(GameDir)' has no Game.exe." />
-    <ItemGroup>
-      <PackageFile Include="$(PackageDir)**\*" />
-    </ItemGroup>
-    <!-- DiscordPresence.dll is locked while the game runs: close the game before publishing -->
-    <Copy SourceFiles="@(PackageFile)" DestinationFiles="@(PackageFile->'$(GameDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    <Message Importance="high" Text="$(MSBuildProjectName) -> deployed to $(GameDir)" />
   </Target>
 
   <UsingTask TaskName="PrependToPath" TaskFactory="RoslynCodeTaskFactory"
