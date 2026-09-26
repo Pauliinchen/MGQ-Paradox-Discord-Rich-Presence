@@ -41,8 +41,9 @@ OPTIONS
 -------
 The mod adds "[Discord] NSFW" to the game's options: in the Mod Config
 Menu if you have it installed, in the game's own Config menu otherwise.
-Off (the default) never mentions requests on Discord. On shows a request
-while it plays and how many requests you made. The option is the same
+Off (the default) never mentions requests or defeat scenes on Discord. On
+shows a request or defeat scene while it plays, and how often they
+happened. The option is the same
 for every save and is kept in Discord\Settings.ini (nsfw = 0 or 1), not
 in your saves. Updating the mod resets it to off.
 
@@ -75,7 +76,8 @@ If you delete the Discord folder without uninstalling, the game still
 starts normally - the mod simply does nothing.
 
 Your save files are never changed. Some trivia (enemies defeated, escapes,
-wipeouts, biggest hit, gold spent, items synthesized, requests) is counted
+wipeouts, biggest hit, gold spent, items synthesized, requests, defeat
+scenes) is counted
 per save by the mod itself, because the game doesn't count those per save.
 Those counters are kept in Discord\Stats\ (one small file per save slot),
 so deleting the Discord folder removes them too. A save starts counting

@@ -16,6 +16,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 | No button pressed for a minute | `<Location> - Idle . . .`, except in battles, the Pocket Castle and the Labyrinth of Chaos |
 | Labyrinth of Chaos | `Labyrinth of Chaos <Normal/Carnage> (<Biome>) - Floor <X> \| <Y> Rare Points!` |
 | In a request (NSFW) | `Pocket Castle - In a request with <Companion> for the <Nth> time!` |
+| After losing a battle (NSFW) | `<Location> - Raped by <Monster girl> for the <Nth> time!` |
 
 **Hover the picture** to see your party leader: `Party leader: <Name> Lv <X> | Race: <Race> Lv <Y> | Class: <Job> Lv <Z>`
 
@@ -29,6 +30,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - The music that's playing, named like in Kagetsumugi's jukebox
 - Gold carried and spent, items synthesized, companions recruited, your Ilias or Alice choice, the deepest Labyrinth of Chaos floor, and more
 - How many requests you made, and to whom the most (NSFW)
+- How often you were raped after losing, and by whom the most (NSFW)
 
 Every number belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).
 
@@ -63,10 +65,10 @@ Nothing else needs to be installed.
 
 The mod adds **`[Discord] NSFW`** to the game's options: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise.
 
-- **Off** (default): Discord never mentions requests.
-- **On**: Discord shows a request while it plays, and the request counters in the trivia.
+- **Off** (default): Discord never mentions requests or defeat scenes.
+- **On**: Discord shows a request or defeat scene while it plays, and their counters in the trivia.
 
-The option is the same for every save. It is kept as `nsfw = 0/1` in `Discord\Settings.ini`, not in your save files, so updating the mod resets it to off. Requests are counted either way, so turning it on later shows the full count since you installed the mod.
+The option is the same for every save. It is kept as `nsfw = 0/1` in `Discord\Settings.ini`, not in your save files, so updating the mod resets it to off. Requests and defeat scenes are counted either way, so turning it on later shows the full count since you installed the mod.
 
 ### After updating the translation
 
@@ -96,7 +98,7 @@ The trivia comes from two places:
 
 | Read from your save | Counted by the mod |
 |---|---|
-| Battles fought, gold carried, playtime, difficulty, companions recruited, deepest Labyrinth of Chaos floor, your Ilias or Alice choice, top stat, mastered jobs and races | Enemies defeated, escapes, wipeouts, items synthesized, gold spent in shops, biggest hit, requests |
+| Battles fought, gold carried, playtime, difficulty, companions recruited, deepest Labyrinth of Chaos floor, your Ilias or Alice choice, top stat, mastered jobs and races | Enemies defeated, escapes, wipeouts, items synthesized, gold spent in shops, biggest hit, requests, defeat scenes |
 | Covers your **whole playthrough** and shows up right away, even on old saves. | Covers only the time **since you installed the mod**. |
 
 The game counts most of the second group only **across all saves combined**. To show them per playthrough, the mod counts these events itself for each save:

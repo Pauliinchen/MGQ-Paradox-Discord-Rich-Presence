@@ -2,7 +2,7 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Read who plays a running request and how often they were requested
+//      Paulinchen  2026-09-26: Read who plays a running request or defeat scene, and how often it happened
 //                            - Read when the player last pressed a button
 //                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
@@ -55,6 +55,7 @@ internal sealed class GameStatus
         "travel" => Scene.Travel,
         "menu" => Scene.Menu,
         "request" => Scene.Request,
+        "defeat_scene" => Scene.DefeatScene,
         _ => Scene.Map,
     };
 
@@ -107,6 +108,16 @@ internal sealed class GameStatus
     /// How many requests this save made to <see cref="RequestCharacter"/>, the running one included.
     /// </summary>
     public int RequestCount => Count("request_count");
+
+    /// <summary>
+    /// The monster girl of the running defeat scene, only set in <see cref="Scene.DefeatScene"/>.
+    /// </summary>
+    public string RapedBy => Value("raped_by");
+
+    /// <summary>
+    /// How many defeat scenes this save saw of <see cref="RapedBy"/>, the running one included.
+    /// </summary>
+    public int RapedCount => Count("raped_count");
 
     /// <summary>
     /// Name of the party leader.

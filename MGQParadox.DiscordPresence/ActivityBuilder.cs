@@ -2,7 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Showed a running request, with who plays it and how often they were requested
+//      Paulinchen  2026-09-26: Showed a running request or defeat scene, with who plays it and how often it happened
 //                            - Showed the player as idle after a minute without a button press
 //      Paulinchen  2026-09-25: Created
 //
@@ -111,6 +111,11 @@ internal static class ActivityBuilder
         if (status.Scene == Scene.Request)
         {
             return WithPlace(status, $"In a request with {status.RequestCharacter} for the {Ordinal(status.RequestCount)} time!");
+        }
+
+        if (status.Scene == Scene.DefeatScene)
+        {
+            return WithPlace(status, $"Raped by {status.RapedBy} for the {Ordinal(status.RapedCount)} time!");
         }
 
         if (status.IsInLabyrinth)

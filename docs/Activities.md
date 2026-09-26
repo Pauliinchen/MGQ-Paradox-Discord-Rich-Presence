@@ -21,6 +21,7 @@ When you add or change an activity, add it under the version it will ship in.
 |---|---|---|
 | Idle | `<Location> - Idle . . .` / `Traveling the world - Idle . . .` | No button pressed for 1 minute, also while the game is in the background. Never in battles, the Pocket Castle, the Labyrinth of Chaos or at the title screen. |
 | Request (NSFW) | `Pocket Castle - In a request with <Companion> for the <Nth> time!` / `<Location> - ...` | While a request plays, in the Pocket Castle or aboard the MS Fish. Replays in the Recollection Room don't count. The count is per save and includes the running request. |
+| Defeat scene (NSFW) | `<Location> - Raped by <Monster girl> for the <Nth> time!` / `Traveling the world - ...` | While the scene after a lost battle plays, named after the monster girl who won. Skipped scenes, replays from the encyclopedia or the Recollection Room, and Labyrinth of Chaos defeats don't count. The count is per save and includes the running scene. |
 
 ### Trivia
 
@@ -29,6 +30,8 @@ When you add or change an activity, add it under the version it will ship in.
 | Music playing | `Currently vibing to <Track>!` | While music plays that the jukebox's music room names (227 of the 234 tracks). Comes after *Last item used*. |
 | Requests made (NSFW) | `Has made <N> request(s)!` | Per save, from the first request. Comes after *Deepest floor*. |
 | Most requested (NSFW) | `Has requested <Companion> the most, <N> time(s)!` | Per save, from the first request. Comes after *Requests made*. |
+| Times raped (NSFW) | `Has been raped <N> time(s)!` | Per save, from the first defeat scene. Comes after *Most requested*. |
+| Most raped by (NSFW) | `Raped by <Monster girl> the most, <N> time(s)!` | Per save, from the first defeat scene. Comes after *Times raped*. |
 
 ## 1.1.1
 

@@ -4,6 +4,7 @@
 #  Changelog:
 #      Paulinchen  2026-09-26: Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
 #                            - Counted the requests per save, in total and per character, and published a running one
+#                            - Counted the defeat scenes per save, in total and per monster girl, and published a running one
 #                            - Published the time of the last button press, so Discord can show when the player is idle
 #                            - Added the music that is playing to the trivia
 #                            - Moved into the Patch folder, where the community's mod loader picks it up
@@ -197,7 +198,7 @@ module MGQ_Discord
     # File inside the mod folder, shared with DiscordPresence.dll and edited by players too.
     FILE = "Settings.ini"
 
-    # Whether requests show on Discord, 0 or 1.
+    # Whether requests and defeat scenes show on Discord, 0 or 1.
     NSFW = :mod_discord_nsfw
 
     # Every option by its key in $game_system.conf, with its key in FILE.
@@ -218,17 +219,17 @@ module MGQ_Discord
         :key  => NSFW,
         :name => "[Discord] NSFW",
         :sub  => true,
-        :help => "Show requests and how often you made them on Discord.\r\n←/→ Toggle",
+        :help => "Show requests and defeat scenes, and how often they happened, on Discord.\r\n←/→ Toggle",
       })
       config::DATA[NSFW] = [0, 1]
       config::DATA_TEXT[NSFW] = {
-        0 => {:name => "Off", :help => "Discord never mentions requests."},
-        1 => {:name => "On",  :help => "Discord shows a running request and the request counters."},
+        0 => {:name => "Off", :help => "Discord never mentions requests or defeat scenes."},
+        1 => {:name => "On",  :help => "Discord shows a running request or defeat scene, and their counters."},
       }
       config::DEFAULT[NSFW] = 0
     end
 
-    # @return [Boolean] whether requests show on Discord
+    # @return [Boolean] whether requests and defeat scenes show on Discord
     def self.nsfw?
       self[NSFW] == 1
     end
@@ -435,7 +436,7 @@ module MGQ_Discord
     # The world map's name is untranslated kanji, so a menu opened there stays "travel" rather
     # than naming the map.
     #
-    # @return [String] "title", "battle", "request", "travel", "map" or "menu"
+    # @return [String] "title", "battle", "request", "defeat_scene", "travel", "map" or "menu"
     def self.scene
       scene = SceneManager.scene
       return "title" if scene.nil?
@@ -444,6 +445,7 @@ module MGQ_Discord
       return "battle"  if name =~ /Battle/
       return "title"   if name =~ /Title/
       return "request" if Options.nsfw? && Requests.current
+      return "defeat_scene" if Options.nsfw? && DefeatScenes.current
       return "travel"  if on_world_map?
       return "map"    if name =~ /Map/
       "menu"
@@ -583,6 +585,48 @@ module MGQ_Discord
     end
   end
 
+  # Defeat scenes: what the monster girl who won a battle does to Luka. Counted with or without
+  # the NSFW option, only showing them depends on it.
+  module DefeatScenes
+    # Counts the defeat scene BattleManager just set up, unless it is a replay or was skipped.
+    # Called from the BattleManager.change_novel_scene hook.
+    #
+    # The Labyrinth of Chaos plays LOSE_EVENT_BASE itself for all its monsters, which has no scene
+    # of her own.
+    def self.started
+      return if BattleManager.memory_battle? || $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
+
+      event_id = $game_temp.lose_event_id
+      enemy = $data_enemies[$game_temp.lose_event_enemy_id]
+      return if event_id <= NWConst::Common::LOSE_EVENT_BASE || enemy.nil? || skipped?(event_id)
+
+      @running = [event_id, enemy.name.to_s]
+      SaveStats.add_for(:rapes, enemy.name.to_s)
+    end
+
+    # Forgets the last defeat scene, so another novel scene with the same event is not taken for
+    # it. Called from the Game_Novel#setup hook.
+    def self.forget
+      @running = nil
+    end
+
+    # @return [String, nil] the monster girl of the running defeat scene, nil while none runs
+    def self.current
+      event_id, monster = @running
+      monster if event_id && $game_novel && $game_novel.running? && $game_novel.event_id == event_id
+    end
+
+    # Reports whether the player chose to skip the scene.
+    #
+    # Skipping replaces the novel's event list with a copy that starts after the scene.
+    #
+    # @param event_id [Integer] the common event of the defeat scene
+    # @return [Boolean]
+    def self.skipped?(event_id)
+      !$game_novel.interpreter.instance_variable_get(:@list).equal?($data_common_events[event_id].list)
+    end
+  end
+
   # The second Discord line. The presence shows one of these at a time.
   module Trivia
     # Seconds the lines are kept before they are worked out again.
@@ -645,6 +689,8 @@ module MGQ_Discord
       :deepest_labyrinth_floor,
       :requests_made,
       :most_requested,
+      :times_raped,
+      :most_raped_by,
       :gold_carried,
     ]
 
@@ -871,6 +917,22 @@ module MGQ_Discord
       "Has requested #{character} the most, #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && character
     end
 
+    # How many defeat scenes this save has seen.
+    #
+    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
+    def self.times_raped
+      count = SaveStats[:rapes]
+      "Has been raped #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && count > 0
+    end
+
+    # Which monster girl this save has seen the most defeat scenes of.
+    #
+    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
+    def self.most_raped_by
+      monster, count = SaveStats.top(:rapes)
+      "Raped by #{monster} the most, #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && monster
+    end
+
     # How much gold the party carries.
     #
     # @return [String] the line
@@ -879,7 +941,8 @@ module MGQ_Discord
     end
   end
 
-  # Counters the mod keeps per save: ones the game only keeps across all saves, and the requests.
+  # Counters the mod keeps per save: ones the game only keeps across all saves, the requests and
+  # the defeat scenes.
   #
   # Stored in Discord/Stats instead of the save files, so saves load the same without the mod.
   module SaveStats
@@ -887,11 +950,11 @@ module MGQ_Discord
     DIR = "Stats"
 
     # Every counter, in the order they are stored.
-    KEYS = [:defeat, :escape, :lose, :synthesize, :gold_spent, :best_hit, :requests]
+    KEYS = [:defeat, :escape, :lose, :synthesize, :gold_spent, :best_hit, :requests, :rapes]
 
     # Counters kept per character too, by the key of their total, with the start of their keys in a
     # stats file: "request.Alice=3".
-    TALLY_PREFIXES = { :requests => "request." }
+    TALLY_PREFIXES = { :requests => "request.", :rapes => "raped_by." }
 
     @counts = {}
     @tallies = {}
@@ -1028,11 +1091,16 @@ module MGQ_Discord
       }
 
       fields["vehicle"] = GameState.vehicle if scene == "travel"
-      fields["overworld"] = 1 if scene == "battle" && GameState.on_world_map?
+      fields["overworld"] = 1 if (scene == "battle" || scene == "defeat_scene") && GameState.on_world_map?
 
       if scene == "request" && (character = Requests.current)
         fields["request_with"] = character
         fields["request_count"] = SaveStats.count_for(:requests, character)
+      end
+
+      if scene == "defeat_scene" && (monster = DefeatScenes.current)
+        fields["raped_by"] = monster
+        fields["raped_count"] = SaveStats.count_for(:rapes, monster)
       end
 
       if (labyrinth = GameState.labyrinth)
@@ -1125,18 +1193,35 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("item_apply hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # Requests play as novel scenes, and the Recollection Room replays them the same way.
+  # Requests and defeat scenes play as novel scenes, and the Recollection Room replays them the same way.
   begin
     class Game_Novel
       alias mgq_discord_setup setup
       def setup(event_id)
         result = mgq_discord_setup(event_id)
+        MGQ_Discord::DefeatScenes.forget rescue nil
         MGQ_Discord::Requests.started(event_id) rescue nil
         result
       end
     end
   rescue => e
     MGQ_Discord::Log.write("novel hook FAILED: #{e.class}: #{e.message}")
+  end
+
+  # A lost battle sets up its defeat scene here, after asking whether to skip it.
+  begin
+    module BattleManager
+      class << self
+        alias mgq_discord_change_novel_scene change_novel_scene
+        def change_novel_scene(*args)
+          result = mgq_discord_change_novel_scene(*args)
+          MGQ_Discord::DefeatScenes.started rescue nil
+          result
+        end
+      end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("defeat scene hook FAILED: #{e.class}: #{e.message}")
   end
 
   # Saving, loading and starting a new game keep the per-save counters in step with the save slots.

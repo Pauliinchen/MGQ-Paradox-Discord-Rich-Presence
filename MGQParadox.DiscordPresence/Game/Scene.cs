@@ -2,7 +2,7 @@
 //  Scene.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Added the running request
+//      Paulinchen  2026-09-26: Added the running request and the running defeat scene
 //                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
@@ -44,4 +44,9 @@ internal enum Scene
     /// A request playing, reported only with the NSFW option on.
     /// </summary>
     Request,
+
+    /// <summary>
+    /// A defeat scene after a lost battle, reported only with the NSFW option on.
+    /// </summary>
+    DefeatScene,
 }
