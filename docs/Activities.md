@@ -13,6 +13,11 @@ When you add or change an activity, add it under the version it will ship in.
 
 ## 1.3.1
 
+| Change | Before | Now |
+|---|---|---|
+| Labyrinth of Chaos Carnage | Always shown as *Normal*, with the floor of the last Normal run | Shown as *Carnage*, with the Carnage run's floor |
+| Defeat scene (NSFW) on 2.x | Never shown or counted | Shown and counted like on 3.x |
+
 ### Picture
 
 | Activity | Picture | When |
@@ -85,7 +90,7 @@ No new activities. This release changed how the mod is installed.
 | Menu | `<Location> - In menu . . .` | In any other screen, shops and the save screen included |
 | World map | `Traveling the world - On foot . . .` / `Sailing . . .` / `Flying . . .` | On the world map, by vehicle |
 | Pocket Castle | `Pocket Castle - <line>` | In the Pocket Castle, except in battle. One of seven lines, rotating with the trivia from a random start: *Not knowing what to do next...*, *Rearranging the party...*, *Wondering how to build a character...*, *Currently in crafting hell...*, *Trying to buy out Vanilla's stock...*, *Befriending some Companions...*, *Getting lost...* |
-| Labyrinth of Chaos | `Labyrinth of Chaos <Normal/Carnage> (<Biome>) - Floor <X> \| <Y> Rare Points!` | Inside the labyrinth. The biome is left out at the entrance. Carnage detection is untested. |
+| Labyrinth of Chaos | `Labyrinth of Chaos <Normal/Carnage> (<Biome>) - Floor <X> \| <Y> Rare Points!` | Inside the labyrinth. The biome is left out at the entrance. Carnage was always shown as Normal until 1.3.1. |
 
 ### Tooltip
 

@@ -2,7 +2,9 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added a Picture option that shows Ilias or Alice, and later the route, instead of the app icon
+#      Paulinchen  2026-09-27: Told a Carnage run by the Labyrinth's type, which the Carnage floor counter never did
+#                            - Named the monster girl of a defeat scene on 2.x too, which does not record her
+#                            - Added a Picture option that shows Ilias or Alice, and later the route, instead of the app icon
 #      Paulinchen  2026-09-26: Added the companions with the most affection to the trivia
 #                            - Published who the player is talking to during a conversation
 #                            - Added the battle fucks won to the trivia
@@ -414,6 +416,9 @@ module MGQ_Discord
     # BGM file of the camp music, "Camping" in the jukebox's music room.
     CAMP_BGM = "yaei"
 
+    # Value of "Labyrinth of Chaos: Type" during a Carnage run. A Normal run holds 9.
+    CARNAGE_TYPE = 10
+
     # Jobs and races an actor has taken to their maximum level.
     class Mastery < Struct.new(:jobs, :races)
       # @return [Integer] jobs and races together
@@ -541,17 +546,15 @@ module MGQ_Discord
 
     # Reads the progress inside the Labyrinth of Chaos.
     #
-    # A Carnage floor counter above 0 is taken to mean Carnage, which is untested.
-    # "Labyrinth of Chaos: Type" does not tell the two apart.
+    # Normal and Carnage runs count their floors in the same variable.
     #
     # @return [Labyrinth, nil] the progress, nil outside the labyrinth
     def self.labyrinth
       return nil unless save_loaded? && in_labyrinth?
 
-      carnage_floor = variable("Carnage Labyrinth of Chaos Current Floor")
-      carnage = carnage_floor > 0
+      carnage = variable("Labyrinth of Chaos: Type") == CARNAGE_TYPE
 
-      Labyrinth.new(carnage ? carnage_floor : variable("Chaos Labyrinth Current LV"),
+      Labyrinth.new(variable("Chaos Labyrinth Current LV"),
                     carnage ? "Carnage" : "Normal",
                     variable("Labyrinth of Chaos Rare Value"))
     end
@@ -659,12 +662,24 @@ module MGQ_Discord
     def self.started
       return if BattleManager.memory_battle? || $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
 
-      event_id = $game_temp.lose_event_id
-      enemy = $data_enemies[$game_temp.lose_event_enemy_id]
+      event_id = $game_troop.lose_event_id
+      enemy = winner(event_id)
       return if event_id <= NWConst::Common::LOSE_EVENT_BASE || enemy.nil? || skipped?(event_id)
 
       @running = [event_id, enemy.name.to_s]
       SaveStats.add_for(:rapes, enemy.name.to_s)
+    end
+
+    # Finds the monster girl who won the battle.
+    #
+    # 3.x records her when the battle starts. 2.x does not, and names her by the event's offset from
+    # LOSE_EVENT_BASE, like its own encyclopedia does.
+    #
+    # @param event_id [Integer] the common event of the defeat scene
+    # @return [RPG::Enemy, nil] the monster girl, nil when there is none
+    def self.winner(event_id)
+      enemy_id = $game_temp.respond_to?(:lose_event_enemy_id) ? $game_temp.lose_event_enemy_id : event_id - NWConst::Common::LOSE_EVENT_BASE
+      $data_enemies[enemy_id]
     end
 
     # Forgets the last defeat scene, so another novel scene with the same event is not taken for
