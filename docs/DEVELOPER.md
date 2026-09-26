@@ -18,6 +18,7 @@ docs/DEVELOPER.md                        this file
 | Module | What it is |
 |---|---|
 | `Log` | `InGame.log`, capped per session. |
+| `Options` | The mod's options in the game's menus, see [Options](#options). |
 | `NumberFormat` | Thousands separators, counted nouns, the game's large-number style. |
 | `GameState` | Everything read from the game: scene, area, vehicle, Labyrinth of Chaos, mastery. |
 | `Trivia` | The second Discord line. **All trivia texts live here**, one named method per line, rotating in the order of `LINES`. Every new or changed line also goes into [Activities.md](Activities.md) under the version it ships in. |
@@ -52,7 +53,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `PatchLoader.cs` | The loader block the earlier versions added to `Patch/Patch.rb`: finding and removing it, safe write. |
 | `NWPatchChecksum.cs` | The checksum the game verifies on line 1 of `Patch.rb`. |
 
-**`package/Discord/`:** `Settings.ini` (`client_id`) and the player `README.txt`.
+**`package/Discord/`:** `Settings.ini` (`client_id`, and `nsfw`, which the game script reads and writes) and the player `README.txt`.
 
 ## Build and test
 
@@ -159,4 +160,13 @@ The variable `Labyrinth of Chaos: Type` is *not* normal vs. Carnage: it held 9 o
 - The save *backup* (`Save/SaveBackup.rvdata2`) has no stats file.
 - A backup loaded later starts at 0.
 
-**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, the `DataManager` save/autosave/load/new-game methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
+**Hook order.** The mod loader runs at the translation's patch script, which comes *before* the `Plugins/*` scripts. None of those redefine any hooked method (checked: `Graphics.update`, `Game_Battler#item_apply`, the `DataManager` save/autosave/backup-save/load/new-game methods, and the `Game_Library` counters above). Recheck this if a translation update adds plugins. Other Patch folder mods load around this one in file name order and may wrap the same methods; the hooks alias under names of their own (`mgq_discord_*`) and always call the original, so they chain with mods that do the same.
+
+## Options
+
+`Options.register` adds each option to `NWConst::Config`: to `MOD_CONTENTS` when the community's Mod Config Menu (`Patch/0_ModConfigMenu.rb`) defined it, which the loader's file name order runs first, to the game's own `CONTENTS` otherwise. Both menus read `DATA`, `DATA_TEXT` and `DEFAULT` and store the value in `$game_system.conf`.
+
+`$game_system.conf` is part of every save, but the options are meant to be the same for all saves and saves must stay untouched. So:
+- **`Discord/Settings.ini`** holds them under short keys (`nsfw = 1`, mapped in `Options::NAMES`), next to the DLL's settings. `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
+- **`Options.sync`** runs before every publish. A new `$game_system.conf` (a save loaded, a new game, the title screen) gets the stored values; any other difference was made in a menu and is stored.
+- **`Options.left_out_of_save`** wraps the save, autosave and backup-save methods and takes the options out of `$game_system.conf` while the game writes the file.

@@ -13,6 +13,8 @@ When you add or change an activity, add it under the version it will ship in.
 
 ## 1.2
 
+*NSFW* activities only show with the mod's NSFW option on, which is off by default. It is in the Mod Config Menu when that is installed, in the game's Config menu otherwise.
+
 ### Line 1
 
 | Activity | Text | When |

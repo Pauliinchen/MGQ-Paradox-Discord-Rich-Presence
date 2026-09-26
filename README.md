@@ -30,6 +30,8 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 
 Every number belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).
 
+**NSFW** lines only show when you turn them on, see [Options](#options).
+
 Every line, its exact text, when it shows and the release that added it: [Activities](docs/Activities.md).
 
 ## Requirements
@@ -54,6 +56,15 @@ Nothing else needs to be installed.
 3. Start the game as usual.
 
 **Updating** works the same way: close the game and extract the new zip over the old one.
+
+### Options
+
+The mod adds **`[Discord] NSFW`** to the game's options: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise.
+
+- **Off** (default): Discord shows nothing NSFW.
+- **On**: Discord shows the NSFW activities.
+
+The option is the same for every save. It is kept as `nsfw = 0/1` in `Discord\Settings.ini`, not in your save files, so updating the mod resets it to off.
 
 ### After updating the translation
 

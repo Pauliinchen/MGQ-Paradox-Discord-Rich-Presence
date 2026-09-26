@@ -37,6 +37,16 @@ Updating works the same way: close the game and extract the new download
 over the old one.
 
 
+OPTIONS
+-------
+The mod adds "[Discord] NSFW" to the game's options: in the Mod Config
+Menu if you have it installed, in the game's own Config menu otherwise.
+Off (the default) shows nothing NSFW on Discord, On shows the NSFW
+activities. The option is the same for every save and is kept in
+Discord\Settings.ini (nsfw = 0 or 1), not in your saves. Updating the
+mod resets it to off.
+
+
 AFTER UPDATING THE TRANSLATION
 ------------------------------
 A translation update replaces Patch\Patch.rb and with it the mod loader,

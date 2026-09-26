@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Published the time of the last button press, so Discord can show when the player is idle
+#      Paulinchen  2026-09-26: Added an NSFW option to the game's Config menu, or to the Mod Config Menu when it is installed
+#                            - Published the time of the last button press, so Discord can show when the player is idle
 #                            - Added the music that is playing to the trivia
 #                            - Moved into the Patch folder, where the community's mod loader picks it up
 #                            - Deleted the earlier versions' script, and skipped hooks in place or still loaded by their block
@@ -103,6 +104,7 @@ module MGQ_Discord
     return if @frames < PUBLISH_INTERVAL
 
     @frames = 0
+    Options.sync
     publish(GameState.scene)
   rescue => e
     @frames = 0
@@ -182,6 +184,140 @@ module MGQ_Discord
 
       File.open(MGQ_Discord.path("InGame.log"), "ab") { |file| file.write("#{Time.now}  #{message}\n") }
     rescue
+    end
+  end
+
+  # The mod's options, in the Mod Config Menu when it is installed, in the game's Config menu otherwise.
+  #
+  # The game keeps its options inside each save. The mod's options are the same for every save, so
+  # they live in Discord/Settings.ini, are handed to whichever save is loaded and left out of the
+  # save files.
+  module Options
+    # File inside the mod folder, shared with DiscordPresence.dll and edited by players too.
+    FILE = "Settings.ini"
+
+    # Whether NSFW activities show on Discord, 0 or 1.
+    NSFW = :mod_discord_nsfw
+
+    # Every option by its key in $game_system.conf, with its key in FILE.
+    NAMES = { NSFW => "nsfw" }
+
+    # Every option, by its key in $game_system.conf.
+    KEYS = NAMES.keys
+
+    # Adds the options to the menu.
+    #
+    # The Mod Config Menu defines MOD_CONTENTS in 0_ModConfigMenu.rb, which the mod loader runs
+    # before this script.
+    def self.register
+      config = NWConst::Config
+      menu = config.const_defined?(:MOD_CONTENTS) ? config::MOD_CONTENTS : config::CONTENTS
+
+      menu.insert(-2, {
+        :key  => NSFW,
+        :name => "[Discord] NSFW",
+        :sub  => true,
+        :help => "Show NSFW activities on Discord.\r\n←/→ Toggle",
+      })
+      config::DATA[NSFW] = [0, 1]
+      config::DATA_TEXT[NSFW] = {
+        0 => {:name => "Off", :help => "Discord shows nothing NSFW."},
+        1 => {:name => "On",  :help => "Discord shows NSFW activities."},
+      }
+      config::DEFAULT[NSFW] = 0
+    end
+
+    # @return [Boolean] whether NSFW activities show on Discord
+    def self.nsfw?
+      self[NSFW] == 1
+    end
+
+    # @param key [Symbol] the option
+    # @return [Integer] its value, the menu's default until it was changed
+    def self.[](key)
+      values.fetch(key) { NWConst::Config::DEFAULT[key] }
+    end
+
+    # Keeps the options of the loaded save and FILE in step. Called before every publish.
+    #
+    # Loading a save, starting a new game or returning to the title brings a new $game_system.conf,
+    # which gets the stored options. Any other difference was made in the menu and gets stored.
+    def self.sync
+      return unless $game_system
+      conf = $game_system.conf
+
+      unless conf.equal?(@conf)
+        @conf = conf
+        KEYS.each { |key| conf[key] = self[key] }
+        return
+      end
+
+      changed = KEYS.reject { |key| conf[key].nil? || conf[key] == self[key] }
+      return if changed.empty?
+
+      changed.each { |key| values[key] = conf[key] }
+      write(changed)
+    rescue => e
+      Log.write("options sync failed: #{e.class}: #{e.message}")
+    end
+
+    # Writes options to FILE, replacing their lines or appending them. Every other line stays as it is.
+    #
+    # @param keys [Array<Symbol>] the options to write
+    def self.write(keys)
+      lines = File.open(MGQ_Discord.path(FILE), "rb") { |file| file.read }.each_line.to_a rescue []
+      newline = lines.first.to_s.end_with?("\r\n") ? "\r\n" : "\n"
+      lines[-1] += newline unless lines.empty? || lines[-1].end_with?("\n")
+
+      keys.each do |key|
+        entry = "#{NAMES[key]} = #{values[key]}#{newline}"
+        index = lines.index { |line| name_of(line) == NAMES[key] }
+        if index
+          lines[index] = entry
+        else
+          lines << entry
+        end
+      end
+
+      File.open(MGQ_Discord.path(FILE), "wb") { |file| file.write(lines.join) }
+    end
+
+    # Runs a block with the options taken out of $game_system.conf, so a save written inside it is
+    # the same as one written without the mod.
+    #
+    # The block runs even when taking them out fails, since it writes the player's save.
+    def self.left_out_of_save
+      conf = $game_system.conf rescue nil
+      kept = KEYS.select { |key| conf.key?(key) }.map { |key| [key, conf.delete(key)] } rescue []
+      yield
+    ensure
+      kept.each { |key, value| conf[key] = value } if kept
+    end
+
+    # The stored options, read from FILE once.
+    #
+    # @return [Hash{Symbol => Integer}] the values by option
+    def self.values
+      @values ||= begin
+        File.open(MGQ_Discord.path(FILE), "rb") { |file| file.read }.each_line.each_with_object({}) do |line, stored|
+          key = NAMES.key(name_of(line))
+          stored[key] = line.split("=", 2)[1].to_i if key
+        end
+      rescue
+        {}
+      end
+    end
+
+    # Reads the key of a line in FILE, compared without regard to case like DiscordPresence.dll does.
+    #
+    # @param line [String] the line
+    # @return [String, nil] the key in lower case, nil for a comment, a section header or a line without one
+    def self.name_of(line)
+      line = line.strip
+      return nil if line.start_with?("#", ";", "[")
+
+      name, value = line.split("=", 2)
+      value && name.strip.downcase
     end
   end
 
@@ -817,6 +953,12 @@ MGQ_Discord.start
 # mod's part never raises. None is redefined by Plugins/*, recheck when the translation adds some.
 
 if MGQ_Discord.hookable?
+  begin
+    MGQ_Discord::Options.register
+  rescue => e
+    MGQ_Discord::Log.write("options FAILED: #{e.class}: #{e.message}")
+  end
+
   # Graphics.update runs every frame in every scene, so unlike a per-scene hook it cannot be missed.
   begin
     module Graphics
@@ -850,12 +992,13 @@ if MGQ_Discord.hookable?
   end
 
   # Saving, loading and starting a new game keep the per-save counters in step with the save slots.
+  # Saving also leaves the mod's options out of the save file.
   begin
     module DataManager
       class << self
         alias mgq_discord_save_game_without_rescue save_game_without_rescue
         def save_game_without_rescue(index)
-          result = mgq_discord_save_game_without_rescue(index)
+          result = MGQ_Discord::Options.left_out_of_save { mgq_discord_save_game_without_rescue(index) }
           begin
             MGQ_Discord::SaveStats.store(index)
           rescue => e
@@ -895,7 +1038,7 @@ if MGQ_Discord.hookable?
       class << self
         alias mgq_discord_auto_save_game_without_rescue auto_save_game_without_rescue
         def auto_save_game_without_rescue(index)
-          result = mgq_discord_auto_save_game_without_rescue(index)
+          result = MGQ_Discord::Options.left_out_of_save { mgq_discord_auto_save_game_without_rescue(index) }
           begin
             MGQ_Discord::SaveStats.store(index)
           rescue => e
@@ -907,6 +1050,20 @@ if MGQ_Discord.hookable?
     end
   rescue => e
     MGQ_Discord::Log.write("autosave hook FAILED: #{e.class}: #{e.message}")
+  end
+
+  # The backup save bypasses both, and has no counter file.
+  begin
+    module DataManager
+      class << self
+        alias mgq_discord_save_game_backup_without_rescue save_game_backup_without_rescue
+        def save_game_backup_without_rescue(*args)
+          MGQ_Discord::Options.left_out_of_save { mgq_discord_save_game_backup_without_rescue(*args) }
+        end
+      end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("backup save hook FAILED: #{e.class}: #{e.message}")
   end
 
   # The game's own counters across all saves, each also counted per save.
