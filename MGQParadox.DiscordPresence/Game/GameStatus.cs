@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Read who plays a running battle fuck
+//      Paulinchen  2026-09-26: Read who the player is talking to
+//                            - Read who plays a running battle fuck
 //                            - Read whether the camp music plays
 //                            - Read who plays a running request or defeat scene, and how often it happened
 //                            - Read when the player last pressed a button
@@ -131,6 +132,11 @@ internal sealed class GameStatus
     /// The monster girl of the running battle fuck, only set in <see cref="Scene.Battlefuck"/>.
     /// </summary>
     public string BattlefuckPartner => Value("battlefuck_with");
+
+    /// <summary>
+    /// Who the player is talking to, empty outside a conversation.
+    /// </summary>
+    public string ConversationPartner => Value("talking_to");
 
     /// <summary>
     /// Name of the party leader.

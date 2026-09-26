@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Showed a running battle fuck, with the monster girl who challenged Luka
+//      Paulinchen  2026-09-26: Showed who the player is talking to during a conversation
+//                            - Showed a running battle fuck, with the monster girl who challenged Luka
 //                            - Showed the player setting up for camp while the camp music plays
 //                            - Showed a running request or defeat scene, with who plays it and how often it happened
 //                            - Showed the player as idle after a minute without a button press
@@ -110,8 +111,8 @@ internal static class ActivityBuilder
     /// <returns>The first line.</returns>
     /// <remarks>
     /// The world map's own name is untranslated kanji, so a fight there names the journey instead.
-    /// Battles, the Labyrinth, the Pocket Castle and camp never show idle, since auto-battle and their
-    /// own lines say more than it would.
+    /// Battles, the Labyrinth, the Pocket Castle, camp and conversations never show idle, since
+    /// auto-battle and their own lines say more than it would.
     /// </remarks>
     private static string DetailsOf(GameStatus status, int pocketCastleIndex)
     {
@@ -140,6 +141,11 @@ internal static class ActivityBuilder
             var place = status.Scene == Scene.Travel ? WorldMapName : status.Area;
 
             return place.Length > 0 ? $"{place} - {CampText}" : CampText;
+        }
+
+        if (status.ConversationPartner.Length > 0)
+        {
+            return WithPlace(status, $"Talking to {status.ConversationPartner} . . .");
         }
 
         if (status.Scene == Scene.Travel)
@@ -203,7 +209,7 @@ internal static class ActivityBuilder
     /// </remarks>
     private static string WithPlace(GameStatus status, string happening)
     {
-        var place = status.IsOnWorldMap ? WorldMapName
+        var place = status.IsOnWorldMap || status.Scene == Scene.Travel ? WorldMapName
             : Mentions(status.Area, PocketCastleName) ? PocketCastleName
             : status.Area;
 

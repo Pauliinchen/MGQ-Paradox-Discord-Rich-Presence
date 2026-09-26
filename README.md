@@ -13,6 +13,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 | Anywhere | `<Location> - Exploring . . .` / `In combat!` / `In menu . . .` |
 | World map | `Traveling the world - On foot . . .` / `Sailing . . .` / `Flying . . .` |
 | Pocket Castle | `Pocket Castle - Currently in crafting hell...` and other rotating lines |
+| In a conversation | `<Location> - Talking to <Name> . . .` |
 | No button pressed for a minute | `<Location> - Idle . . .`, except in battles, the Pocket Castle and the Labyrinth of Chaos |
 | Labyrinth of Chaos | `Labyrinth of Chaos <Normal/Carnage> (<Biome>) - Floor <X> \| <Y> Rare Points!` |
 | In a request (NSFW) | `Pocket Castle - In a request with <Companion> for the <Nth> time!` |

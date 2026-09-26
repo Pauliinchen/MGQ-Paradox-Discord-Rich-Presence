@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Added the battle fucks won to the trivia
+#      Paulinchen  2026-09-26: Published who the player is talking to during a conversation
+#                            - Added the battle fucks won to the trivia
 #                            - Published a running battle fuck, with the monster girl who challenged Luka
 #                            - Published whether the camp music plays
 #                            - Kept the per-save counters inside the save, taking over the earlier versions' files once
@@ -723,6 +724,72 @@ module MGQ_Discord
     end
   end
 
+  # Conversations: events the player starts on the map and novel scenes, named after who speaks.
+  module Conversations
+    # The Ace Message System's name box codes, \n<Name> and its placed variants, which the game
+    # writes in front of a speaker's lines.
+    NAME_BOX = /\\n[1-5cr]?<(.+?)>/i
+
+    # What a companion's name box adds after the name: " (Affection:\V[3054])".
+    AFFECTION_SUFFIX = /\s*[(（]Affection.*\z/i
+
+    # Any other text code left in a name, such as \c[2].
+    TEXT_CODE = /\\[a-z]+(\[[^\]]*\])?/i
+
+    # Luka's name, as the name boxes write it.
+    LUKA = "Luka"
+
+    # Remembers who speaks in a message the game just queued. Called from the Game_Message#add hook.
+    #
+    # Luka speaks in most conversations, so he never replaces the one he is talking to.
+    #
+    # @param text [String] one line of the message
+    def self.heard(text)
+      name = speaker_in(text)
+      interpreter = running_interpreter
+      return if name.nil? || name == LUKA || interpreter.nil?
+
+      @speaker = [name, interpreter, interpreter.instance_variable_get(:@list)]
+    end
+
+    # Names who the player is talking to.
+    #
+    # A conversation lasts as long as the event that started it, so the pauses between its messages
+    # count too. The event's list tells it apart from a later event on the same interpreter.
+    #
+    # @return [String, nil] the last speaker other than Luka, nil outside a conversation
+    def self.current
+      name, interpreter, list = @speaker
+      name if interpreter && interpreter.equal?(running_interpreter) &&
+              interpreter.instance_variable_get(:@list).equal?(list)
+    end
+
+    # The interpreter running the event on screen: the novel's in a novel scene, the map's on the map.
+    #
+    # Parallel events run on interpreters of their own, and battles on the troop's.
+    #
+    # @return [Game_Interpreter, nil] the interpreter, nil while it runs no event
+    def self.running_interpreter
+      scene = SceneManager.scene
+      interpreter = if scene.is_a?(Scene_Novel) then $game_novel.interpreter
+                    elsif scene.is_a?(Scene_Map) then $game_map.interpreter
+                    end
+      interpreter if interpreter && interpreter.running?
+    end
+
+    # Reads the name in a line's name box.
+    #
+    # @param text [String] one line of a message
+    # @return [String, nil] the name, nil when the line has no name box
+    def self.speaker_in(text)
+      match = NAME_BOX.match(text.to_s)
+      return nil unless match
+
+      name = match[1].sub(AFFECTION_SUFFIX, "").gsub(TEXT_CODE, "").strip
+      name.empty? ? nil : name
+    end
+  end
+
   # The second Discord line. The presence shows one of these at a time.
   module Trivia
     # Seconds the lines are kept before they are worked out again.
@@ -1211,6 +1278,9 @@ module MGQ_Discord
 
       fields["battlefuck_with"] = Battlefucks.current if scene == "battlefuck"
 
+      talking_to = MGQ_Discord.text_of { Conversations.current }
+      fields["talking_to"] = talking_to unless talking_to.empty?
+
       if (labyrinth = GameState.labyrinth)
         fields["loc_floor"] = labyrinth.floor
         fields["loc_type"] = labyrinth.kind
@@ -1314,6 +1384,20 @@ if MGQ_Discord.hookable?
     end
   rescue => e
     MGQ_Discord::Log.write("novel hook FAILED: #{e.class}: #{e.message}")
+  end
+
+  # Every line a message shows passes add, the speaker's name box included, on the map and in novel scenes.
+  begin
+    class Game_Message
+      alias mgq_discord_add add
+      def add(text)
+        result = mgq_discord_add(text)
+        MGQ_Discord::Conversations.heard(text) rescue nil
+        result
+      end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("message hook FAILED: #{e.class}: #{e.message}")
   end
 
   # A map event calls the common event of a battle fuck, which returns once the battle fuck is over.

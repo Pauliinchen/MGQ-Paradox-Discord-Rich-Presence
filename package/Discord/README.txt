@@ -3,7 +3,8 @@ Monster Girl Quest! Paradox RPG - Discord Rich Presence
 
 Shows what you're doing in Monster Girl Quest! Paradox RPG on your
 Discord profile: where you are and what you're doing (exploring,
-traveling, in combat, idle, Labyrinth of Chaos floor and rare points),
+traveling, in combat, who you're talking to, idle, Labyrinth of Chaos
+floor and rare points),
 rotating trivia about your playthrough (the music that's playing
 included), and your party leader's level, race and class when someone
 hovers the picture. Requests, defeat scenes and battle fucks only show if
