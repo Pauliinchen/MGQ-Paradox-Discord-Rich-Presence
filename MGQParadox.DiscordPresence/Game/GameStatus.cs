@@ -129,7 +129,7 @@ internal sealed class GameStatus
     public int RapedCount => Count("raped_count");
 
     /// <summary>
-    /// The monster girl of the running battle fuck, only set in <see cref="Scene.Battlefuck"/>.
+    /// The battlefucker of the running battle fuck, only set in <see cref="Scene.Battlefuck"/>.
     /// </summary>
     public string BattlefuckPartner => Value("battlefuck_with");
 

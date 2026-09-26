@@ -3,7 +3,7 @@
 //
 //  Changelog:
 //      Paulinchen  2026-09-26: Showed who the player is talking to during a conversation
-//                            - Showed a running battle fuck, with the monster girl who challenged Luka
+//                            - Showed a running battle fuck with the battlefucker
 //                            - Showed the player setting up for camp while the camp music plays
 //                            - Showed a running request or defeat scene, with who plays it and how often it happened
 //                            - Showed the player as idle after a minute without a button press

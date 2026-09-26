@@ -5,7 +5,7 @@
 #      Paulinchen  2026-09-26: Added the companions with the most affection to the trivia
 #                            - Published who the player is talking to during a conversation
 #                            - Added the battle fucks won to the trivia
-#                            - Published a running battle fuck, with the monster girl who challenged Luka
+#                            - Published a running battle fuck with the battlefucker
 #                            - Published whether the camp music plays
 #                            - Kept the per-save counters inside the save, taking over the earlier versions' files once
 #                            - Added an option to count the trivia across all saves instead of per save
@@ -673,7 +673,7 @@ module MGQ_Discord
     end
   end
 
-  # Battle fucks: sex matches a monster girl challenges Luka to. They play as a common event on the
+  # Battle fucks: sex matches a battlefucker challenges Luka to. They play as a common event on the
   # map, not as a battle, and last until that common event returns, the scene after a win included.
   module Battlefucks
     # How the Recollection Room names the common event that starts a battle fuck.
@@ -688,9 +688,9 @@ module MGQ_Discord
     def self.starting(interpreter, event_id)
       return false if $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
 
-      monster = monsters[event_id]
-      @running = [monster, interpreter, $game_map] if monster
-      !monster.nil?
+      battlefucker = battlefuckers[event_id]
+      @running = [battlefucker, interpreter, $game_map] if battlefucker
+      !battlefucker.nil?
     end
 
     # Forgets the battle fuck once its common event returned. Called from the
@@ -699,23 +699,23 @@ module MGQ_Discord
       @running = nil
     end
 
-    # Names the monster girl of the running battle fuck.
+    # Names the battlefucker of the running battle fuck.
     #
     # Loading a save or going back to the title abandons the interpreter without returning from the
     # common event, which the new $game_map and the stopped interpreter give away.
     #
-    # @return [String, nil] the monster girl, nil while none runs
+    # @return [String, nil] the battlefucker, nil while none runs
     def self.current
-      monster, interpreter, map = @running
-      monster if map && map.equal?($game_map) && interpreter.running?
+      battlefucker, interpreter, map = @running
+      battlefucker if map && map.equal?($game_map) && interpreter.running?
     end
 
-    # Monster girls by the common events starting their battle fucks, read from the Recollection
+    # Battlefuckers by the common events starting their battle fucks, read from the Recollection
     # Room once, without the form in brackets: "Sara (Human)" counts as Sara.
     #
-    # @return [Hash{Integer => String}] the monster girls by common event
-    def self.monsters
-      @monsters ||= NWConst::Library::H_SCENE_ITEMS.values.each_with_object({}) do |character, names|
+    # @return [Hash{Integer => String}] the battlefuckers by common event
+    def self.battlefuckers
+      @battlefuckers ||= NWConst::Library::H_SCENE_ITEMS.values.each_with_object({}) do |character, names|
         name = character[:name].to_s.sub(/\s*[(（].*\z/m, "")
 
         (character[:items] || {}).each_value do |item|

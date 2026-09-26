@@ -21,7 +21,7 @@ The Statistics option also switches *Battlefucks won* between the game's counts 
 |---|---|---|
 | Camp | `<Location> - Setting up for Camp . . .` / `Traveling the world - Setting up for Camp . . .` | While the camp music (*Camping*) plays, except in battles, the Pocket Castle and the Labyrinth of Chaos. Shown instead of idle. |
 | Conversation | `<Location> - Talking to <Name> . . .` / `Pocket Castle - ...` / `Traveling the world - ...` | From the first line someone other than Luka speaks until the event or story scene is over, named after the last one who spoke. Not in battles or the Labyrinth of Chaos. Camp comes first; shown instead of idle. |
-| Battle fuck (NSFW) | `<Location> - Currently Battlefucking <Monster girl>!` | From accepting a battle fuck until it is over, the scene after a win included. Replays in the Recollection Room don't show. |
+| Battle fuck (NSFW) | `<Location> - Currently Battlefucking <Battlefucker>!` | Between Luka and a Battlefucker, from accepting a battle fuck until it is over, the scene after a win included. Replays in the Recollection Room don't show. |
 
 ### Trivia
 

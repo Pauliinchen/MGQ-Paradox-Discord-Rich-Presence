@@ -18,7 +18,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 | Labyrinth of Chaos | `Labyrinth of Chaos <Normal/Carnage> (<Biome>) - Floor <X> \| <Y> Rare Points!` |
 | In a request (NSFW) | `Pocket Castle - In a request with <Companion> for the <Nth> time!` |
 | After losing a battle (NSFW) | `<Location> - Raped by <Monster girl> for the <Nth> time!` |
-| In a battle fuck (NSFW) | `<Location> - Currently Battlefucking <Monster girl>!` |
+| In a battle fuck (NSFW) | `<Location> - Currently Battlefucking <Battlefucker>!` |
 
 **Hover the picture** to see your party leader: `Party leader: <Name> Lv <X> | Race: <Race> Lv <Y> | Class: <Job> Lv <Z>`
 
