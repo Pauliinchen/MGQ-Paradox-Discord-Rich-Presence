@@ -17,7 +17,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 
 **Hover the picture** to see your party leader: `Party leader: <Name> Lv <X> | Race: <Race> Lv <Y> | Class: <Job> Lv <Z>`
 
-**Trivia** rotates every 15 seconds:
+**Trivia** rotates every 16 seconds:
 
 - Battles fought, enemies defeated, escapes and wipeouts
 - Difficulty and playtime, each with a comment
@@ -92,7 +92,7 @@ The game counts the second group only **across all saves combined**. To show the
 ## Troubleshooting
 
 - **Nothing shows on Discord:** make sure the mod loader is installed and activity sharing is turned on (see [Requirements](#requirements)). Discord can be started before or after the game; the status appears within about 15 seconds. If it still doesn't, check `Discord\DiscordPresence.log`.
-- **The status updates slowly:** Discord allows about one update every 15 seconds. The game also pauses while its window is in the background, so the status doesn't change then.
+- **The status updates slowly:** Discord allows 5 updates per 20 seconds, so a new map or fight shows up within about 4 seconds. The game also pauses while its window is in the background, so the status doesn't change then.
 - **`Discord\InGame.log` exists:** it only appears when something went wrong inside the game. Please attach it when [opening an issue](https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence/issues).
 
 ## Building from source

@@ -81,7 +81,7 @@ TROUBLESHOOTING
   activity sharing is on. Discord can be started before or after the
   game; the status appears within about 15 seconds. Then look at
   Discord\DiscordPresence.log.
-- The status only updates about every 15 seconds (Discord's limit), and not
+- The status updates at most every 4 seconds (Discord's limit), and not
   while the game window is in the background - the game pauses then.
 - Discord\InGame.log only appears if something went wrong inside
   the game. Include it when reporting a problem.

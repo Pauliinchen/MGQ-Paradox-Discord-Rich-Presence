@@ -2,7 +2,8 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Named the game script by its new file name
+//      Paulinchen  2026-09-26: Sent the status every 4 seconds and rotated the trivia every 4th update
+//                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -20,24 +21,22 @@ namespace MGQParadox.DiscordPresence;
 internal sealed class PresenceLoop
 {
     /// <summary>
-    /// How often the latest status is looked at, in milliseconds.
-    /// </summary>
-    private const int PollIntervalMs = 500;
-
-    /// <summary>
     /// Size at which the log starts over.
     /// </summary>
     private const long MaxLogBytes = 200_000;
 
     /// <summary>
-    /// Shortest gap Discord accepts between two presence updates.
+    /// Ticks each trivia line stays up, 16 seconds.
     /// </summary>
-    private static readonly TimeSpan UpdateInterval = TimeSpan.FromSeconds(15);
+    private const int TicksPerTriviaLine = 4;
 
     /// <summary>
-    /// How long each trivia line stays up.
+    /// Gap between two ticks, each of which sends the latest status if it changed.
     /// </summary>
-    private static readonly TimeSpan TriviaInterval = TimeSpan.FromSeconds(15);
+    /// <remarks>
+    /// Discord accepts 5 updates per 20 seconds, so ticks never come closer than this.
+    /// </remarks>
+    private static readonly TimeSpan TickInterval = TimeSpan.FromSeconds(4);
 
     /// <summary>
     /// How long to wait before trying to reach Discord again.
@@ -90,11 +89,6 @@ internal sealed class PresenceLoop
     private string? _lastSentActivity;
 
     /// <summary>
-    /// When Discord last accepted an update.
-    /// </summary>
-    private DateTime _lastSentAt = DateTime.MinValue;
-
-    /// <summary>
     /// When the last attempt to reach Discord was made.
     /// </summary>
     private DateTime _lastConnectAttemptAt = DateTime.MinValue;
@@ -105,14 +99,14 @@ internal sealed class PresenceLoop
     private bool _reportedUnreachable;
 
     /// <summary>
-    /// Counts up once per trivia interval and picks both the trivia and the Pocket Castle line.
+    /// Ticks since the loop started.
     /// </summary>
-    private int _rotation;
+    private int _ticks;
 
     /// <summary>
-    /// When <see cref="_rotation"/> last moved on.
+    /// Picks both the trivia and the Pocket Castle line, moving on every <see cref="TicksPerTriviaLine"/> ticks.
     /// </summary>
-    private DateTime _rotatedAt = DateTime.UtcNow;
+    private int Rotation => _ticks / TicksPerTriviaLine;
 
     /// <summary>
     /// Creates the loop.
@@ -181,14 +175,13 @@ internal sealed class PresenceLoop
     {
         while (true)
         {
-            RotateWhenDue();
-
             if (LatestStatus() is { } status)
             {
                 Update(status);
             }
 
-            Thread.Sleep(PollIntervalMs);
+            _ticks++;
+            Thread.Sleep(TickInterval);
         }
     }
 
@@ -210,26 +203,9 @@ internal sealed class PresenceLoop
     }
 
     /// <summary>
-    /// Moves on to the next trivia line once the current one has been up long enough.
-    /// </summary>
-    private void RotateWhenDue()
-    {
-        if (DateTime.UtcNow - _rotatedAt < TriviaInterval)
-        {
-            return;
-        }
-
-        _rotation++;
-        _rotatedAt = DateTime.UtcNow;
-    }
-
-    /// <summary>
-    /// Sends the activity for a status, if it changed and the rate limit allows it.
+    /// Sends the activity for a status, if it changed since the last send.
     /// </summary>
     /// <param name="status">The status the game handed over.</param>
-    /// <remarks>
-    /// Discord silently drops an update that comes too soon, and a dropped one would never be retried.
-    /// </remarks>
     private void Update(GameStatus status)
     {
         if (!EnsureConnected())
@@ -237,9 +213,9 @@ internal sealed class PresenceLoop
             return;
         }
 
-        var activity = ActivityBuilder.Build(status, _largeImage, _rotation, _rotation + _pocketCastleOffset).ToJson();
+        var activity = ActivityBuilder.Build(status, _largeImage, Rotation, Rotation + _pocketCastleOffset).ToJson();
 
-        if (activity == _lastSentActivity || DateTime.UtcNow - _lastSentAt < UpdateInterval)
+        if (activity == _lastSentActivity)
         {
             return;
         }
@@ -248,7 +224,6 @@ internal sealed class PresenceLoop
         {
             _discord.SetActivity(_processId, activity);
             _lastSentActivity = activity;
-            _lastSentAt = DateTime.UtcNow;
             Log.Write("presence updated");
         }
         catch (Exception ex)

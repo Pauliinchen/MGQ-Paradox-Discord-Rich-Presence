@@ -119,7 +119,7 @@ Ruby's `Float#to_s` prints the *shortest* round-tripping decimal, and `x.0` for 
 - **Nothing throws into the game.** Every export and the DLL's threads catch everything; an exception escaping them would end the game.
 - **No process to watch.** The DLL lives and dies with the game. When the game closes, the pipe closes and Discord clears the status by itself.
 - **Reconnecting:** when Discord closes the pipe, for example on a restart, the DLL tries again every 15 s, logs the outage once, and sends the current status again once connected.
-- **Rate limit:** Discord drops updates sent less than 15 s apart. The DLL throttles to that and rotates the trivia on the same 15 s tick.
+- **Rate limit:** Discord accepts 5 updates per 20 s. The DLL ticks every 4 s, sends the status on a tick only if it changed, and moves the trivia on every 4th tick (16 s). Sends only happen on ticks, so the first one after a reconnect waits for the next tick too.
 - **F12:** the game's reset only restarts `rgss_main`; `Patch.rb` and with it `Discord_RPC.rb` are evaluated once per start. Should the file be evaluated twice anyway, `MGQ_Discord.hookable?` keeps the hooks from wrapping themselves.
 
 ## Game data used (Paradox)
