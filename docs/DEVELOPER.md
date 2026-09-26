@@ -20,7 +20,7 @@ docs/DEVELOPER.md                        this file
 | `Log` | `InGame.log`, capped per session. |
 | `NumberFormat` | Thousands separators, counted nouns, the game's large-number style. |
 | `GameState` | Everything read from the game: scene, area, vehicle, Labyrinth of Chaos, mastery. |
-| `Trivia` | The second Discord line. **All trivia texts live here**, one named method per line, rotating in the order of `LINES`. |
+| `Trivia` | The second Discord line. **All trivia texts live here**, one named method per line, rotating in the order of `LINES`. Every new or changed line also goes into [Activities.md](Activities.md) under the version it ships in. |
 | `SaveStats` | The per-save counters, see [Per-save statistics](#per-save-statistics-savestats). |
 | `StatusText` | The `key=value` status. The keys are shared with `Game/GameStatus.cs`. |
 | `Presence` | Calls `DiscordPresence.dll` through `Win32API`. |
@@ -33,7 +33,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 |---|---|
 | `Exports.cs` | The functions `Discord_RPC.rb` calls: `presence_start` and `presence_update`. Nothing may throw out of them. |
 | `PresenceLoop.cs` | The DLL's own thread: rate limit, trivia rotation, reconnecting to Discord. |
-| `ActivityBuilder.cs` | Builds the Discord activity. **All user-visible texts on the C# side live here.** |
+| `ActivityBuilder.cs` | Builds the Discord activity. **All user-visible texts on the C# side live here.** New or changed ones also go into [Activities.md](Activities.md) under the version they ship in. |
 | `PresenceImage.cs` | Picks the picture: `large_image` from `Settings.ini`, or the application icon. |
 | `ModFolder.cs` | The `Discord` folder, which the game script finds the DLL in. |
 | `Log.cs`, `Settings.cs` | `DiscordPresence.log` and `Settings.ini` in that folder. |

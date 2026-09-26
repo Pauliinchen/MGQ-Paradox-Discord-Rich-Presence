@@ -28,6 +28,8 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 
 Every number belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).
 
+Every line, its exact text, when it shows and the release that added it: [Activities](docs/Activities.md).
+
 ## Requirements
 
 - Windows 10 or 11. Linux and Steam Deck (Wine) are untested.
