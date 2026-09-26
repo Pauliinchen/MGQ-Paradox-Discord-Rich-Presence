@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-26: Named the game script by its new file name
+//      Paulinchen  2026-09-26: Read when the player last pressed a button
+//                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -36,10 +37,12 @@ internal sealed class GameStatus
     /// <summary>
     /// Start of the game session in Unix seconds, <see langword="null"/> when unknown.
     /// </summary>
-    public long? StartedAt =>
-        long.TryParse(Value("start"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var start) && start > 0
-            ? start
-            : null;
+    public long? StartedAt => UnixSeconds("start");
+
+    /// <summary>
+    /// When the player last pressed a button, in Unix seconds, <see langword="null"/> when unknown.
+    /// </summary>
+    public long? LastInputAt => UnixSeconds("last_input");
 
     /// <summary>
     /// What the game is showing.
@@ -156,6 +159,16 @@ internal sealed class GameStatus
     /// <param name="key">The key Discord_RPC.rb published it under.</param>
     /// <returns>The value, or an empty string when absent.</returns>
     private string Value(string key) => _values.TryGetValue(key, out var value) ? value : string.Empty;
+
+    /// <summary>
+    /// Looks up a published point in time.
+    /// </summary>
+    /// <param name="key">The key Discord_RPC.rb published it under.</param>
+    /// <returns>The time in Unix seconds, or <see langword="null"/> when absent or invalid.</returns>
+    private long? UnixSeconds(string key) =>
+        long.TryParse(Value(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var seconds) && seconds > 0
+            ? seconds
+            : null;
 
     /// <summary>
     /// Collects <c>trivia0</c>, <c>trivia1</c> and so on up to the first gap.

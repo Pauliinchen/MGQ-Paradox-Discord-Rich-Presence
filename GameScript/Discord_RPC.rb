@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-26: Moved into the Patch folder, where the community's mod loader picks it up
+#      Paulinchen  2026-09-26: Published the time of the last button press, so Discord can show when the player is idle
+#                            - Moved into the Patch folder, where the community's mod loader picks it up
 #                            - Deleted the earlier versions' script, and skipped hooks in place or still loaded by their block
 #      Paulinchen  2026-09-25: Created
 #
@@ -92,10 +93,11 @@ module MGQ_Discord
     Log.write("boot failed: #{e.class}: #{e.message}")
   end
 
-  # Publishes the status every PUBLISH_INTERVAL frames. Called once per frame.
+  # Notes button presses and publishes the status every PUBLISH_INTERVAL frames. Called once per frame.
   def self.tick
     return unless @running
 
+    @last_input_at = Time.now.to_i if GameState.input?
     @frames = (@frames || 0) + 1
     return if @frames < PUBLISH_INTERVAL
 
@@ -118,6 +120,13 @@ module MGQ_Discord
     Presence.update(status)
   rescue => e
     Log.write("write failed: #{e.class}: #{e.message}")
+  end
+
+  # When the player last pressed a button, in Unix seconds.
+  #
+  # @return [Integer] the time, the start of the game session until the first press
+  def self.last_input_at
+    @last_input_at || STARTED_AT
   end
 
   # Builds the path of a file inside the mod folder.
@@ -212,12 +221,24 @@ module MGQ_Discord
     # Progress inside the Labyrinth of Chaos.
     Labyrinth = Struct.new(:floor, :kind, :rare_points)
 
+    # Every button of the game's Input module, keyboard and gamepad alike.
+    BUTTONS = [:DOWN, :LEFT, :RIGHT, :UP, :A, :B, :C, :X, :Y, :Z, :L, :R, :SHIFT, :CTRL, :ALT]
+
     # Jobs and races an actor has taken to their maximum level.
     class Mastery < Struct.new(:jobs, :races)
       # @return [Integer] jobs and races together
       def total
         jobs + races
       end
+    end
+
+    # Reports whether the player holds any button down.
+    #
+    # The game has no mouse support, so the mouse never counts.
+    #
+    # @return [Boolean]
+    def self.input?
+      BUTTONS.any? { |button| Input.press?(button) }
     end
 
     # Reports whether a save is loaded.
@@ -709,6 +730,7 @@ module MGQ_Discord
       # Paradox keeps a personal level plus one for the job (class) and one for the race (tribe).
       fields = {
         "start"       => STARTED_AT,
+        "last_input"  => MGQ_Discord.last_input_at,
         "scene"       => scene,
         "leader"      => MGQ_Discord.text_of { leader.name },
         "level"       => MGQ_Discord.text_of { leader.base_level },

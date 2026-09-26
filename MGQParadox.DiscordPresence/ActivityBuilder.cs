@@ -2,6 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Showed the player as idle after a minute without a button press
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -27,6 +28,16 @@ internal static class ActivityBuilder
     /// Name of the home base, as it appears in map names.
     /// </summary>
     private const string PocketCastleName = "Pocket Castle";
+
+    /// <summary>
+    /// What the player is shown doing after <see cref="IdleAfter"/> without a button press.
+    /// </summary>
+    private const string IdleText = "Idle . . .";
+
+    /// <summary>
+    /// Time without a button press after which the player counts as idle.
+    /// </summary>
+    private static readonly TimeSpan IdleAfter = TimeSpan.FromMinutes(1);
 
     /// <summary>
     /// What the player is shown doing in the Pocket Castle, one at a time.
@@ -85,6 +96,8 @@ internal static class ActivityBuilder
     /// <returns>The first line.</returns>
     /// <remarks>
     /// The world map's own name is untranslated kanji, so a fight there names the journey instead.
+    /// Battles, the Labyrinth and the Pocket Castle never show idle, since auto-battle and their own
+    /// lines say more than it would.
     /// </remarks>
     private static string DetailsOf(GameStatus status, int pocketCastleIndex)
     {
@@ -95,7 +108,7 @@ internal static class ActivityBuilder
 
         if (status.Scene == Scene.Travel)
         {
-            return $"Traveling the world - {TravelText(status.Vehicle)}";
+            return $"Traveling the world - {(IsIdle(status) ? IdleText : TravelText(status.Vehicle))}";
         }
 
         if (status.Scene == Scene.Battle && status.IsOnWorldMap)
@@ -108,10 +121,23 @@ internal static class ActivityBuilder
             return $"{PocketCastleName} - {PocketCastleLines[pocketCastleIndex % PocketCastleLines.Length]}";
         }
 
-        return status.Area.Length > 0
-            ? $"{status.Area} - {StateText(status.Scene)}"
-            : StateText(status.Scene);
+        var state = status.Scene != Scene.Battle && IsIdle(status) ? IdleText : StateText(status.Scene);
+
+        return status.Area.Length > 0 ? $"{status.Area} - {state}" : state;
     }
+
+    /// <summary>
+    /// Reports whether the player has pressed no button for <see cref="IdleAfter"/>.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <returns><see langword="true"/> when idle.</returns>
+    /// <remarks>
+    /// Measured against the DLL's own clock, which keeps running while the game is frozen in the
+    /// background and publishes nothing.
+    /// </remarks>
+    private static bool IsIdle(GameStatus status) =>
+        status.LastInputAt is { } lastInputAt &&
+        DateTimeOffset.UtcNow.ToUnixTimeSeconds() - lastInputAt >= IdleAfter.TotalSeconds;
 
     /// <summary>
     /// Builds the first line inside the Labyrinth of Chaos.
