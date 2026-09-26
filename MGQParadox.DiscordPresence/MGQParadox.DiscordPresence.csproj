@@ -60,7 +60,13 @@
     <PrependToPath Directory="$(VsInstallerDir)" />
   </Target>
 
+  <!--
+    The setup project is built from here rather than referenced, so nothing restores it on its
+    own. The restore runs under a session id of its own, which makes the build afterwards evaluate
+    the project anew and see the restored packages.
+  -->
   <Target Name="AssemblePackage" AfterTargets="Publish">
+    <MSBuild Projects="$(SetupProject)" Targets="Restore" Properties="Configuration=$(Configuration);MSBuildRestoreSessionId=$([System.Guid]::NewGuid())" />
     <MSBuild Projects="$(SetupProject)" Targets="Build" Properties="Configuration=$(Configuration);Version=$(Version)">
       <Output TaskParameter="TargetOutputs" ItemName="SetupExecutable" />
     </MSBuild>
