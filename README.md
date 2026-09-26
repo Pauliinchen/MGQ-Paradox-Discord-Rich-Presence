@@ -23,6 +23,8 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 
 **Hover the picture** to see your party leader: `Party leader: <Name> Lv <X> | Race: <Race> Lv <Y> | Class: <Job> Lv <Z>`
 
+**The picture** is the game's icon, or if you [choose so](#options) Ilias or Alice, whoever you picked, and later the route you are on.
+
 **Trivia** rotates every 16 seconds:
 
 - Battles fought, enemies defeated, escapes and wipeouts
@@ -68,7 +70,7 @@ Nothing else needs to be installed.
 
 ### Options
 
-The mod adds two options to the game: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise.
+The mod adds three options to the game: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise.
 
 **`[Discord] NSFW`**
 - **Off** (default): Discord never mentions requests, defeat scenes or battle fucks.
@@ -78,7 +80,11 @@ The mod adds two options to the game: in the community's Mod Config Menu (`Patch
 - **All saves** (default): the game's own counts, across every save and from before you installed the mod.
 - **This save**: counted by the mod for the save you're playing, see [Per-save statistics](#per-save-statistics). Battle fucks won are the game's own count for the save.
 
-The options are the same for every save. They are kept as `nsfw` and `all_saves` (`0` or `1`) in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
+**`[Discord] Picture`**
+- **Static** (default): the game's icon.
+- **Dynamic**: Ilias or Alice, whoever you picked this playthrough, and in the final chapter the route you are on. Before you pick, it stays the game's icon.
+
+The options are the same for every save. They are kept as `nsfw`, `all_saves` and `picture` (`0` or `1`) in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
 
 ### After updating the translation
 

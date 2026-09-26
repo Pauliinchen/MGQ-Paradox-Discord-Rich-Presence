@@ -2,6 +2,7 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
+#      Paulinchen  2026-09-27: Added a Picture option that shows Ilias or Alice, and later the route, instead of the app icon
 #      Paulinchen  2026-09-26: Added the companions with the most affection to the trivia
 #                            - Published who the player is talking to during a conversation
 #                            - Added the battle fucks won to the trivia
@@ -211,8 +212,11 @@ module MGQ_Discord
     # Whether the trivia counts across all saves (1) or per save (0).
     ALL_SAVES = :mod_discord_all_saves
 
+    # Whether the picture follows the story (1) or is always the app icon (0).
+    PICTURE = :mod_discord_picture
+
     # Every option by its key in $game_system.conf, with its key in FILE.
-    NAMES = { NSFW => "nsfw", ALL_SAVES => "all_saves" }
+    NAMES = { NSFW => "nsfw", ALL_SAVES => "all_saves", PICTURE => "picture" }
 
     # Every option, by its key in $game_system.conf.
     KEYS = NAMES.keys
@@ -234,6 +238,14 @@ module MGQ_Discord
         :values => {
           1 => ["All saves", "The game's own counts across every save."],
           0 => ["This save", "Counted by the mod for the loaded save, since the mod was installed."],
+        },
+      },
+      PICTURE => {
+        :name   => "[Discord] Picture",
+        :help   => "Show the game's icon on Discord, or a picture that follows the story.",
+        :values => {
+          0 => ["Static",  "Always the game's icon."],
+          1 => ["Dynamic", "Ilias or Alice, whoever you chose, and later the route you are on."],
         },
       },
     }
@@ -263,6 +275,11 @@ module MGQ_Discord
     # @return [Boolean] whether the trivia counts across all saves instead of per save
     def self.all_saves?
       self[ALL_SAVES] == 1
+    end
+
+    # @return [Boolean] whether the picture follows the story instead of being the app icon
+    def self.dynamic_picture?
+      self[PICTURE] == 1
     end
 
     # @param key [Symbol] the option
@@ -791,6 +808,73 @@ module MGQ_Discord
     end
   end
 
+  # The picture the Picture option shows: Ilias or Alice, whoever this playthrough chose, and in
+  # the final chapter the route. The pictures are art assets of the Discord application, named here.
+  module Story
+    # Art asset of the side chosen, by the switch that records the choice.
+    SIDES = { "Ilias Chosen" => "ilias", "Alice Chosen" => "alice" }
+
+    # Art asset of the Chaos route.
+    CHAOS = "chaos"
+
+    # Switch the game turns on when the Chaos route opens, after both other routes are cleared.
+    CHAOS_OPEN = "Chaos Route Open"
+
+    # Art asset of each route, by the top folder of the editor's map tree that holds its maps.
+    ROUTES = {
+      438  => CHAOS,
+      1001 => "monster_realm",
+      1193 => "angelic_dominion",
+      1287 => CHAOS,
+    }
+
+    # Maps per block of the game's map folders: Data holds 1 to 999, Data/Map/Data 1001 to 1999.
+    MAPS_PER_BLOCK = 1000
+
+    # Names the art asset for the current point of the story.
+    #
+    # @return [String, nil] the asset, nil before the side is chosen
+    def self.picture
+      route_asset = route
+      return route_asset if route_asset
+
+      switch = SIDES.keys.find { |name| GameState.switch_on?(name) }
+      SIDES[switch]
+    end
+
+    # Names the route of the final chapter.
+    #
+    # Maps shared by the routes, like the Pocket Castle, belong to none. There the Chaos route counts
+    # once it is open, and otherwise the route seen last in this save.
+    #
+    # @return [String, nil] the route's asset, nil while none is known
+    def self.route
+      current = ROUTES[top_folder($game_map.map_id)]
+      @route = [current, $game_system] if current
+      return current if current
+      return CHAOS if GameState.switch_on?(CHAOS_OPEN)
+
+      seen, game = @route
+      seen if game.equal?($game_system)
+    end
+
+    # Finds the top folder of the editor's map tree that holds a map.
+    #
+    # Each block of map folders has a tree of its own, whose parent ids count from the block's start.
+    #
+    # @param map_id [Integer] the map
+    # @return [Integer] the top folder's map id, the map itself when it has no parent
+    def self.top_folder(map_id)
+      block = map_id / MAPS_PER_BLOCK * MAPS_PER_BLOCK
+
+      while (info = $data_mapinfos[map_id]) && info.parent_id > 0
+        map_id = block + info.parent_id
+      end
+
+      map_id
+    end
+  end
+
   # The second Discord line. The presence shows one of these at a time.
   module Trivia
     # Seconds the lines are kept before they are worked out again.
@@ -1312,6 +1396,9 @@ module MGQ_Discord
 
       talking_to = MGQ_Discord.text_of { Conversations.current }
       fields["talking_to"] = talking_to unless talking_to.empty?
+
+      picture = Options.dynamic_picture? ? MGQ_Discord.text_of { Story.picture } : ""
+      fields["picture"] = picture unless picture.empty?
 
       if (labyrinth = GameState.labyrinth)
         fields["loc_floor"] = labyrinth.floor

@@ -2,6 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-27: Showed the art asset the Picture option picked instead of the app icon
 //      Paulinchen  2026-09-26: Showed who the player is talking to during a conversation
 //                            - Showed a running battle fuck with the battlefucker
 //                            - Showed the player setting up for camp while the camp music plays
@@ -77,7 +78,7 @@ internal static class ActivityBuilder
     /// Builds the activity for a game status.
     /// </summary>
     /// <param name="status">The status the game published.</param>
-    /// <param name="largeImage">The picture the tooltip hangs off, if there is one.</param>
+    /// <param name="largeImage">The app icon, shown unless the game published a picture of its own.</param>
     /// <param name="triviaIndex">Which trivia line to show, wrapping around.</param>
     /// <param name="pocketCastleIndex">Which Pocket Castle line to show, wrapping around.</param>
     /// <returns>The activity.</returns>
@@ -98,7 +99,7 @@ internal static class ActivityBuilder
             Details = DetailsOf(status, pocketCastleIndex),
             State = TriviaAt(status.Trivia, triviaIndex),
             StartedAt = status.StartedAt,
-            LargeImage = largeImage,
+            LargeImage = status.Picture.Length > 0 ? status.Picture : largeImage,
             LargeText = TooltipOf(status),
         };
     }

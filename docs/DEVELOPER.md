@@ -26,6 +26,7 @@ docs/Activities.md                       every line Discord shows, by the releas
 | `DefeatScenes` | The scene after a lost battle, and which monster girl won. |
 | `Battlefucks` | A running battle fuck, and which battlefucker Luka faces. |
 | `Conversations` | Who the player is talking to, from the name boxes of the messages. |
+| `Story` | The art asset the Picture option shows: the side chosen, or the route of the final chapter. |
 | `Trivia` | The second Discord line. **All trivia texts live here**, one named method per line, rotating in the order of `LINES`. Every new or changed line also goes into [Activities.md](Activities.md) under the version it ships in. |
 | `Statistics` | The counts the trivia shows: `SaveStats`, or the game's own across all saves when the Statistics option says so. |
 | `SaveStats` | The per-save counters, see [Per-save statistics](#per-save-statistics-savestats). |
@@ -49,7 +50,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `Discord/DiscordIpcClient.cs` | Discord's local named-pipe protocol. `Opcode.cs` holds the frame kinds. |
 | `Discord/Activity.cs`, `Discord/Json.cs` | The activity and its JSON, with Discord's field limits. |
 
-**`package/Discord/`:** `Settings.ini` (`client_id`, and the options `nsfw` and `all_saves`, which the game script reads and writes) and the player `README.txt`.
+**`package/Discord/`:** `Settings.ini` (`client_id`, and the options `nsfw`, `all_saves` and `picture`, which the game script reads and writes) and the player `README.txt`.
 
 ## Build and test
 
@@ -125,6 +126,7 @@ They appended a block (`# >>> MGQ Discord RPC` … `# <<< MGQ Discord RPC`) to `
 | Music playing | `RPG::BGM.last.name`, named through `NWConst::Library::BGM_SCENE_ITEMS` (the jukebox's music room, 227 of the 234 BGM files) |
 | Camp | `RPG::BGM.last.name` is `yaei` (*Camping* in the music room), published as `camping` |
 | Conversations | Every message line passes `Game_Message#add`; the speaker is its Ace Message System name box (`\n<Name>`, also `\n1<`…`\n5<`, `\nc<`, `\nr<`), without companions' ` (Affection:\V[id])` suffix. Lines by `Luka` are skipped. The speaker is kept with the interpreter running the event on screen (`$game_novel.interpreter` in `Scene_Novel`, `$game_map.interpreter` in `Scene_Map`) and that interpreter's `@list`; the conversation lasts while the same interpreter still runs the same list. Polling `$game_message` instead misses most of it: the message window clears it after every page. Published as `talking_to`. |
+| Story picture | Published as `picture`, an art asset of the Discord application, which `ActivityBuilder` shows instead of the app icon. The side: switches `Ilias Chosen` / `Alice Chosen` (assets `ilias`, `alice`). The route: the top folder of the editor's map tree above `$game_map.map_id`. Maps 1000 to 1999 live in `Data/Map/Data` with a `MapInfos` of their own whose parent ids count from 1000 (`$data_mapinfos` is the game's `MapInfos`, which joins them). Their top folders are the final chapter's worlds: 1001 *Monster Realm* (`monster_realm`), 1193 *Angelic Dominion* (`angelic_dominion`), 1287 *混沌* (`chaos`); 438 *Chaos Route Prologue* is `chaos` too. They are also the world maps common event 2 (map display) tells apart. On other maps the route is `chaos` once switch `Chaos Route Open` is on (set after both other routes are cleared), otherwise the one last seen in the loaded save. |
 | Affection | `RPG::Actor#love`, variable `NWConst::Var::ACTOR_REL_BASE` (3000) + actor id, which `Game_Variables` redirects to `$game_global_system.actor_love` in the system save, so all saves share it |
 | Requests | Map events start them with the script call `call_novel_scene(<common event>)`, which ends in `Game_Novel#setup`. A scene is a request when the Recollection Room (`NWConst::Library::H_SCENE_ITEMS`) lists its common event under a name matching `Requests::SCENE_NAME`; the character is the companion whose affection unlocks it (condition on variable `NWConst::Var::ACTOR_REL_BASE` (3000) + actor id, named from `$data_actors`), or else the entry's name without its form in brackets. The Recollection Room replays through the same method with switch `NWConst::Sw::LIBRARY_H_MEMORY` (443) on, which excludes replays. A running one is `$game_novel.running?` with `$game_novel.event_id`. |
 | Defeat scenes | A lost battle calls `BattleManager.change_novel_scene`, which sets up `$game_temp.lose_event_id` (`NWConst::Common::LOSE_EVENT_BASE` (3000) + enemy id) as a novel scene. The monster girl is `$data_enemies[$game_temp.lose_event_enemy_id].name`. Not counted: encyclopedia battle replays (`BattleManager.memory_battle?`), the Recollection Room (switch 443), the Labyrinth of Chaos (its monsters all play `LOSE_EVENT_BASE` itself), and skipped scenes (skipping swaps the novel interpreter's `@list` for a copy). |
@@ -156,6 +158,6 @@ Requests are counted from the `Game_Novel#setup` hook, defeat scenes from the `B
 `Options::MENU` describes each option's name, help and values (the first is the default). `Options.register` adds them to `NWConst::Config`: to `MOD_CONTENTS` when the community's Mod Config Menu (`Patch/0_ModConfigMenu.rb`) defined it, which the loader's file name order runs first, to the game's own `CONTENTS` otherwise. Both menus read `DATA`, `DATA_TEXT` and `DEFAULT` and store the value in `$game_system.conf`.
 
 `$game_system.conf` is part of every save, but the options are meant to be the same for all saves and saves must stay untouched. So:
-- **`Discord/Settings.ini`** holds them under short keys (`nsfw = 0`, `all_saves = 1`, mapped in `Options::NAMES`), next to the DLL's settings. `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
+- **`Discord/Settings.ini`** holds them under short keys (`nsfw = 0`, `all_saves = 1`, `picture = 0`, mapped in `Options::NAMES`), next to the DLL's settings. `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
 - **`Options.sync`** runs before every publish. A new `$game_system.conf` (a save loaded, a new game, the title screen) gets the stored values; any other difference was made in a menu and is stored.
 - **`Options.left_out_of_save`** wraps the save, autosave and backup-save methods and takes the options out of `$game_system.conf` while the game writes the file.

@@ -46,8 +46,8 @@ which is no longer used; you can delete it.
 
 OPTIONS
 -------
-The mod adds two options to the game: in the Mod Config Menu if you have
-it installed, in the game's own Config menu otherwise.
+The mod adds three options to the game: in the Mod Config Menu if you
+have it installed, in the game's own Config menu otherwise.
 
 [Discord] NSFW: Off (the default) never mentions requests, defeat scenes
 or battle fucks on Discord. On shows a request, defeat scene or battle
@@ -58,8 +58,13 @@ of enemies defeated, escapes, wipeouts, items synthesized, gold spent and
 the biggest hit across every save. This save counts them for the save
 you're playing instead, since you installed the mod.
 
+[Discord] Picture: Static (the default) shows the game's icon. Dynamic
+shows Ilias or Alice, whoever you picked this playthrough, and in the
+final chapter the route you are on.
+
 The options are the same for every save and are kept in
-Discord\Settings.ini (nsfw and all_saves, 0 or 1), not in your saves.
+Discord\Settings.ini (nsfw, all_saves and picture, 0 or 1), not in your
+saves.
 Updating the mod resets them.
 
 

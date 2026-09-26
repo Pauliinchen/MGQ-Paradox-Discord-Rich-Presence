@@ -2,6 +2,7 @@
 //  GameStatus.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-27: Read the art asset the Picture option picked
 //      Paulinchen  2026-09-26: Read who the player is talking to
 //                            - Read who plays a running battle fuck
 //                            - Read whether the camp music plays
@@ -137,6 +138,11 @@ internal sealed class GameStatus
     /// Who the player is talking to, empty outside a conversation.
     /// </summary>
     public string ConversationPartner => Value("talking_to");
+
+    /// <summary>
+    /// The Discord application's art asset to show as the picture, empty for the app icon.
+    /// </summary>
+    public string Picture => Value("picture");
 
     /// <summary>
     /// Name of the party leader.

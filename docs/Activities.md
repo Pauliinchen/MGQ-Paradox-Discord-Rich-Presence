@@ -11,6 +11,14 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
+## 1.3.1
+
+### Picture
+
+| Activity | Picture | When |
+|---|---|---|
+| Story picture | Ilias or Alice / the route: Monster Realm, Angelic Dominion or Chaos | With the new Picture option on *Dynamic* (default *Static*: the app icon). Ilias or Alice, whoever this playthrough chose; in the final chapter the route, taken from the map you are on. On maps all routes share, like the Pocket Castle, the Chaos route once it is open, otherwise the route seen last. The app icon before the choice and at the title screen. |
+
 ## 1.3
 
 The Statistics option also switches *Battlefucks won* between the game's counts across all saves (default) and per save.
