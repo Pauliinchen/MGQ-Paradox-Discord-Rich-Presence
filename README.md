@@ -25,6 +25,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - The biggest hit dealt, shortened like in the game (`118.497Qnt.`)
 - Who in your party has the highest stat, and who has mastered the most jobs and races
 - The last item you used, and on whom
+- The music that's playing, named like in Kagetsumugi's jukebox
 - Gold carried and spent, items synthesized, companions recruited, your Ilias or Alice choice, the deepest Labyrinth of Chaos floor, and more
 
 Every number belongs to the save you're playing. See [Per-save statistics](#per-save-statistics).

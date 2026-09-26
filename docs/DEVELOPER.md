@@ -132,6 +132,7 @@ Ruby's `Float#to_s` prints the *shortest* round-tripping decimal, and `x.0` for 
 | Defeats, escapes, wipeouts, synthesis, gold spent, biggest hit | `SaveStats` in `Discord_RPC.rb` (per save; see below). **Not** `$game_library.party_*`, which is shared by all saves. |
 | Difficulty | `$game_variables[NWConst::Var::CURRENT_DIFFICULTY]` (-2..4) |
 | Idle | `Input.press?` on every button, published as `last_input` (Unix seconds); the DLL compares it with its own clock, so a game frozen in the background turns idle too |
+| Music playing | `RPG::BGM.last.name`, named through `NWConst::Library::BGM_SCENE_ITEMS` (the jukebox's music room, 227 of the 234 BGM files) |
 | Switches (looked up by name in `$data_system`) | `Ilias Chosen`, `Alice Chosen`, `Within Chaos Labyrinth` |
 | Variables (looked up by name in `$data_system`) | `Chaos Labyrinth Current LV` (floor), `Labyrinth of Chaos Rare Value`, `Carnage Labyrinth of Chaos Current Floor` (> 0 counts as Carnage; **unverified**) |
 

@@ -19,6 +19,12 @@ When you add or change an activity, add it under the version it will ship in.
 |---|---|---|
 | Idle | `<Location> - Idle . . .` / `Traveling the world - Idle . . .` | No button pressed for 1 minute, also while the game is in the background. Never in battles, the Pocket Castle, the Labyrinth of Chaos or at the title screen. |
 
+### Trivia
+
+| Activity | Text | When |
+|---|---|---|
+| Music playing | `Currently vibing to <Track>!` | While music plays that the jukebox's music room names (227 of the 234 tracks). Comes after *Last item used*. |
+
 ## 1.1.1
 
 | Change | Before | Now |

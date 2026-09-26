@@ -3,6 +3,7 @@
 #
 #  Changelog:
 #      Paulinchen  2026-09-26: Published the time of the last button press, so Discord can show when the player is idle
+#                            - Added the music that is playing to the trivia
 #                            - Moved into the Patch folder, where the community's mod loader picks it up
 #                            - Deleted the earlier versions' script, and skipped hooks in place or still loaded by their block
 #      Paulinchen  2026-09-25: Created
@@ -426,6 +427,7 @@ module MGQ_Discord
       :playtime,
       :chosen_side,
       :last_item_used,
+      :current_track,
       :top_master,
       :enemies_defeated,
       :battles_escaped,
@@ -536,6 +538,25 @@ module MGQ_Discord
     def self.last_item_used
       use = @item_use
       "Just used #{use.item} on #{use.target}!" if use && Time.now.to_i - use.used_at <= ITEM_USE_SECONDS
+    end
+
+    # The music that is playing, named like in the music room of Kagetsumugi's jukebox.
+    #
+    # RPG::BGM.last is the game's own record of the music started last, emptied when it stops.
+    #
+    # @return [String, nil] the line, nil when no music plays or the jukebox does not know the track
+    def self.current_track
+      title = track_titles[File.basename(RPG::BGM.last.name.to_s, ".*").downcase]
+      "Currently vibing to #{title}!" if title
+    end
+
+    # Track names by BGM file name, read from the music room once.
+    #
+    # @return [Hash{String => String}] the names by lower-case file name
+    def self.track_titles
+      @track_titles ||= NWConst::Library::BGM_SCENE_ITEMS.values.each_with_object({}) do |item, titles|
+        titles[item[:file].to_s.downcase] = item[:name].to_s
+      end
     end
 
     # Names one of the three actors in the active party with the most mastered jobs and races,
