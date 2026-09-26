@@ -2,6 +2,7 @@
 //  Scene.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -9,7 +10,7 @@
 namespace MGQParadox.DiscordPresence.Game;
 
 /// <summary>
-/// What the game is showing, as rpc.rb reports it.
+/// What the game is showing, as Discord_RPC.rb reports it.
 /// </summary>
 internal enum Scene
 {

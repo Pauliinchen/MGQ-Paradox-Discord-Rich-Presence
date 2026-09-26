@@ -2,6 +2,8 @@
 //  GameFolder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Added the paths of the Patch folder, the mod's script in it and the old patcher
+//                            - Dropped the checks for the game script and Patch.rb, which uninstalling does not need
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -18,14 +20,29 @@ namespace MGQParadox.DiscordPresence.Setup;
 internal sealed class GameFolder
 {
     /// <summary>
+    /// Name of the folder the game loads Patch.rb from, and the community's mod loader loads mods from.
+    /// </summary>
+    public const string PatchFolderName = "Patch";
+
+    /// <summary>
     /// File name of the translation's patch script.
     /// </summary>
     public const string PatchFileName = "Patch.rb";
 
     /// <summary>
-    /// File name of the copy kept of the translation's own patch script.
+    /// File name of the copy the earlier versions kept of the translation's own patch script.
     /// </summary>
     public const string PatchBackupFileName = "Patch.rb.backup";
+
+    /// <summary>
+    /// File name of the mod's script in the Patch folder.
+    /// </summary>
+    public const string ModScriptFileName = "Discord_RPC.rb";
+
+    /// <summary>
+    /// File name of the setup launcher the earlier versions put next to Game.exe.
+    /// </summary>
+    private const string LegacyPatcherFileName = "DiscordPatcher.bat";
 
     /// <summary>
     /// Creates the folder.
@@ -47,14 +64,29 @@ internal sealed class GameFolder
     public string ExecutablePath => Path.Combine(Root, "Game.exe");
 
     /// <summary>
-    /// Full path of the translation's patch script.
+    /// Full path of the Patch folder.
     /// </summary>
-    public string PatchPath => Path.Combine(Root, "Patch", PatchFileName);
+    public string PatchFolder => Path.Combine(Root, PatchFolderName);
 
     /// <summary>
-    /// Full path of the copy kept of the translation's own patch script.
+    /// Full path of the translation's patch script.
     /// </summary>
-    public string PatchBackupPath => Path.Combine(Root, "Patch", PatchBackupFileName);
+    public string PatchPath => Path.Combine(PatchFolder, PatchFileName);
+
+    /// <summary>
+    /// Full path of the copy the earlier versions kept of the translation's own patch script.
+    /// </summary>
+    public string PatchBackupPath => Path.Combine(PatchFolder, PatchBackupFileName);
+
+    /// <summary>
+    /// Full path of the mod's script in the Patch folder.
+    /// </summary>
+    public string ModScriptPath => Path.Combine(PatchFolder, ModScriptFileName);
+
+    /// <summary>
+    /// Full path of the setup launcher the earlier versions put next to Game.exe.
+    /// </summary>
+    public string LegacyPatcherPath => Path.Combine(Root, LegacyPatcherFileName);
 
     /// <summary>
     /// Finds the game folder the mod folder sits in.
@@ -71,25 +103,13 @@ internal sealed class GameFolder
             return null;
         }
 
-        if (!File.Exists(ModFolder.PathOf(ModFolder.GameScriptFileName)))
-        {
-            problem = $"{ModFolder.GameScriptFileName} is missing from the {ModFolder.Name} folder. Please extract the whole download again.";
-            return null;
-        }
-
         var game = new GameFolder(Path.GetDirectoryName(ModFolder.Root)!);
 
         if (!File.Exists(game.ExecutablePath))
         {
             problem = $"Game.exe was not found next to the {ModFolder.Name} folder.\n\n" +
-                      $"Extract the whole download (the {ModFolder.Name} folder and DiscordPatcher.bat) into your " +
-                      "Monster Girl Quest! Paradox RPG folder (the one containing Game.exe) and run DiscordPatcher.bat again.";
-            return null;
-        }
-
-        if (!File.Exists(game.PatchPath))
-        {
-            problem = "Patch\\Patch.rb was not found. Please install the English translation first.";
+                      $"Run this from the {ModFolder.Name} folder inside your Monster Girl Quest! Paradox RPG folder " +
+                      "(the one containing Game.exe).";
             return null;
         }
 
@@ -102,7 +122,7 @@ internal sealed class GameFolder
     /// </summary>
     /// <returns><see langword="true"/> when it is, or when that cannot be told.</returns>
     /// <remarks>
-    /// A process whose path cannot be read counts as running, patching under a running game is worse.
+    /// A process whose path cannot be read counts as running, uninstalling under a running game is worse.
     /// </remarks>
     public bool IsGameRunning()
     {

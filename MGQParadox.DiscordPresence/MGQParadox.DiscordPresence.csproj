@@ -4,8 +4,8 @@
     Builds DiscordPresence.dll, which the game loads, and on publish the complete release layout
     in Shipping\ at the repository root (git-ignored), ready to copy into a game folder:
 
-      DiscordPatcher.bat
-      Discord\  DiscordPresence.dll  DiscordPresenceSetup.exe  rpc.rb  Settings.ini  README.txt
+      Discord\  DiscordPresence.dll  Uninstall.exe  Settings.ini  README.txt
+      Patch\    Discord_RPC.rb
 
       dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=1.2.0
 
@@ -32,6 +32,7 @@
 
     <PackageDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', 'Shipping'))</PackageDir>
     <ModDir>$(PackageDir)Discord\</ModDir>
+    <PatchDir>$(PackageDir)Patch\</PatchDir>
     <ZipFile>$(MSBuildProjectDirectory)\bin\$(Configuration)\MGQ-Paradox-Discord-RPC-$(Version).zip</ZipFile>
     <SetupProject>..\MGQParadox.DiscordPresence.Setup\MGQParadox.DiscordPresence.Setup.csproj</SetupProject>
     <VsInstallerDir>$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer\</VsInstallerDir>
@@ -39,13 +40,11 @@
 
   <!-- Shipped as-is: shown in the project, copied into the package on publish. -->
   <ItemGroup>
-    <ShippedInModFolder Include="..\GameScript\rpc.rb" />
     <ShippedInModFolder Include="..\package\Discord\*" />
-    <ShippedInGameFolder Include="..\package\DiscordPatcher.bat" />
+    <ShippedInPatchFolder Include="..\GameScript\Discord_RPC.rb" />
 
-    <None Include="..\GameScript\rpc.rb" Link="Shipped\Discord\rpc.rb" />
+    <None Include="..\GameScript\Discord_RPC.rb" Link="Shipped\Patch\Discord_RPC.rb" />
     <None Include="..\package\Discord\*" Link="Shipped\Discord\%(Filename)%(Extension)" />
-    <None Include="..\package\DiscordPatcher.bat" Link="Shipped\DiscordPatcher.bat" />
   </ItemGroup>
 
   <!--
@@ -69,7 +68,7 @@
 
     <RemoveDir Directories="$(PackageDir)" />
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).dll;@(SetupExecutable);@(ShippedInModFolder)" DestinationFolder="$(ModDir)" />
-    <Copy SourceFiles="@(ShippedInGameFolder)" DestinationFolder="$(PackageDir)" />
+    <Copy SourceFiles="@(ShippedInPatchFolder)" DestinationFolder="$(PatchDir)" />
     <Message Importance="high" Text="$(MSBuildProjectName) -> $(PackageDir)" />
   </Target>
 
@@ -94,7 +93,7 @@
 
   <!--
     MSBuild's own ZipDirectory (and Compress-Archive) can write "\" into entry names,
-    which some unzip tools extract as a file literally named "Discord\rpc.rb".
+    which some unzip tools extract as a file literally named "Patch\Discord_RPC.rb".
     The zip spec wants "/", so entries are written by hand.
   -->
   <UsingTask TaskName="ZipWithForwardSlashes" TaskFactory="RoslynCodeTaskFactory"

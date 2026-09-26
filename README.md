@@ -32,6 +32,7 @@ Every number belongs to the save you're playing. See [Per-save statistics](#per-
 
 - Windows 10 or 11. Linux and Steam Deck (Wine) are untested.
 - Monster Girl Quest! Paradox RPG with the **English translation** installed (the `Patch` folder must exist).
+- The community's **mod loader**: the `Patch.rb` from [*Patch.rb (enable Type 1 mods)*](https://mgq.miraheze.org/wiki/Paradox_mods#Patch.rb_(enable_Type_1_mods)) on the MGQ wiki, put into the `Patch` folder. If you already use other Patch folder mods, you have it.
 - The Discord **desktop app**, with *Settings → Activity Privacy → Share your detected activities* turned on.
 
 Nothing else needs to be installed.
@@ -39,35 +40,37 @@ Nothing else needs to be installed.
 ## Installation
 
 1. Download `MGQ-Paradox-Discord-RPC-x.y.z.zip` from the [latest release](https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence/releases/latest).
-2. Extract it **into your game folder**, the one that contains `Game.exe`:
+2. Close the game and extract the zip **into your game folder**, the one that contains `Game.exe`:
    ```
    Game.exe
-   DiscordPatcher.bat    <- new
-   Discord\              <- new
-   Patch\
+   Discord\                 <- new
+   Patch\Discord_RPC.rb     <- new
    ...
    ```
-3. Close the game, double-click **`DiscordPatcher.bat`** and choose **Yes**.
-4. Start the game as usual.
+3. Start the game as usual.
 
-> [!NOTE]
-> Windows may warn that it protected your PC, because the setup is new and not signed. Click **More info → Run anyway**. The setup only edits `Patch\Patch.rb`, as described [below](#what-it-changes), and its source code is in this repository.
+**Updating** works the same way: close the game and extract the new zip over the old one.
 
 ### After updating the translation
 
-A translation update replaces `Patch\Patch.rb` and with it the mod's loader. The game keeps working, but your Discord status stops showing. Double-click **`DiscordPatcher.bat`** again and choose **Yes**.
+A translation update replaces `Patch\Patch.rb` and with it the mod loader, so no Patch folder mod is loaded any more. The game keeps working, but your Discord status stops showing. Put the community's `Patch.rb` back into the `Patch` folder.
 
 ### Uninstall
 
-Double-click **`DiscordPatcher.bat`** and choose **No** (= Uninstall). Then delete the `Discord` folder and `DiscordPatcher.bat`.
+Close the game, double-click **`Discord\Uninstall.exe`** and choose **Yes**. It deletes `Patch\Discord_RPC.rb`, so the mod loader no longer loads the mod; the loader itself stays for your other mods. Then delete the `Discord` folder.
+
+Deleting `Patch\Discord_RPC.rb` and the `Discord` folder by hand does the same.
+
+> [!NOTE]
+> Windows may warn that it protected your PC, because the uninstaller is not signed. Click **More info → Run anyway**. Its source code is in this repository.
 
 ## What it changes
 
-Only **one** file outside its own folder: a small, clearly marked loader is added to the end of `Patch\Patch.rb`, and the checksum in that file's first line is updated so the game accepts it.
+The mod is a regular **Patch folder mod** ("Type 1"), `Patch\Discord_RPC.rb`, like the community's mods on the [MGQ wiki](https://mgq.miraheze.org/wiki/Paradox_mods). The community's mod loader runs it, and it works next to the other mods.
 
-- Your original file is kept as `Patch\Patch.rb.backup`, and uninstalling restores it exactly.
-- The loader works with whatever version of the translation you have. No translation file is ever replaced.
-- If you delete the `Discord` folder without uninstalling, the game still starts normally. The loader then simply does nothing.
+- **Nothing outside its own files**, `Discord\` and `Patch\Discord_RPC.rb`, is changed. `Patch\Patch.rb` is never touched.
+- **Uninstalling** deletes `Patch\Discord_RPC.rb`. The mod loader stays for your other mods.
+- If you delete the `Discord` folder without uninstalling, the game still starts normally, and the mod simply does nothing.
 - **Your save files are never changed**, and they load the same with or without the mod.
 
 ## Per-save statistics
@@ -88,7 +91,7 @@ The game counts the second group only **across all saves combined**. To show the
 
 ## Troubleshooting
 
-- **Nothing shows on Discord:** make sure activity sharing is turned on (see [Requirements](#requirements)). Discord can be started before or after the game; the status appears within about 15 seconds. If it still doesn't, check `Discord\DiscordPresence.log`.
+- **Nothing shows on Discord:** make sure the mod loader is installed and activity sharing is turned on (see [Requirements](#requirements)). Discord can be started before or after the game; the status appears within about 15 seconds. If it still doesn't, check `Discord\DiscordPresence.log`.
 - **The status updates slowly:** Discord allows about one update every 15 seconds. The game also pauses while its window is in the background, so the status doesn't change then.
 - **`Discord\InGame.log` exists:** it only appears when something went wrong inside the game. Please attach it when [opening an issue](https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence/issues).
 
@@ -102,7 +105,11 @@ To build locally, you need the .NET 10 SDK and the Visual Studio workload *Deskt
 dotnet publish MGQParadox.DiscordPresence -c Release
 ```
 
-This puts the finished mod into the `Shipping` folder: copy its content into your game folder and continue with step 3 of the [installation](#installation). It also zips it. See [docs/DEVELOPER.md](docs/DEVELOPER.md) for the code layout, how the mod hooks into the game, and which game data it reads.
+This puts the finished mod into the `Shipping` folder: copy its content into your game folder, as in the [installation](#installation). It also zips it. See [docs/DEVELOPER.md](docs/DEVELOPER.md) for the code layout, how the mod hooks into the game, and which game data it reads.
+
+## Credits
+
+- The mod loader this mod runs in is the community's `Patch.rb` from the [MGQ wiki](https://mgq.miraheze.org/wiki/Paradox_mods#Patch.rb_(enable_Type_1_mods)). It isn't part of this repository or its releases; please download it from there.
 
 ## Disclaimer
 

@@ -2,6 +2,7 @@
 //  Log.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Named the uninstaller as the second writer
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -14,7 +15,7 @@ using System.Text;
 namespace MGQParadox.DiscordPresence;
 
 /// <summary>
-/// DiscordPresence.log in the mod folder, written by the DLL and the setup alike.
+/// DiscordPresence.log in the mod folder, written by the DLL and the uninstaller alike.
 /// </summary>
 /// <remarks>
 /// Never throws. A failing log must not take down the code writing it, least of all the game.

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    DiscordPresenceSetup.exe, which DiscordPatcher.bat opens: installs, repairs or removes the
-    loader in Patch/Patch.rb. The game never starts it.
+    Discord\Uninstall.exe, which the player opens: removes the mod and whatever its earlier
+    versions left behind, including their block in Patch/Patch.rb. The game never starts it.
 
     .NET Framework 4.8 on purpose: it is part of every Windows 10/11, so players need nothing
     installed. Packaged by the MGQParadox.DiscordPresence project.
@@ -13,11 +13,11 @@
     <TargetFramework>net48</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <AssemblyName>DiscordPresenceSetup</AssemblyName>
+    <AssemblyName>Uninstall</AssemblyName>
     <RootNamespace>MGQParadox.DiscordPresence.Setup</RootNamespace>
     <Product>Monster Girl Quest! Paradox RPG Discord Rich Presence</Product>
     <Version>0.0.0-dev</Version>
-    <GenerateSupportedRuntime>false</GenerateSupportedRuntime>   <!-- no DiscordPresenceSetup.exe.config -->
+    <GenerateSupportedRuntime>false</GenerateSupportedRuntime>   <!-- no Uninstall.exe.config -->
     <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
   </PropertyGroup>
 

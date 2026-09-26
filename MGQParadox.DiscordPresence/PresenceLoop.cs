@@ -2,6 +2,7 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -139,7 +140,7 @@ internal sealed class PresenceLoop
     /// <summary>
     /// Hands over the game's latest status.
     /// </summary>
-    /// <param name="status">The <c>key=value</c> lines rpc.rb built.</param>
+    /// <param name="status">The <c>key=value</c> lines Discord_RPC.rb built.</param>
     /// <remarks>
     /// Called on the game's own thread, so it only stores the text. Everything else happens on the
     /// loop's thread.

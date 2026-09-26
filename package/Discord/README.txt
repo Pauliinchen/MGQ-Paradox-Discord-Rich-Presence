@@ -8,47 +8,61 @@ trivia about your playthrough, and your party leader's level, race and
 class when someone hovers the picture.
 
 
+REQUIREMENT
+-----------
+This is a Patch folder mod ("Type 1"), so the community's mod loader must
+be installed: download "Patch.rb (enable Type 1 mods)" from the MGQ wiki
+and put it into your Patch folder. If you already use other Patch folder
+mods, you have it.
+
+   https://mgq.miraheze.org/wiki/Paradox_mods#Patch.rb_(enable_Type_1_mods)
+
+
 INSTALL
 -------
-1. Extract the download into your Monster Girl Quest! Paradox RPG
-   folder (the one that contains Game.exe). It should then look like
-   this:
+1. Close the game and extract the download into your Monster Girl Quest!
+   Paradox RPG folder (the one that contains Game.exe). It should then
+   look like this:
 
       Game.exe
-      DiscordPatcher.bat
       Discord\
-      Patch\
+      Patch\Discord_RPC.rb
       ...
 
-2. Close the game, double-click DiscordPatcher.bat and choose "Yes".
-   If Windows warns that it protected your PC, click "More info" and then
-   "Run anyway": the setup is new and not signed.
-
-3. Start the game as usual. Discord (the desktop app) needs to be running,
+2. Start the game as usual. Discord (the desktop app) needs to be running,
    and "Share your detected activities" must be enabled in Discord's
    Settings > Activity Privacy.
+
+Updating works the same way: close the game and extract the new download
+over the old one.
 
 
 AFTER UPDATING THE TRANSLATION
 ------------------------------
-A translation update removes this mod's loader. The game keeps working,
-but your Discord status stops showing. Just double-click DiscordPatcher.bat
-again and choose "Yes".
+A translation update replaces Patch\Patch.rb and with it the mod loader,
+so no Patch folder mod is loaded any more. The game keeps working, but
+your Discord status stops showing. Put the community's Patch.rb back into
+the Patch folder.
 
 
 UNINSTALL
 ---------
-Double-click DiscordPatcher.bat and choose "No" (= Uninstall), then delete
-the Discord folder and DiscordPatcher.bat.
+Close the game, double-click Discord\Uninstall.exe and choose "Yes". It
+deletes Patch\Discord_RPC.rb, so the mod loader no longer loads the mod;
+the loader itself stays for your other mods. Then delete the Discord
+folder. Deleting Patch\Discord_RPC.rb and the Discord folder by hand does
+the same.
+If Windows warns that it protected your PC, click "More info" and then
+"Run anyway": the uninstaller is not signed.
 
 
 WHAT IT CHANGES
 ---------------
-Only one file outside its own folder: a small loader block is added to the
-end of Patch\Patch.rb (and that file's first line, a checksum, is updated).
-A copy of your original file is kept as Patch\Patch.rb.backup.
+The mod itself is Patch\Discord_RPC.rb, like any other Patch folder mod,
+and the community's mod loader runs it. Nothing outside its own files is
+changed, and Patch\Patch.rb is never touched.
 If you delete the Discord folder without uninstalling, the game still
-starts normally - the loader simply does nothing.
+starts normally - the mod simply does nothing.
 
 Your save files are never changed. Some trivia (enemies defeated, escapes,
 wipeouts, biggest hit, gold spent, items synthesized) is counted per save
@@ -63,10 +77,17 @@ save itself and covers the whole playthrough.
 
 TROUBLESHOOTING
 ---------------
-- Nothing on Discord: check that activity sharing is on. Discord can be
-  started before or after the game; the status appears within about 15
-  seconds. Then look at Discord\DiscordPresence.log.
+- Nothing on Discord: check that the mod loader is installed and that
+  activity sharing is on. Discord can be started before or after the
+  game; the status appears within about 15 seconds. Then look at
+  Discord\DiscordPresence.log.
 - The status only updates about every 15 seconds (Discord's limit), and not
   while the game window is in the background - the game pauses then.
 - Discord\InGame.log only appears if something went wrong inside
   the game. Include it when reporting a problem.
+
+
+CREDITS
+-------
+The mod loader is the community's Patch.rb from the MGQ wiki (link above).
+It is not included in this download.

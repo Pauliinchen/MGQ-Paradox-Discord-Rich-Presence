@@ -2,6 +2,7 @@
 //  ModFolder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Removed the game script's file name, the script lives in the Patch folder now
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -12,7 +13,7 @@ using System.IO;
 namespace MGQParadox.DiscordPresence;
 
 /// <summary>
-/// The Discord folder next to Game.exe, which holds the mod and everything it reads or writes.
+/// The Discord folder next to Game.exe, which holds the DLL, the uninstaller and everything they read or write.
 /// </summary>
 internal static class ModFolder
 {
@@ -20,14 +21,9 @@ internal static class ModFolder
     /// Name the folder must have inside the game folder.
     /// </summary>
     /// <remarks>
-    /// The loader in Patch.rb names the script by this path, so a renamed folder is never loaded.
+    /// The game script finds the DLL by this path, so a renamed folder is never used.
     /// </remarks>
     public const string Name = "Discord";
-
-    /// <summary>
-    /// File name of the script that runs inside the game.
-    /// </summary>
-    public const string GameScriptFileName = "rpc.rb";
 
     /// <summary>
     /// Full path of the folder, without a trailing separator.

@@ -2,6 +2,7 @@
 //  GameStatus.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -13,7 +14,7 @@ using System.Globalization;
 namespace MGQParadox.DiscordPresence.Game;
 
 /// <summary>
-/// One snapshot of the game, as GameScript/rpc.rb published it.
+/// One snapshot of the game, as GameScript/Discord_RPC.rb published it.
 /// </summary>
 internal sealed class GameStatus
 {
@@ -123,7 +124,7 @@ internal sealed class GameStatus
     public string RaceLevel => Value("race_level");
 
     /// <summary>
-    /// The trivia lines that currently apply, in the order rpc.rb lists them.
+    /// The trivia lines that currently apply, in the order Discord_RPC.rb lists them.
     /// </summary>
     public IReadOnlyList<string> Trivia { get; }
 
@@ -152,7 +153,7 @@ internal sealed class GameStatus
     /// <summary>
     /// Looks up a published value.
     /// </summary>
-    /// <param name="key">The key rpc.rb published it under.</param>
+    /// <param name="key">The key Discord_RPC.rb published it under.</param>
     /// <returns>The value, or an empty string when absent.</returns>
     private string Value(string key) => _values.TryGetValue(key, out var value) ? value : string.Empty;
 

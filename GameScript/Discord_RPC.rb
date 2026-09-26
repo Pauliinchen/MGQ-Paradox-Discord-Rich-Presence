@@ -1,7 +1,9 @@
 #----------------------------------------------------------------
-#  rpc.rb
+#  Discord_RPC.rb
 #
 #  Changelog:
+#      Paulinchen  2026-09-26: Moved into the Patch folder, where the community's mod loader picks it up
+#                            - Deleted the earlier versions' script, and skipped hooks in place or still loaded by their block
 #      Paulinchen  2026-09-25: Created
 #
 #----------------------------------------------------------------
@@ -23,6 +25,60 @@ module MGQ_Discord
 
   # Start of this game session in Unix seconds, shown on Discord as elapsed time.
   STARTED_AT = Time.now.to_i
+
+  # Game script of the earlier versions, which a block they added to Patch.rb loads after the mod
+  # loader. Relative to the working directory, like in that block.
+  LEGACY_SCRIPT = "Discord/rpc.rb"
+
+  # The file the game and the earlier versions' block are loaded from.
+  PATCH_FILE = "Patch/Patch.rb"
+
+  # First line of the block the earlier versions added to PATCH_FILE.
+  LEGACY_BLOCK_MARKER = "# >>> MGQ Discord RPC"
+
+  # Reports whether the game hooks can be installed, deleting the game script of the earlier
+  # versions on the way.
+  #
+  # Another copy of this script or an earlier version wraps the same methods under the same names,
+  # and each hook would then call itself until the stack overflows.
+  #
+  # @return [Boolean] false when the hooks are in place already, or the earlier version would add them
+  def self.hookable?
+    retired = retire_legacy_script
+
+    if Graphics.respond_to?(:mgq_discord_update)
+      Log.write("hooks skipped: another copy or an earlier version installed them already")
+      return false
+    end
+
+    return true if retired || !legacy_block_present?
+
+    Log.write("hooks skipped: the earlier version's block in #{PATCH_FILE} would still load #{LEGACY_SCRIPT}")
+    false
+  end
+
+  # Deletes the game script of the earlier versions, so their block in Patch.rb finds nothing to load.
+  #
+  # @return [Boolean] whether it is gone
+  def self.retire_legacy_script
+    return true unless File.exist?(LEGACY_SCRIPT)
+
+    File.delete(LEGACY_SCRIPT)
+    Log.write("deleted #{LEGACY_SCRIPT} of an earlier version")
+    true
+  rescue => e
+    Log.write("could not delete #{LEGACY_SCRIPT} of an earlier version: #{e.class}: #{e.message}")
+    false
+  end
+
+  # Reports whether Patch.rb still holds the block of the earlier versions, which loads LEGACY_SCRIPT.
+  #
+  # @return [Boolean] whether the block is present, true when Patch.rb cannot be read
+  def self.legacy_block_present?
+    File.open(PATCH_FILE, "rb") { |file| file.read }.include?(LEGACY_BLOCK_MARKER)
+  rescue
+    true
+  end
 
   # Starts the presence, once per game session.
   def self.start
@@ -717,117 +773,119 @@ MGQ_Discord.start
 # Each wraps a game method: the original runs first, its result is returned unchanged, and the
 # mod's part never raises. None is redefined by Plugins/*, recheck when the translation adds some.
 
-# Graphics.update runs every frame in every scene, so unlike a per-scene hook it cannot be missed.
-begin
-  module Graphics
-    class << self
-      alias mgq_discord_update update
-      def update
-        mgq_discord_update
-        MGQ_Discord.tick
+if MGQ_Discord.hookable?
+  # Graphics.update runs every frame in every scene, so unlike a per-scene hook it cannot be missed.
+  begin
+    module Graphics
+      class << self
+        alias mgq_discord_update update
+        def update
+          mgq_discord_update
+          MGQ_Discord.tick
+        end
       end
     end
+  rescue => e
+    MGQ_Discord::Log.write("Graphics hook FAILED: #{e.class}: #{e.message}")
   end
-rescue => e
-  MGQ_Discord::Log.write("Graphics hook FAILED: #{e.class}: #{e.message}")
-end
 
-# Every item use, in menus and in battle, passes item_apply once per target.
-begin
-  class Game_Battler
-    alias mgq_discord_item_apply item_apply
-    def item_apply(user, item, *args)
-      result = mgq_discord_item_apply(user, item, *args)
-      begin
-        MGQ_Discord::Trivia.item_used(item, self) if actor? && item.is_a?(RPG::Item)
-      rescue
-      end
-      result
-    end
-  end
-rescue => e
-  MGQ_Discord::Log.write("item_apply hook FAILED: #{e.class}: #{e.message}")
-end
-
-# Saving, loading and starting a new game keep the per-save counters in step with the save slots.
-begin
-  module DataManager
-    class << self
-      alias mgq_discord_save_game_without_rescue save_game_without_rescue
-      def save_game_without_rescue(index)
-        result = mgq_discord_save_game_without_rescue(index)
+  # Every item use, in menus and in battle, passes item_apply once per target.
+  begin
+    class Game_Battler
+      alias mgq_discord_item_apply item_apply
+      def item_apply(user, item, *args)
+        result = mgq_discord_item_apply(user, item, *args)
         begin
-          MGQ_Discord::SaveStats.store(index)
-        rescue => e
-          MGQ_Discord::Log.write("stats save failed: #{e.class}: #{e.message}")
+          MGQ_Discord::Trivia.item_used(item, self) if actor? && item.is_a?(RPG::Item)
+        rescue
         end
         result
       end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("item_apply hook FAILED: #{e.class}: #{e.message}")
+  end
 
-      alias mgq_discord_load_game_without_rescue load_game_without_rescue
-      def load_game_without_rescue(index)
-        result = mgq_discord_load_game_without_rescue(index)
-        begin
-          MGQ_Discord::SaveStats.restore(index)
-        rescue => e
+  # Saving, loading and starting a new game keep the per-save counters in step with the save slots.
+  begin
+    module DataManager
+      class << self
+        alias mgq_discord_save_game_without_rescue save_game_without_rescue
+        def save_game_without_rescue(index)
+          result = mgq_discord_save_game_without_rescue(index)
+          begin
+            MGQ_Discord::SaveStats.store(index)
+          rescue => e
+            MGQ_Discord::Log.write("stats save failed: #{e.class}: #{e.message}")
+          end
+          result
+        end
+
+        alias mgq_discord_load_game_without_rescue load_game_without_rescue
+        def load_game_without_rescue(index)
+          result = mgq_discord_load_game_without_rescue(index)
+          begin
+            MGQ_Discord::SaveStats.restore(index)
+          rescue => e
+            MGQ_Discord::SaveStats.reset rescue nil
+            MGQ_Discord::Log.write("stats load failed: #{e.class}: #{e.message}")
+          end
+          result
+        end
+
+        alias mgq_discord_setup_new_game setup_new_game
+        def setup_new_game(*args)
+          result = mgq_discord_setup_new_game(*args)
           MGQ_Discord::SaveStats.reset rescue nil
-          MGQ_Discord::Log.write("stats load failed: #{e.class}: #{e.message}")
+          result
         end
-        result
-      end
-
-      alias mgq_discord_setup_new_game setup_new_game
-      def setup_new_game(*args)
-        result = mgq_discord_setup_new_game(*args)
-        MGQ_Discord::SaveStats.reset rescue nil
-        result
       end
     end
+  rescue => e
+    MGQ_Discord::Log.write("save/load hooks FAILED: #{e.class}: #{e.message}")
   end
-rescue => e
-  MGQ_Discord::Log.write("save/load hooks FAILED: #{e.class}: #{e.message}")
-end
 
-# Autosaves bypass save_game_without_rescue. Without their own counter file, loading one would
-# start every counter at 0.
-begin
-  module DataManager
-    class << self
-      alias mgq_discord_auto_save_game_without_rescue auto_save_game_without_rescue
-      def auto_save_game_without_rescue(index)
-        result = mgq_discord_auto_save_game_without_rescue(index)
-        begin
-          MGQ_Discord::SaveStats.store(index)
-        rescue => e
-          MGQ_Discord::Log.write("stats autosave failed: #{e.class}: #{e.message}")
+  # Autosaves bypass save_game_without_rescue. Without their own counter file, loading one would
+  # start every counter at 0.
+  begin
+    module DataManager
+      class << self
+        alias mgq_discord_auto_save_game_without_rescue auto_save_game_without_rescue
+        def auto_save_game_without_rescue(index)
+          result = mgq_discord_auto_save_game_without_rescue(index)
+          begin
+            MGQ_Discord::SaveStats.store(index)
+          rescue => e
+            MGQ_Discord::Log.write("stats autosave failed: #{e.class}: #{e.message}")
+          end
+          result
         end
-        result
       end
     end
+  rescue => e
+    MGQ_Discord::Log.write("autosave hook FAILED: #{e.class}: #{e.message}")
   end
-rescue => e
-  MGQ_Discord::Log.write("autosave hook FAILED: #{e.class}: #{e.message}")
-end
 
-# The game's own counters across all saves, each also counted per save.
-begin
-  class Game_Library
-    [[:count_up_party_defeat,         :add,          :defeat,     false],
-     [:count_up_party_escape,         :add,          :escape,     false],
-     [:count_up_party_lose,           :add,          :lose,       false],
-     [:count_up_party_synthesize,     :add,          :synthesize, false],
-     [:addition_purchase_gold,        :add,          :gold_spent, true ],
-     [:set_party_damage_record_actor, :keep_highest, :best_hit,   true ],
-    ].each do |method, operation, key, amount_from_argument|
-      original = :"mgq_discord_#{method}"
-      alias_method original, method
-      define_method(method) do |*args|
-        result = send(original, *args)
-        MGQ_Discord::SaveStats.send(operation, key, amount_from_argument ? args[0] : 1) rescue nil
-        result
+  # The game's own counters across all saves, each also counted per save.
+  begin
+    class Game_Library
+      [[:count_up_party_defeat,         :add,          :defeat,     false],
+       [:count_up_party_escape,         :add,          :escape,     false],
+       [:count_up_party_lose,           :add,          :lose,       false],
+       [:count_up_party_synthesize,     :add,          :synthesize, false],
+       [:addition_purchase_gold,        :add,          :gold_spent, true ],
+       [:set_party_damage_record_actor, :keep_highest, :best_hit,   true ],
+      ].each do |method, operation, key, amount_from_argument|
+        original = :"mgq_discord_#{method}"
+        alias_method original, method
+        define_method(method) do |*args|
+          result = send(original, *args)
+          MGQ_Discord::SaveStats.send(operation, key, amount_from_argument ? args[0] : 1) rescue nil
+          result
+        end
       end
     end
+  rescue => e
+    MGQ_Discord::Log.write("library hooks FAILED: #{e.class}: #{e.message}")
   end
-rescue => e
-  MGQ_Discord::Log.write("library hooks FAILED: #{e.class}: #{e.message}")
 end

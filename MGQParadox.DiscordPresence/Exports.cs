@@ -2,6 +2,7 @@
 //  Exports.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-26: Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -14,7 +15,7 @@ using System.Runtime.InteropServices;
 namespace MGQParadox.DiscordPresence;
 
 /// <summary>
-/// The functions GameScript/rpc.rb calls through Win32API.
+/// The functions GameScript/Discord_RPC.rb calls through Win32API.
 /// </summary>
 /// <remarks>
 /// Nothing may throw out of these. An exception crossing into the game ends it.
