@@ -35,6 +35,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - The music that's playing, named like in Kagetsumugi's jukebox
 - The three companions with the most affection
 - Gold carried and spent, items synthesized, companions recruited, the deepest Labyrinth of Chaos floor, and more
+- In Part 3 (3.x): how many Randolphs you found
 - How many requests you made, and to whom the most (NSFW)
 - How often you were raped after losing, and by whom the most (NSFW)
 - How many battle fucks you won (NSFW)

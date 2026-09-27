@@ -11,6 +11,16 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
+## 1.4.0
+
+Trivia lines now belong to a group: *general* lines rotate throughout; a part's lines (Part 1, 2 or 3) only rotate while it is played, after the general ones; a Part 3 route's lines (Destroyer, Judgment, Chaos) only rotate while it is played, after those. Every earlier line is general.
+
+### Trivia
+
+| Activity | Text | When |
+|---|---|---|
+| Randolphs found (Part 3) | `Has found <X> out of <Y> Randolphs!` | In Part 3 on 3.x, from the first Randolph found. |
+
 ## 1.3.5
 
 | Change | Before | Now |

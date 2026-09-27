@@ -2,7 +2,9 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Hid the options that do not apply, and the ones under a greyed out option
+#      Paulinchen  2026-09-27: Added the Randolphs found to the trivia of Part 3
+#                            - Grouped the trivia by the part and route they belong to
+#                            - Hid the options that do not apply, and the ones under a greyed out option
 #                            - Added Ilias / Alice (adult or sealed) and Routes (layered or logo) under a Dynamic Picture
 #                            - Offered every picture of the application under Shown Picture
 #                            - Showed the Destroyer and Judgment logos layered over their heroines
@@ -642,6 +644,14 @@ module MGQ_Discord
       id && $game_switches[id]
     end
 
+    # Finds every switch with a name in the editor, for names the game gives to a whole row of them.
+    #
+    # @param name [String] the name of the switches
+    # @return [Array<Integer>] their ids, none when no switch has that name
+    def self.switches_named(name)
+      $data_system.switches.each_index.select { |id| $data_system.switches[id] == name }
+    end
+
     # Reads a variable by its name in the editor, so no id is hard-coded.
     #
     # @param name [String] the name of the variable
@@ -1116,6 +1126,14 @@ module MGQ_Discord
       variable = ROUTES.keys.find { |name| GameState.variable(name) > 0 }
       ROUTES[variable]
     end
+
+    # Names the groups of trivia that belong to the current point of the story.
+    #
+    # @return [Array<Symbol, Integer, String>] :general, the part, and in the final chapter the route
+    #   once it is being played
+    def self.groups
+      [:general, part, (route if part == 3)].compact
+    end
   end
 
   # The second Discord line. The presence shows one of these at a time.
@@ -1159,35 +1177,47 @@ module MGQ_Discord
       [1000, "Has become the true Paradox"],
     ]
 
+    # Name in the editor of the switches that record each Randolph found, one per hiding place. 2.x
+    # has none.
+    RANDOLPH_FOUND = "親方発見"
+
     # The last item an actor used, on whom and when.
     ItemUse = Struct.new(:item, :target, :used_at)
 
-    # Every line, in the order they rotate. Each returns its text, or nil to be left out for now.
-    LINES = [
-      :dead_party_members,
-      :recruited_members,
-      :most_affection,
-      :battles_fought,
-      :difficulty,
-      :playtime,
-      :last_item_used,
-      :current_track,
-      :top_master,
-      :enemies_defeated,
-      :battles_escaped,
-      :wipeouts,
-      :top_stat,
-      :biggest_hit,
-      :gold_spent,
-      :items_synthesized,
-      :deepest_labyrinth_floor,
-      :requests_made,
-      :most_requested,
-      :times_raped,
-      :most_raped_by,
-      :battlefucks_won,
-      :gold_carried,
-    ]
+    # Every line by the group it belongs to, see Story.groups: :general always, a part (1 to 3) or a
+    # route of the final chapter ("chaos", "destroyer", "judgment") only while it is played. The
+    # general lines rotate first, then the part's, then the route's, each in their order here. Each
+    # returns its text, or nil to be left out for now.
+    LINES = {
+      :general => [
+        :dead_party_members,
+        :recruited_members,
+        :most_affection,
+        :battles_fought,
+        :difficulty,
+        :playtime,
+        :last_item_used,
+        :current_track,
+        :top_master,
+        :enemies_defeated,
+        :battles_escaped,
+        :wipeouts,
+        :top_stat,
+        :biggest_hit,
+        :gold_spent,
+        :items_synthesized,
+        :deepest_labyrinth_floor,
+        :requests_made,
+        :most_requested,
+        :times_raped,
+        :most_raped_by,
+        :battlefucks_won,
+        :gold_carried,
+      ],
+      3 => [
+        :randolphs_found,
+      ],
+    }
 
     # The lines that currently apply.
     #
@@ -1203,7 +1233,14 @@ module MGQ_Discord
 
       @computed_at = now
       @game = game
-      @lines = LINES.map { |line| MGQ_Discord.text_of { send(line) } }.reject { |text| text.empty? }
+      @lines = current_lines.map { |line| MGQ_Discord.text_of { send(line) } }.reject { |text| text.empty? }
+    end
+
+    # The lines of the groups the story is at.
+    #
+    # @return [Array<Symbol>] the lines, in the order they rotate
+    def self.current_lines
+      Story.groups.flat_map { |group| LINES.fetch(group, []) }
     end
 
     # Remembers an item an actor just used. Called from the Game_Battler#item_apply hook.
@@ -1457,6 +1494,21 @@ module MGQ_Discord
     # @return [String] the line
     def self.gold_carried
       "Currently carrying #{NumberFormat.grouped($game_party.gold)} gold!"
+    end
+
+    # How many of Randolph's hiding places this playthrough has found.
+    #
+    # @return [String, nil] the line, nil before the first or on 2.x
+    def self.randolphs_found
+      found = randolph_switches.count { |id| $game_switches[id] }
+      "Has found #{found} out of #{randolph_switches.size} Randolphs!" if found > 0
+    end
+
+    # The switches recording each Randolph found, looked up once.
+    #
+    # @return [Array<Integer>] the switch ids, none on 2.x
+    def self.randolph_switches
+      @randolph_switches ||= GameState.switches_named(RANDOLPH_FOUND)
     end
   end
 
