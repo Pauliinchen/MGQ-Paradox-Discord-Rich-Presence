@@ -168,7 +168,7 @@ internal sealed class GameStatus
     public string Side => Value("side");
 
     /// <summary>
-    /// The route of the final chapter, "monster_realm", "angelic_dominion" or "chaos", empty while unknown.
+    /// The route of the final chapter, "destroyer", "judgment" or "chaos", empty while unknown.
     /// </summary>
     public string Route => Value("route");
 

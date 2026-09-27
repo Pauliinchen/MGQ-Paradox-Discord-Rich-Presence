@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Put the act of the Collaboration Scenario in front of the tooltip while it is played
+//      Paulinchen  2026-09-27: Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
+//                            - Put the act of the Collaboration Scenario in front of the tooltip while it is played
 //                            - Put the part of the story in front of the tooltip, dropping the labels when it gets too long
 //                            - Showed the art asset the Picture option picked instead of the app icon
 //      Paulinchen  2026-09-26: Showed who the player is talking to during a conversation
@@ -76,8 +77,8 @@ internal static class ActivityBuilder
     /// </summary>
     private static readonly Dictionary<string, string> RouteNames = new()
     {
-        ["monster_realm"] = "Monster Realm",
-        ["angelic_dominion"] = "Angelic Dominion",
+        ["destroyer"] = "Destroyer",
+        ["judgment"] = "Judgment",
         ["chaos"] = "Chaos",
     };
 

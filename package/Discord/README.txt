@@ -70,8 +70,8 @@ picked this playthrough, in the final chapter the route you are on, and
 the collab's heroes during the Collaboration Scenario.
 
     -> Shown Picture: the picture while Picture is Static. Default (the
-    game's icon), Ilias, Alice, Monster Realm, Angelic Dominion, Chaos or
-    Collaboration Scenario.
+    game's icon), Ilias, Alice, Judgment, Destroyer, Chaos or Collaboration
+    Scenario.
 
 The options are the same for every save and are kept in
 Discord\Settings.ini (presence, nsfw, all_saves, picture and

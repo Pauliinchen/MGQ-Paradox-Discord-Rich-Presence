@@ -85,7 +85,7 @@ The mod adds its options to the game: in the community's Mod Config Menu (`Patch
 - **This save**: counted by the mod for the save you're playing, see [Per-save statistics](#per-save-statistics). Battle fucks won are the game's own count for the save.
 
 **`Picture`**
-- **Static** (default): always the same picture, the one picked under **`-> Shown Picture`**: **Default** (the game's icon), Ilias, Alice, Monster Realm, Angelic Dominion, Chaos or Collaboration Scenario.
+- **Static** (default): always the same picture, the one picked under **`-> Shown Picture`**: **Default** (the game's icon), Ilias, Alice, Judgment, Destroyer, Chaos or Collaboration Scenario.
 - **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon.
 
 The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `picture` and `shown_picture` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.

@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added a Shown Picture option under Picture, the picture shown while Picture is Static
+#      Paulinchen  2026-09-27: Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
+#                            - Added a Shown Picture option under Picture, the picture shown while Picture is Static
 #                            - Grouped the options under a Rich Presence option that turns the whole status off
 #                            - Published the act of the Collaboration Scenario while it is played
 #                            - Published the part of the story, the side chosen and the route, and dropped the chosen side from the trivia
@@ -236,8 +237,8 @@ module MGQ_Discord
     FIXED_PICTURES = {
       1 => "ilias",
       2 => "alice",
-      3 => "monster_realm",
-      4 => "angelic_dominion",
+      3 => "judgment",
+      4 => "destroyer",
       5 => "chaos",
       6 => "collab",
     }
@@ -302,8 +303,8 @@ module MGQ_Discord
           0 => ["Default",                "The game's icon."],
           1 => ["Ilias",                  "Always Ilias."],
           2 => ["Alice",                  "Always Alice."],
-          3 => ["Monster Realm",          "Always the Monster Realm route's logo."],
-          4 => ["Angelic Dominion",       "Always the Angelic Dominion route's logo."],
+          3 => ["Judgment",               "Always the Judgment route's logo."],
+          4 => ["Destroyer",              "Always the Destroyer route's logo."],
           5 => ["Chaos",                  "Always the Chaos route's logo."],
           6 => ["Collaboration Scenario", "Always the collab's heroes."],
         },
@@ -939,13 +940,14 @@ module MGQ_Discord
     # Decision ends Part 2.
     PART_STARTS = [[3, 40], [2, 20], [1, 0]]
 
-    # Route of the final chapter, by the variable that counts its progress: Chaos, Angelic Dominion,
-    # Monster Realm. The Great Decision starts the counter of the route chosen, and a route that is
-    # not being played holds 0. 2.x has none of them.
+    # Route of the final chapter, by the variable that counts its progress: Chaos, Destroyer (of
+    # Heaven, the heaven route), Judgment (of the Monster Realm, the demon realm route). The Great
+    # Decision starts the counter of the route chosen, and a route that is not being played holds 0.
+    # 2.x has none of them.
     ROUTES = {
       "混沌ルート進行度" => "chaos",
-      "天界ルート進行度" => "angelic_dominion",
-      "魔界ルート進行度" => "monster_realm",
+      "天界ルート進行度" => "destroyer",
+      "魔界ルート進行度" => "judgment",
     }
 
     # Art asset shown during the Collaboration Scenario.
