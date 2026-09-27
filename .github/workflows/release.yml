@@ -1,10 +1,19 @@
 # Publishing a release on GitHub (tag e.g. v1.0.0) builds the mod and attaches
 # MGQ-Paradox-Discord-RPC-<version>.zip to that release. Nothing to upload by hand.
+#
+# Run it by hand from the Actions tab with a release's tag to build and attach the zip again, for
+# example after a failed run. It builds the code at that tag with this workflow from main, so the
+# release and its tag stay as they are.
 name: Release
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag of the published release, e.g. v1.4.0
+        required: true
 
 permissions:
   contents: write   # needed to attach the zip to the release
@@ -12,8 +21,12 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -38,11 +51,11 @@ jobs:
       - name: Publish (Release publishes also zip the package)
         shell: pwsh
         run: |
-          $version = "${{ github.event.release.tag_name }}".TrimStart("v")
+          $version = $env:TAG.TrimStart("v")
           dotnet publish MGQParadox.DiscordPresence -c Release -p:Version=$version
 
       - name: Attach zip to the release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" (Get-ChildItem MGQParadox.DiscordPresence/bin/Release/*.zip).FullName --clobber
+        run: gh release upload $env:TAG (Get-ChildItem MGQParadox.DiscordPresence/bin/Release/*.zip).FullName --clobber

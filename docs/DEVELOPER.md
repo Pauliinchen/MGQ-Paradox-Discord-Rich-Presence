@@ -104,6 +104,7 @@ dotnet run --project MGQParadox.DiscordPresence.Tests
 1. Push your changes.
 2. On GitHub, go to **Releases → Draft a new release**, create a tag like `v1.0.0`, write the notes, and click **Publish**.
 3. The *Release* workflow runs the tests, builds the mod and attaches `MGQ-Paradox-Discord-RPC-1.0.0.zip` to that release within a few minutes. Check the **Actions** tab if it doesn't appear.
+4. If the run failed, fix the cause on `main`, then start **Actions → Release → Run workflow** with the release's tag. It builds the code at that tag with the workflow from `main` and attaches the zip to the existing release, so there is no need to release again.
 
 ## How it hooks in
 
