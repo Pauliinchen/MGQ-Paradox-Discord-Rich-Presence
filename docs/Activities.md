@@ -11,7 +11,7 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
-## 1.3.1
+## 1.3.5
 
 | Change | Before | Now |
 |---|---|---|
