@@ -2,7 +2,11 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
+#      Paulinchen  2026-09-27: Hid the options that do not apply, and the ones under a greyed out option
+#                            - Added Ilias / Alice (adult or sealed) and Routes (layered or logo) under a Dynamic Picture
+#                            - Offered every picture of the application under Shown Picture
+#                            - Showed the Destroyer and Judgment logos layered over their heroines
+#                            - Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
 #                            - Added a Shown Picture option under Picture, the picture shown while Picture is Static
 #                            - Grouped the options under a Rich Presence option that turns the whole status off
 #                            - Published the act of the Collaboration Scenario while it is played
@@ -233,31 +237,44 @@ module MGQ_Discord
     # FIXED_PICTURES.
     SHOWN_PICTURE = :mod_discord_shown_picture
 
-    # Art assets the Shown Picture option can fix, by its value.
+    # Whether the dynamic picture shows Ilias and Alice sealed (1) or in their adult forms (0).
+    SEALED_SIDES = :mod_discord_sealed_sides
+
+    # Whether the dynamic picture shows a route's logo over its heroines (1) or the logo alone (0).
+    LAYERED_ROUTES = :mod_discord_layered_routes
+
+    # Art assets the Shown Picture option can fix, by its value: every picture of the application.
     FIXED_PICTURES = {
-      1 => "ilias",
-      2 => "alice",
-      3 => "judgment",
-      4 => "destroyer",
-      5 => "chaos",
-      6 => "collab",
+      1  => "ilias_adult",
+      2  => "ilias_sealed",
+      3  => "alice_adult",
+      4  => "alice_sealed",
+      5  => "judgment",
+      6  => "judgment_layered",
+      7  => "destroyer",
+      8  => "destroyer_layered",
+      9  => "chaos",
+      10 => "collab",
     }
 
     # Every option by its key in $game_system.conf, with its key in FILE.
     NAMES = {
-      PRESENCE      => "presence",
-      NSFW          => "nsfw",
-      ALL_SAVES     => "all_saves",
-      PICTURE       => "picture",
-      SHOWN_PICTURE => "shown_picture",
+      PRESENCE       => "presence",
+      NSFW           => "nsfw",
+      ALL_SAVES      => "all_saves",
+      PICTURE        => "picture",
+      SHOWN_PICTURE  => "shown_picture",
+      SEALED_SIDES   => "sealed_sides",
+      LAYERED_ROUTES => "layered_routes",
     }
 
     # Every option, by its key in $game_system.conf.
     KEYS = NAMES.keys
 
     # How each option shows in the menu, in this order: its name, its help, the option it sits
-    # under and the value that option needs for this one to apply (1 unless :when says otherwise),
-    # and a name and help per value. The first value is the default.
+    # under, and a name and help per value. The first value is the default. An option greys out
+    # while the one it sits under is off; one with :when only shows while the one it sits under
+    # holds that value. An option under a greyed out one leaves the menu.
     MENU = {
       PRESENCE => {
         :name   => "[Discord] Rich Presence",
@@ -300,56 +317,113 @@ module MGQ_Discord
         :under  => PICTURE,
         :when   => 0,
         :values => {
-          0 => ["Default",                "The game's icon."],
-          1 => ["Ilias",                  "Always Ilias."],
-          2 => ["Alice",                  "Always Alice."],
-          3 => ["Judgment",               "Always the Judgment route's logo."],
-          4 => ["Destroyer",              "Always the Destroyer route's logo."],
-          5 => ["Chaos",                  "Always the Chaos route's logo."],
-          6 => ["Collaboration Scenario", "Always the collab's heroes."],
+          0  => ["Default",                "The game's icon."],
+          1  => ["Ilias (Adult)",          "Always Ilias in her adult form."],
+          2  => ["Ilias (Sealed)",         "Always Ilias sealed."],
+          3  => ["Alice (Adult)",          "Always Alice in her adult form."],
+          4  => ["Alice (Sealed)",         "Always Alice sealed."],
+          5  => ["Judgment (Logo)",        "Always the Judgment route's logo."],
+          6  => ["Judgment (Layered)",     "Always the Judgment route's logo over its angels."],
+          7  => ["Destroyer (Logo)",       "Always the Destroyer route's logo."],
+          8  => ["Destroyer (Layered)",    "Always the Destroyer route's logo over its monster girls."],
+          9  => ["Chaos",                  "Always the Chaos route's logo."],
+          10 => ["Collaboration Scenario", "Always the collab's heroes."],
+        },
+      },
+      SEALED_SIDES => {
+        :name   => "Ilias / Alice",
+        :help   => "How Ilias or Alice shows while Picture is Dynamic.",
+        :under  => PICTURE,
+        :when   => 1,
+        :values => {
+          1 => ["Sealed", "Ilias or Alice sealed."],
+          0 => ["Adult",  "Ilias or Alice in her adult form."],
+        },
+      },
+      LAYERED_ROUTES => {
+        :name   => "Routes",
+        :help   => "How the Judgment and Destroyer routes show while Picture is Dynamic.",
+        :under  => PICTURE,
+        :when   => 1,
+        :values => {
+          1 => ["Layered", "The route's logo over its heroines."],
+          0 => ["Logo",    "The route's logo alone."],
         },
       },
     }
 
-    # Adds the options to the menu, each one under its parents, which grey it out while one of them
-    # does not hold the value it needs.
+    # Adds the options to the menu, each one under its parents, and takes out the ones that do not
+    # apply. Every entry is kept, so arrange can put them back.
     #
     # The Mod Config Menu defines MOD_CONTENTS in 0_ModConfigMenu.rb, which the mod loader runs
     # before this script. The game's own Config menu ignores :enable.
     def self.register
       config = NWConst::Config
-      menu = config.const_defined?(:MOD_CONTENTS) ? config::MOD_CONTENTS : config::CONTENTS
+      @menu = config.const_defined?(:MOD_CONTENTS) ? config::MOD_CONTENTS : config::CONTENTS
+      @entries = []
 
       MENU.each do |key, option|
-        needs = needs_of(key)
         entry = {
           :key  => key,
-          :name => INDENTS[needs.size] + option[:name],
+          :name => INDENTS[depth_of(key)] + option[:name],
           :sub  => true,
           :help => "#{option[:help]}\r\n←/→ Toggle",
         }
-        entry[:enable] = proc { needs.all? { |parent, value| in_menu(parent) == value } } unless needs.empty?
+        entry[:enable] = proc { enabled?(key) } if option[:under]
 
-        menu.insert(-2, entry)
+        @entries << entry
+        @menu.insert(-2, entry)
         config::DATA[key] = option[:values].keys
         config::DATA_TEXT[key] = {}
         option[:values].each { |value, (name, help)| config::DATA_TEXT[key][value] = { :name => name, :help => help } }
         config::DEFAULT[key] = option[:values].keys.first
       end
+
+      arrange
+    end
+
+    # Puts the options that apply into the menu, below Rich Presence, which always shows, and takes
+    # the others out. The config windows call it before they draw, so the menu follows every change.
+    #
+    # @return [Boolean] whether the menu changed
+    def self.arrange
+      return false unless @entries
+
+      shown = @entries.select { |entry| shown?(entry[:key]) }
+      listed = @menu.select { |item| @entries.any? { |entry| entry.equal?(item) } }
+      return false if listed == shown
+
+      at = @menu.index { |item| item.equal?(@entries.first) }
+      @menu.reject! { |item| @entries.any? { |entry| entry.equal?(item) } }
+      @menu.insert(at, *shown)
+      true
     end
 
     # @param key [Symbol] the option
-    # @return [Array(Symbol, Integer)] each option it sits under in the menu with the value that
-    #   option needs for this one to apply, the nearest first
-    def self.needs_of(key)
-      needs = []
+    # @return [Integer] how many options it sits under
+    def self.depth_of(key)
+      parent = MENU[key][:under]
+      parent ? depth_of(parent) + 1 : 0
+    end
 
-      while (parent = MENU[key][:under])
-        needs << [parent, MENU[key].fetch(:when, 1)]
-        key = parent
-      end
+    # @param key [Symbol] the option
+    # @return [Boolean] whether it is in the menu as it currently shows
+    def self.shown?(key)
+      option = MENU[key]
+      parent = option[:under]
+      return true unless parent
 
-      needs
+      shown?(parent) && enabled?(parent) && (!option.key?(:when) || in_menu(parent) == option[:when])
+    end
+
+    # @param key [Symbol] the option
+    # @return [Boolean] whether it can be changed, rather than greyed out, as the menu currently shows
+    def self.enabled?(key)
+      option = MENU[key]
+      parent = option[:under]
+      return true unless parent
+
+      enabled?(parent) && (option.key?(:when) || in_menu(parent) == 1)
     end
 
     # Reads an option as the menu currently shows it, which may not be stored yet.
@@ -384,6 +458,16 @@ module MGQ_Discord
     # @return [String, nil] the art asset the Shown Picture option picks, nil for the app icon
     def self.fixed_picture
       FIXED_PICTURES[self[SHOWN_PICTURE]]
+    end
+
+    # @return [Boolean] whether the dynamic picture shows Ilias and Alice sealed
+    def self.sealed_sides?
+      self[SEALED_SIDES] == 1
+    end
+
+    # @return [Boolean] whether the dynamic picture shows a route's logo over its heroines
+    def self.layered_routes?
+      self[LAYERED_ROUTES] == 1
     end
 
     # @param key [Symbol] the option
@@ -926,8 +1010,9 @@ module MGQ_Discord
   end
 
   # Where the story stands: the part, the side this playthrough chose, in the final chapter the
-  # route, and the act of the Collaboration Scenario while it is played. The keys of the side, the
-  # route and the collab double as the Discord application's art assets that the Picture option shows.
+  # route, and the act of the Collaboration Scenario while it is played. The keys of the route and
+  # the collab double as the Discord application's art assets that the Picture option shows, the
+  # routes' ones being their logos.
   module Story
     # Side chosen, by the switch that records the choice.
     SIDES = { "Ilias Chosen" => "ilias", "Alice Chosen" => "alice" }
@@ -950,6 +1035,15 @@ module MGQ_Discord
       "魔界ルート進行度" => "judgment",
     }
 
+    # Art asset of Ilias or Alice in her adult form, by the side's key.
+    ADULT_SIDES = { "ilias" => "ilias_adult", "alice" => "alice_adult" }
+
+    # Art asset of Ilias or Alice sealed, by the side's key.
+    SEALED_SIDES = { "ilias" => "ilias_sealed", "alice" => "alice_sealed" }
+
+    # Art asset of a route's logo over its heroines, by the route's key. Chaos has none.
+    LAYERED_ROUTES = { "destroyer" => "destroyer_layered", "judgment" => "judgment_layered" }
+
     # Art asset shown during the Collaboration Scenario.
     COLLAB = "collab"
 
@@ -965,11 +1059,15 @@ module MGQ_Discord
     # Names the art asset for the current point of the story.
     #
     # @return [String, nil] the collab during the Collaboration Scenario, the route in the final
-    #   chapter, else the side, nil before the side is chosen
+    #   chapter, else the side, each in the form the options pick, nil before the side is chosen
     def self.picture
       return COLLAB if collab_act
 
-      (part == 3 && route) || side
+      if part == 3 && (chosen = route)
+        Options.layered_routes? ? LAYERED_ROUTES.fetch(chosen, chosen) : chosen
+      elsif (chosen = side)
+        (Options.sealed_sides? ? SEALED_SIDES : ADULT_SIDES)[chosen]
+      end
     end
 
     # Tells the act of the Collaboration Scenario being played.
@@ -1604,6 +1702,26 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Options.register
   rescue => e
     MGQ_Discord::Log.write("options FAILED: #{e.class}: #{e.message}")
+  end
+
+  # The config windows draw every option again after each change, so the options that a change
+  # shows or hides come and go right away. The game's window sizes its contents to the options once,
+  # the Mod Config Menu's its width, so both are measured again when the options change.
+  begin
+    [:Window_Config, :Window_ModConfig].select { |name| Object.const_defined?(name) }.each do |name|
+      Object.const_get(name).class_eval do
+        alias_method :mgq_discord_refresh, :refresh
+        define_method(:refresh) do
+          if (MGQ_Discord::Options.arrange rescue false)
+            calculate_and_resize if respond_to?(:calculate_and_resize)
+            create_contents
+          end
+          mgq_discord_refresh
+        end
+      end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("config window hooks FAILED: #{e.class}: #{e.message}")
   end
 
   # Graphics.update runs every frame in every scene, so unlike a per-scene hook it cannot be missed.

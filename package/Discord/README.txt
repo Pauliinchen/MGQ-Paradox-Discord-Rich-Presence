@@ -69,13 +69,19 @@ picked under Shown Picture. Dynamic shows Ilias or Alice, whoever you
 picked this playthrough, in the final chapter the route you are on, and
 the collab's heroes during the Collaboration Scenario.
 
-    -> Shown Picture: the picture while Picture is Static. Default (the
-    game's icon), Ilias, Alice, Judgment, Destroyer, Chaos or Collaboration
-    Scenario.
+    -> Shown Picture (Static only): Default (the game's icon), Ilias or
+    Alice in her adult form or sealed, the Judgment or Destroyer route's
+    logo alone or over its heroines, Chaos or Collaboration Scenario.
 
-The options are the same for every save and are kept in
-Discord\Settings.ini (presence, nsfw, all_saves, picture and
-shown_picture), not in your saves.
+    -> Ilias / Alice (Dynamic only): Sealed (the default) or Adult.
+
+    -> Routes (Dynamic only): Layered (the default) shows the Judgment or
+    Destroyer route's logo over its heroines, Logo the logo alone.
+
+The options under Picture only show while they apply. The options are the
+same for every save and are kept in Discord\Settings.ini (presence, nsfw,
+all_saves, picture, shown_picture, sealed_sides and layered_routes), not
+in your saves.
 Updating the mod resets them.
 
 

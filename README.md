@@ -85,10 +85,12 @@ The mod adds its options to the game: in the community's Mod Config Menu (`Patch
 - **This save**: counted by the mod for the save you're playing, see [Per-save statistics](#per-save-statistics). Battle fucks won are the game's own count for the save.
 
 **`Picture`**
-- **Static** (default): always the same picture, the one picked under **`-> Shown Picture`**: **Default** (the game's icon), Ilias, Alice, Judgment, Destroyer, Chaos or Collaboration Scenario.
-- **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon.
+- **Static** (default): always the same picture, the one picked under **`-> Shown Picture`**: **Default** (the game's icon), Ilias or Alice in her adult form or sealed, the Judgment or Destroyer route's logo alone or over its heroines, Chaos or Collaboration Scenario.
+- **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon. Two options appear under it instead of Shown Picture:
+  - **`-> Ilias / Alice`**: **Sealed** (default) or **Adult**.
+  - **`-> Routes`**: **Layered** (default), the Judgment or Destroyer route's logo over its heroines, or **Logo**, the logo alone.
 
-The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `picture` and `shown_picture` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
+The options under `Picture` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
 
 ### After updating the translation
 
