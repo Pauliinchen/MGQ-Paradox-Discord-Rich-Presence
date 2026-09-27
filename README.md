@@ -35,7 +35,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - The music that's playing, named like in Kagetsumugi's jukebox
 - The three companions with the most affection
 - Gold carried and spent, items synthesized, companions recruited, the deepest Labyrinth of Chaos floor, and more
-- In Part 3 (3.x): how many Randolphs you found
+- In Part 3 (3.x): how many Randolphs you found (a spoiler, see [Options](#options))
 - How many requests you made, and to whom the most (NSFW)
 - How often you were raped after losing, and by whom the most (NSFW)
 - How many battle fucks you won (NSFW)
@@ -85,13 +85,17 @@ The mod adds its options to the game: in the community's Mod Config Menu (`Patch
 - **All saves** (default): the game's own counts, across every save and from before you installed the mod.
 - **This save**: counted by the mod for the save you're playing, see [Per-save statistics](#per-save-statistics). Battle fucks won are the game's own count for the save.
 
+**`Spoilers`**, for your friends who haven't played Part 3 yet:
+- **Hide** (default): while you play Part 3, Discord leaves out the trivia that spoils it, leaves the map name off the first line (the world map, Pocket Castle and Labyrinth of Chaos still show), names nobody there (`Talking to someone . . .`, `In a request with a companion …`, `Raped by a monster girl …`, `Currently Battlefucking a battlefucker!`) and calls the routes `Monster route` (Destroyer), `Angel route` (Judgment) and `Third route` (Chaos) in the tooltip. Parts 1 and 2 show as usual.
+- **Show**: Discord shows everything, Part 3 included.
+
 **`Picture`**
 - **Static** (default): always the same picture, the one picked under **`-> Shown Picture`**: **Default** (the game's icon), Ilias or Alice in her adult form or sealed, the Judgment or Destroyer route's logo alone or over its heroines, Chaos or Collaboration Scenario.
 - **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon. Two options appear under it instead of Shown Picture:
   - **`-> Ilias / Alice`**: **Sealed** (default) or **Adult**.
   - **`-> Routes`**: **Layered** (default), the Judgment or Destroyer route's logo over its heroines, or **Logo**, the logo alone.
 
-The options under `Picture` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
+The options under `Picture` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
 
 ### After updating the translation
 

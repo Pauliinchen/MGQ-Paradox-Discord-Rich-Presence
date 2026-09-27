@@ -15,11 +15,29 @@ When you add or change an activity, add it under the version it will ship in.
 
 Trivia lines now belong to a group: *general* lines rotate throughout; a part's lines (Part 1, 2 or 3) only rotate while it is played, after the general ones; a Part 3 route's lines (Destroyer, Judgment, Chaos) only rotate while it is played, after those. Every earlier line is general.
 
+The new **Spoilers** option (default *Hide*, under `[Discord] Rich Presence`) protects viewers who haven't played Part 3. While Part 3 is played with it on *Hide*, spoiler trivia is left out and the changes below apply. Parts 1 and 2 are never affected.
+
+### Line 1
+
+| Activity | Before | With spoilers hidden in Part 3 |
+|---|---|---|
+| Location | `<Location> - Exploring . . .` and every other line that names the map | The map name is left out: `Exploring . . .`. The world map, the Pocket Castle and the Labyrinth of Chaos still show as usual. |
+| Conversation | `<Location> - Talking to <Name> . . .` | `Talking to someone . . .` |
+| Request (NSFW) | `… In a request with <Companion> for the <Nth> time!` | `… In a request with a companion for the <Nth> time!` |
+| Defeat scene (NSFW) | `… Raped by <Monster girl> for the <Nth> time!` | `… Raped by a monster girl for the <Nth> time!` |
+| Battle fuck (NSFW) | `… Currently Battlefucking <Battlefucker>!` | `… Currently Battlefucking a battlefucker!` |
+
+### Tooltip
+
+| Activity | Before | With spoilers hidden in Part 3 |
+|---|---|---|
+| Route | `Part 3: Destroyer route` / `Judgment route` / `Chaos route` | `Part 3: Monster route` / `Angel route` / `Third route` |
+
 ### Trivia
 
 | Activity | Text | When |
 |---|---|---|
-| Randolphs found (Part 3) | `Has found <X> out of <Y> Randolphs!` | In Part 3 on 3.x, from the first Randolph found. |
+| Randolphs found (Part 3, spoiler) | `Has found <X> out of <Y> Randolphs!` | In Part 3 on 3.x, from the first Randolph found. Hidden while spoilers are hidden. |
 
 ## 1.3.5
 

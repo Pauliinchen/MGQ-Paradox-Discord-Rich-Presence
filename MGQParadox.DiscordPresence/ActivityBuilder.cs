@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Showed the default art asset whenever the game picks no picture, instead of the looked-up app icon
+//      Paulinchen  2026-09-27: Left the names, map names and route names that spoil Part 3 out while spoilers are hidden
+//                            - Showed the default art asset whenever the game picks no picture, instead of the looked-up app icon
 //                            - Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
 //                            - Put the act of the Collaboration Scenario in front of the tooltip while it is played
 //                            - Put the part of the story in front of the tooltip, dropping the labels when it gets too long
@@ -55,6 +56,26 @@ internal static class ActivityBuilder
     private const string CampText = "Setting up for Camp . . .";
 
     /// <summary>
+    /// Who the player is talking to while spoilers are hidden.
+    /// </summary>
+    private const string SpoilerFreeSpeaker = "someone";
+
+    /// <summary>
+    /// Who plays a request while spoilers are hidden.
+    /// </summary>
+    private const string SpoilerFreeCompanion = "a companion";
+
+    /// <summary>
+    /// Who plays a defeat scene while spoilers are hidden.
+    /// </summary>
+    private const string SpoilerFreeMonsterGirl = "a monster girl";
+
+    /// <summary>
+    /// Who plays a battle fuck while spoilers are hidden.
+    /// </summary>
+    private const string SpoilerFreeBattlefucker = "a battlefucker";
+
+    /// <summary>
     /// What stands between the parts of the tooltip.
     /// </summary>
     private const string TooltipSeparator = " | ";
@@ -86,6 +107,17 @@ internal static class ActivityBuilder
         ["destroyer"] = "Destroyer",
         ["judgment"] = "Judgment",
         ["chaos"] = "Chaos",
+    };
+
+    /// <summary>
+    /// Names of the final chapter's routes while spoilers are hidden, by the key the game script
+    /// publishes.
+    /// </summary>
+    private static readonly Dictionary<string, string> SpoilerFreeRouteNames = new()
+    {
+        ["destroyer"] = "Monster",
+        ["judgment"] = "Angel",
+        ["chaos"] = "Third",
     };
 
     /// <summary>
@@ -151,17 +183,21 @@ internal static class ActivityBuilder
     {
         if (status.Scene == Scene.Request)
         {
-            return WithPlace(status, $"In a request with {status.RequestCharacter} for the {Ordinal(status.RequestCount)} time!");
+            var companion = NameOf(status, status.RequestCharacter, SpoilerFreeCompanion);
+
+            return WithPlace(status, $"In a request with {companion} for the {Ordinal(status.RequestCount)} time!");
         }
 
         if (status.Scene == Scene.DefeatScene)
         {
-            return WithPlace(status, $"Raped by {status.RapedBy} for the {Ordinal(status.RapedCount)} time!");
+            var monsterGirl = NameOf(status, status.RapedBy, SpoilerFreeMonsterGirl);
+
+            return WithPlace(status, $"Raped by {monsterGirl} for the {Ordinal(status.RapedCount)} time!");
         }
 
         if (status.Scene == Scene.Battlefuck)
         {
-            return WithPlace(status, $"Currently Battlefucking {status.BattlefuckPartner}!");
+            return WithPlace(status, $"Currently Battlefucking {NameOf(status, status.BattlefuckPartner, SpoilerFreeBattlefucker)}!");
         }
 
         if (status.IsInLabyrinth)
@@ -171,14 +207,14 @@ internal static class ActivityBuilder
 
         if (status.IsCamping && status.Scene != Scene.Battle && !Mentions(status.Area, PocketCastleName))
         {
-            var place = status.Scene == Scene.Travel ? WorldMapName : status.Area;
+            var place = status.Scene == Scene.Travel ? WorldMapName : AreaOf(status);
 
             return place.Length > 0 ? $"{place} - {CampText}" : CampText;
         }
 
         if (status.ConversationPartner.Length > 0)
         {
-            return WithPlace(status, $"Talking to {status.ConversationPartner} . . .");
+            return WithPlace(status, $"Talking to {NameOf(status, status.ConversationPartner, SpoilerFreeSpeaker)} . . .");
         }
 
         if (status.Scene == Scene.Travel)
@@ -198,8 +234,28 @@ internal static class ActivityBuilder
 
         var state = status.Scene != Scene.Battle && IsIdle(status) ? IdleText : StateText(status.Scene);
 
-        return status.Area.Length > 0 ? $"{status.Area} - {state}" : state;
+        var area = AreaOf(status);
+
+        return area.Length > 0 ? $"{area} - {state}" : state;
     }
+
+    /// <summary>
+    /// Names the current map on the first line, or leaves it out while spoilers are hidden.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>The map's name, or an empty string.</returns>
+    private static string AreaOf(GameStatus status) =>
+        status.HidesSpoilers ? string.Empty : status.Area;
+
+    /// <summary>
+    /// Names a character on the first line, or stands in for them while spoilers are hidden.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <param name="name">The character's name.</param>
+    /// <param name="spoilerFreeName">What stands in for the name while spoilers are hidden.</param>
+    /// <returns>The name, or its stand-in.</returns>
+    private static string NameOf(GameStatus status, string name, string spoilerFreeName) =>
+        status.HidesSpoilers ? spoilerFreeName : name;
 
     /// <summary>
     /// Reports whether the player has pressed no button for <see cref="IdleAfter"/>.
@@ -244,7 +300,7 @@ internal static class ActivityBuilder
     {
         var place = status.IsOnWorldMap || status.Scene == Scene.Travel ? WorldMapName
             : Mentions(status.Area, PocketCastleName) ? PocketCastleName
-            : status.Area;
+            : AreaOf(status);
 
         return place.Length > 0 ? $"{place} - {happening}" : happening;
     }
@@ -309,8 +365,8 @@ internal static class ActivityBuilder
     }
 
     /// <summary>
-    /// Describes where the story stands: "Part 1: Ilias side", "Part 3: Chaos route",
-    /// "Collaboration Scenario: Act 5".
+    /// Describes where the story stands: "Part 1: Ilias side", "Part 3: Chaos route" ("Part 3: Third
+    /// route" while spoilers are hidden), "Collaboration Scenario: Act 5".
     /// </summary>
     /// <param name="status">The status the game published.</param>
     /// <returns>The act of the Collaboration Scenario while it is played, else the part with the route in the final chapter or with the side, or an empty string when the part is unknown.</returns>
@@ -328,7 +384,9 @@ internal static class ActivityBuilder
 
         var part = $"Part {status.Part}";
 
-        if (RouteNames.TryGetValue(status.Route, out var route))
+        var routeNames = status.HidesSpoilers ? SpoilerFreeRouteNames : RouteNames;
+
+        if (routeNames.TryGetValue(status.Route, out var route))
         {
             return $"{part}: {route} route";
         }

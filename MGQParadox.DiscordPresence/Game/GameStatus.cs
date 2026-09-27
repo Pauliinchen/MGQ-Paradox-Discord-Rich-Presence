@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Read whether the player turned the Rich Presence option off
+//      Paulinchen  2026-09-27: Read whether Part 3 spoilers are hidden
+//                            - Read whether the player turned the Rich Presence option off
 //                            - Read the act of the Collaboration Scenario
 //                            - Read the part of the story, the side chosen and the route
 //                            - Read the art asset the Picture option picked
@@ -171,6 +172,11 @@ internal sealed class GameStatus
     /// The route of the final chapter, "destroyer", "judgment" or "chaos", empty while unknown.
     /// </summary>
     public string Route => Value("route");
+
+    /// <summary>
+    /// Whether names, map names and routes that spoil Part 3 are left out.
+    /// </summary>
+    public bool HidesSpoilers => Value("hide_spoilers") == "1";
 
     /// <summary>
     /// Name of the party leader.

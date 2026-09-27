@@ -64,6 +64,11 @@ of enemies defeated, escapes, wipeouts, items synthesized, gold spent and
 the biggest hit across every save. This save counts them for the save
 you're playing instead, since you installed the mod.
 
+  Spoilers: Hide (the default) keeps Part 3 spoilers off Discord while
+you play Part 3: spoiler trivia is left out, the first line names neither
+the map nor anybody ("Talking to someone . . ."), and the routes are
+called Monster route, Angel route and Third route. Show shows everything.
+
   Picture: Static (the default) always shows the same picture, the one
 picked under Shown Picture. Dynamic shows Ilias or Alice, whoever you
 picked this playthrough, in the final chapter the route you are on, and
@@ -80,8 +85,8 @@ the collab's heroes during the Collaboration Scenario.
 
 The options under Picture only show while they apply. The options are the
 same for every save and are kept in Discord\Settings.ini (presence, nsfw,
-all_saves, picture, shown_picture, sealed_sides and layered_routes), not
-in your saves.
+all_saves, spoilers, picture, shown_picture, sealed_sides and
+layered_routes), not in your saves.
 Updating the mod resets them.
 
 

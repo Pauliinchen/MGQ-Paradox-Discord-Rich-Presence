@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added the Randolphs found to the trivia of Part 3
+#      Paulinchen  2026-09-27: Added a Spoilers option that hides Part 3 spoilers
+#                            - Added the Randolphs found to the trivia of Part 3
 #                            - Grouped the trivia by the part and route they belong to
 #                            - Hid the options that do not apply, and the ones under a greyed out option
 #                            - Added Ilias / Alice (adult or sealed) and Routes (layered or logo) under a Dynamic Picture
@@ -232,6 +233,9 @@ module MGQ_Discord
     # Whether the trivia counts across all saves (1) or per save (0).
     ALL_SAVES = :mod_discord_all_saves
 
+    # Whether Discord shows what spoils Part 3 (1) or leaves it out while it is played (0).
+    SPOILERS = :mod_discord_spoilers
+
     # Whether the picture follows the story (1) or is always the app icon (0).
     PICTURE = :mod_discord_picture
 
@@ -264,6 +268,7 @@ module MGQ_Discord
       PRESENCE       => "presence",
       NSFW           => "nsfw",
       ALL_SAVES      => "all_saves",
+      SPOILERS       => "spoilers",
       PICTURE        => "picture",
       SHOWN_PICTURE  => "shown_picture",
       SEALED_SIDES   => "sealed_sides",
@@ -302,6 +307,15 @@ module MGQ_Discord
         :values => {
           1 => ["All saves", "The game's own counts across every save."],
           0 => ["This save", "Counted by the mod for the loaded save, since the mod was installed."],
+        },
+      },
+      SPOILERS => {
+        :name   => "Spoilers",
+        :help   => "Show names and trivia that spoil Part 3 on Discord.",
+        :under  => PRESENCE,
+        :values => {
+          0 => ["Hide", "In Part 3, Discord leaves out spoiler trivia, names and places, and calls the routes Monster, Angel and Third."],
+          1 => ["Show", "Discord shows everything, Part 3 included."],
         },
       },
       PICTURE => {
@@ -450,6 +464,11 @@ module MGQ_Discord
     # @return [Boolean] whether the trivia counts across all saves instead of per save
     def self.all_saves?
       self[ALL_SAVES] == 1
+    end
+
+    # @return [Boolean] whether Discord shows what spoils Part 3
+    def self.spoilers?
+      self[SPOILERS] == 1
     end
 
     # @return [Boolean] whether the picture follows the story instead of being the app icon
@@ -1134,6 +1153,14 @@ module MGQ_Discord
     def self.groups
       [:general, part, (route if part == 3)].compact
     end
+
+    # Reports whether Discord leaves out what spoils Part 3, which it does while Part 3 is played
+    # unless the Spoilers option shows it.
+    #
+    # @return [Boolean]
+    def self.hides_spoilers?
+      !Options.spoilers? && part == 3
+    end
   end
 
   # The second Discord line. The presence shows one of these at a time.
@@ -1219,6 +1246,9 @@ module MGQ_Discord
       ],
     }
 
+    # Lines that spoil Part 3, left out while Story.hides_spoilers?.
+    SPOILERS = [:randolphs_found]
+
     # The lines that currently apply.
     #
     # Worked out at most every RECOMPUTE_SECONDS, and at once when another save is loaded.
@@ -1236,11 +1266,12 @@ module MGQ_Discord
       @lines = current_lines.map { |line| MGQ_Discord.text_of { send(line) } }.reject { |text| text.empty? }
     end
 
-    # The lines of the groups the story is at.
+    # The lines of the groups the story is at, without the spoilers while they are hidden.
     #
     # @return [Array<Symbol>] the lines, in the order they rotate
     def self.current_lines
-      Story.groups.flat_map { |group| LINES.fetch(group, []) }
+      lines = Story.groups.flat_map { |group| LINES.fetch(group, []) }
+      Story.hides_spoilers? ? lines - SPOILERS : lines
     end
 
     # Remembers an item an actor just used. Called from the Game_Battler#item_apply hook.
@@ -1696,6 +1727,7 @@ module MGQ_Discord
         fields["part"] = part unless part.empty?
         fields["side"] = MGQ_Discord.text_of { Story.side }
         fields["route"] = MGQ_Discord.text_of { Story.route } if part == "3"
+        fields["hide_spoilers"] = 1 if (Story.hides_spoilers? rescue false)
       end
 
       if (labyrinth = GameState.labyrinth)
