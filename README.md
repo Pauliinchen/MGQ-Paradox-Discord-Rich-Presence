@@ -25,6 +25,8 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 
 **The picture** is the game's icon, or if you [choose so](#options) Ilias or Alice, whoever you picked, later the route you are on, and the collab's heroes during the Collaboration Scenario.
 
+**A `Get the mod` button** under your status links your friends to this page. Discord doesn't show it to you, only to others.
+
 **Trivia** rotates every 16 seconds:
 
 - Battles fought, enemies defeated, escapes and wipeouts

@@ -2,11 +2,15 @@
 //  Activity.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Shared the longest text Discord accepts, so texts can shorten themselves first
+//      Paulinchen  2026-09-27: Added link buttons
+//                            - Shared the longest text Discord accepts, so texts can shorten themselves first
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace MGQParadox.DiscordPresence.Discord;
@@ -28,6 +32,16 @@ internal sealed class Activity
     /// A shorter one does not just go missing, Discord rejects the whole activity over it.
     /// </remarks>
     private const int MinTextLength = 2;
+
+    /// <summary>
+    /// Most buttons Discord shows under an activity.
+    /// </summary>
+    private const int MaxButtons = 2;
+
+    /// <summary>
+    /// Longest button label Discord accepts.
+    /// </summary>
+    private const int MaxButtonLabelLength = 32;
 
     /// <summary>
     /// First line: where the player is and what they are doing.
@@ -56,6 +70,11 @@ internal sealed class Activity
     /// Discord shows hover text only on a picture, so this is dropped without <see cref="LargeImage"/>.
     /// </remarks>
     public string LargeText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Link buttons under the activity, of which Discord shows the first <see cref="MaxButtons"/>.
+    /// </summary>
+    public IReadOnlyList<ActivityButton> Buttons { get; set; } = Array.Empty<ActivityButton>();
 
     /// <summary>
     /// Writes the activity object of a SET_ACTIVITY command.
@@ -90,6 +109,14 @@ internal sealed class Activity
             json.Append('}');
         }
 
+        if (Buttons.Count > 0)
+        {
+            var buttons = Buttons.Take(MaxButtons).Select(button =>
+                $"{{\"label\":{Json.Quote(Fit(button.Label, MaxButtonLabelLength))},\"url\":{Json.Quote(button.Url)}}}");
+
+            json.Append(",\"buttons\":[").Append(string.Join(",", buttons)).Append(']');
+        }
+
         return json.Append('}').ToString();
     }
 
@@ -97,7 +124,8 @@ internal sealed class Activity
     /// Shortens a text to what fits into one field.
     /// </summary>
     /// <param name="text">The text to shorten.</param>
+    /// <param name="maxLength">The longest text the field accepts.</param>
     /// <returns>The text, cut off with an ellipsis when it was too long.</returns>
-    private static string Fit(string text) =>
-        text.Length <= MaxTextLength ? text : text.Substring(0, MaxTextLength - 1) + "…";
+    private static string Fit(string text, int maxLength = MaxTextLength) =>
+        text.Length <= maxLength ? text : text.Substring(0, maxLength - 1) + "…";
 }

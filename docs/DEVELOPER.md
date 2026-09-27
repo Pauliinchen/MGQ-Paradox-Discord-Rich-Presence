@@ -47,7 +47,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `NativeMethods.cs` | Lets the DLL find its own folder. |
 | `Game/GameStatus.cs` | One parsed status, a property per value. `Scene.cs` and `Vehicle.cs` hold its enums. |
 | `Discord/DiscordIpcClient.cs` | Discord's local named-pipe protocol. `Opcode.cs` holds the frame kinds. |
-| `Discord/Activity.cs`, `Discord/Json.cs` | The activity and its JSON, with Discord's field limits. |
+| `Discord/Activity.cs`, `Discord/ActivityButton.cs`, `Discord/Json.cs` | The activity, its link buttons and its JSON, with Discord's field limits. |
 
 **`package/Discord/`:** `Settings.ini` (the options `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes`, which the game script reads and writes) and the player `README.txt`.
 

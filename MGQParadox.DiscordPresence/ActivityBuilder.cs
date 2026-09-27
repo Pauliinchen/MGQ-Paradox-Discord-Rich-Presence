@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Left the names, map names and route names that spoil Part 3 out while spoilers are hidden
+//      Paulinchen  2026-09-27: Added a button that links to the mod's page
+//                            - Left the names, map names and route names that spoil Part 3 out while spoilers are hidden
 //                            - Showed the default art asset whenever the game picks no picture, instead of the looked-up app icon
 //                            - Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
 //                            - Put the act of the Collaboration Scenario in front of the tooltip while it is played
@@ -91,6 +92,15 @@ internal static class ActivityBuilder
     private static readonly TimeSpan IdleAfter = TimeSpan.FromMinutes(1);
 
     /// <summary>
+    /// Buttons under every activity: a link to the mod's page, which explains what it needs and
+    /// links the download.
+    /// </summary>
+    private static readonly ActivityButton[] Buttons =
+    {
+        new("Get the mod", "https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence"),
+    };
+
+    /// <summary>
     /// Names of the sides a playthrough chooses, by the key the game script publishes.
     /// </summary>
     private static readonly Dictionary<string, string> SideNames = new()
@@ -155,6 +165,7 @@ internal static class ActivityBuilder
                 Details = "At the title screen",
                 StartedAt = status.StartedAt,
                 LargeImage = DefaultPicture,
+                Buttons = Buttons,
             };
         }
 
@@ -165,6 +176,7 @@ internal static class ActivityBuilder
             StartedAt = status.StartedAt,
             LargeImage = status.Picture.Length > 0 ? status.Picture : DefaultPicture,
             LargeText = TooltipOf(status),
+            Buttons = Buttons,
         };
     }
 

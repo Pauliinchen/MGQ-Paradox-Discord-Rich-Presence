@@ -33,6 +33,12 @@ The new **Spoilers** option (default *Hide*, under `[Discord] Rich Presence`) pr
 |---|---|---|
 | Image options | `Picture`, `-> Shown Picture` | `Activity Image`, `-> Shown Image`; the Settings.ini keys stay `picture` and `shown_picture` |
 
+### Buttons
+
+| Button | Link | When |
+|---|---|---|
+| `Get the mod` | The mod's GitHub page, with its requirements, installation and download | Always, the title screen included. Discord shows buttons to everyone but the player. |
+
 ### Tooltip
 
 | Activity | Before | With spoilers hidden in Part 3 |
