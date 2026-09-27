@@ -27,6 +27,12 @@ The new **Spoilers** option (default *Hide*, under `[Discord] Rich Presence`) pr
 | Defeat scene (NSFW) | `… Raped by <Monster girl> for the <Nth> time!` | `… Raped by a monster girl for the <Nth> time!` |
 | Battle fuck (NSFW) | `… Currently Battlefucking <Battlefucker>!` | `… Currently Battlefucking a battlefucker!` |
 
+### Options
+
+| Change | Before | Now |
+|---|---|---|
+| Image options | `Picture`, `-> Shown Picture` | `Activity Image`, `-> Shown Image`; the Settings.ini keys stay `picture` and `shown_picture` |
+
 ### Tooltip
 
 | Activity | Before | With spoilers hidden in Part 3 |

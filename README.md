@@ -89,13 +89,13 @@ The mod adds its options to the game: in the community's Mod Config Menu (`Patch
 - **Hide** (default): while you play Part 3, Discord leaves out the trivia that spoils it, leaves the map name off the first line (the world map, Pocket Castle and Labyrinth of Chaos still show), names nobody there (`Talking to someone . . .`, `In a request with a companion …`, `Raped by a monster girl …`, `Currently Battlefucking a battlefucker!`) and calls the routes `Monster route` (Destroyer), `Angel route` (Judgment) and `Third route` (Chaos) in the tooltip. Parts 1 and 2 show as usual.
 - **Show**: Discord shows everything, Part 3 included.
 
-**`Picture`**
-- **Static** (default): always the same picture, the one picked under **`-> Shown Picture`**: **Default** (the game's icon), Ilias or Alice in her adult form or sealed, the Judgment or Destroyer route's logo alone or over its heroines, Chaos or Collaboration Scenario.
-- **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon. Two options appear under it instead of Shown Picture:
+**`Activity Image`**
+- **Static** (default): always the same picture, the one picked under **`-> Shown Image`**: **Default** (the game's icon), Ilias or Alice in her adult form or sealed, the Judgment or Destroyer route's logo alone or over its heroines, Chaos or Collaboration Scenario.
+- **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon. Two options appear under it instead of Shown Image:
   - **`-> Ilias / Alice`**: **Sealed** (default) or **Adult**.
   - **`-> Routes`**: **Layered** (default), the Judgment or Destroyer route's logo over its heroines, or **Logo**, the logo alone.
 
-The options under `Picture` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
+The options under `Activity Image` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
 
 ### After updating the translation
 

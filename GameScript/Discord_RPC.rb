@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added a Spoilers option that hides Part 3 spoilers
+#      Paulinchen  2026-09-27: Renamed the Picture and Shown Picture options to Activity Image and Shown Image
+#                            - Added a Spoilers option that hides Part 3 spoilers
 #                            - Added the Randolphs found to the trivia of Part 3
 #                            - Grouped the trivia by the part and route they belong to
 #                            - Hid the options that do not apply, and the ones under a greyed out option
@@ -249,7 +250,7 @@ module MGQ_Discord
     # Whether the dynamic picture shows a route's logo over its heroines (1) or the logo alone (0).
     LAYERED_ROUTES = :mod_discord_layered_routes
 
-    # Art assets the Shown Picture option can fix, by its value: every picture of the application.
+    # Art assets the Shown Image option can fix, by its value: every picture of the application.
     FIXED_PICTURES = {
       1  => "ilias_adult",
       2  => "ilias_sealed",
@@ -319,17 +320,17 @@ module MGQ_Discord
         },
       },
       PICTURE => {
-        :name   => "Picture",
-        :help   => "Show the game's icon on Discord, or a picture that follows the story.",
+        :name   => "Activity Image",
+        :help   => "Show the game's icon on Discord, or an image that follows the story.",
         :under  => PRESENCE,
         :values => {
-          0 => ["Static",  "Always the same picture, the game's icon unless Shown Picture picks another."],
+          0 => ["Static",  "Always the same image, the game's icon unless Shown Image picks another."],
           1 => ["Dynamic", "Ilias or Alice, whoever you chose, and later the route you are on."],
         },
       },
       SHOWN_PICTURE => {
-        :name   => "Shown Picture",
-        :help   => "The picture shown while Picture is Static.",
+        :name   => "Shown Image",
+        :help   => "The image shown while Activity Image is Static.",
         :under  => PICTURE,
         :when   => 0,
         :values => {
@@ -348,7 +349,7 @@ module MGQ_Discord
       },
       SEALED_SIDES => {
         :name   => "Ilias / Alice",
-        :help   => "How Ilias or Alice shows while Picture is Dynamic.",
+        :help   => "How Ilias or Alice shows while Activity Image is Dynamic.",
         :under  => PICTURE,
         :when   => 1,
         :values => {
@@ -358,7 +359,7 @@ module MGQ_Discord
       },
       LAYERED_ROUTES => {
         :name   => "Routes",
-        :help   => "How the Judgment and Destroyer routes show while Picture is Dynamic.",
+        :help   => "How the Judgment and Destroyer routes show while Activity Image is Dynamic.",
         :under  => PICTURE,
         :when   => 1,
         :values => {
@@ -476,7 +477,7 @@ module MGQ_Discord
       self[PICTURE] == 1
     end
 
-    # @return [String, nil] the art asset the Shown Picture option picks, nil for the app icon
+    # @return [String, nil] the art asset the Shown Image option picks, nil for the app icon
     def self.fixed_picture
       FIXED_PICTURES[self[SHOWN_PICTURE]]
     end
@@ -1040,7 +1041,7 @@ module MGQ_Discord
 
   # Where the story stands: the part, the side this playthrough chose, in the final chapter the
   # route, and the act of the Collaboration Scenario while it is played. The keys of the route and
-  # the collab double as the Discord application's art assets that the Picture option shows, the
+  # the collab double as the Discord application's art assets that the Activity Image option shows, the
   # routes' ones being their logos.
   module Story
     # Side chosen, by the switch that records the choice.

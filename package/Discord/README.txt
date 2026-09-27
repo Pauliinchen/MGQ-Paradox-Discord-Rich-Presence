@@ -69,12 +69,12 @@ you play Part 3: spoiler trivia is left out, the first line names neither
 the map nor anybody ("Talking to someone . . ."), and the routes are
 called Monster route, Angel route and Third route. Show shows everything.
 
-  Picture: Static (the default) always shows the same picture, the one
-picked under Shown Picture. Dynamic shows Ilias or Alice, whoever you
+  Activity Image: Static (the default) always shows the same picture, the
+one picked under Shown Image. Dynamic shows Ilias or Alice, whoever you
 picked this playthrough, in the final chapter the route you are on, and
 the collab's heroes during the Collaboration Scenario.
 
-    -> Shown Picture (Static only): Default (the game's icon), Ilias or
+    -> Shown Image (Static only): Default (the game's icon), Ilias or
     Alice in her adult form or sealed, the Judgment or Destroyer route's
     logo alone or over its heroines, Chaos or Collaboration Scenario.
 
@@ -83,10 +83,10 @@ the collab's heroes during the Collaboration Scenario.
     -> Routes (Dynamic only): Layered (the default) shows the Judgment or
     Destroyer route's logo over its heroines, Logo the logo alone.
 
-The options under Picture only show while they apply. The options are the
-same for every save and are kept in Discord\Settings.ini (presence, nsfw,
-all_saves, spoilers, picture, shown_picture, sealed_sides and
-layered_routes), not in your saves.
+The options under Activity Image only show while they apply. The options
+are the same for every save and are kept in Discord\Settings.ini
+(presence, nsfw, all_saves, spoilers, picture, shown_picture,
+sealed_sides and layered_routes), not in your saves.
 Updating the mod resets them.
 
 
