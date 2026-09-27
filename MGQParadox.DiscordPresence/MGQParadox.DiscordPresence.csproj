@@ -21,6 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="MGQParadox.DiscordPresence.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ModFile Include="..\package\Discord\*" />
     <PatchFile Include="..\GameScript\Discord_RPC.rb" />
 

@@ -7,11 +7,12 @@ MGQ-Paradox-Discord-Rich-Presence.slnx   Visual Studio solution
 Directory.Build.targets                  puts vswhere.exe on the PATH, which the NativeAOT link needs
 GameScript/Discord_RPC.rb                Ruby, runs inside the game
 MGQParadox.DiscordPresence/              C# NativeAOT project -> DiscordPresence.dll, and the package
+MGQParadox.DiscordPresence.Tests/        xUnit tests of the DLL, 32-bit like it
 package/                                 static files shipped as-is
 Shipping/                                publish output, git-ignored
 docs/DEVELOPER.md                        this file
 docs/Activities.md                       every line Discord shows, by the release that added it
-.github/workflows/release.yml            builds and attaches the zip on release
+.github/workflows/release.yml            tests, builds and attaches the zip on release
 ```
 
 **`GameScript/Discord_RPC.rb`:** a Patch folder mod, shipped as `Patch/Discord_RPC.rb` and loaded by the mod loader in `Patch.rb`. It collects the game state and hands it to `DiscordPresence.dll` as plain values; it writes no text Discord shows, the DLL does. Everything lives in the module `MGQ_Discord`, which holds the settings and the start-up, tick and publish steps. Nested modules do one job each:
@@ -76,6 +77,19 @@ Patch/    Discord_RPC.rb
 - **Game folder for testing:** it needs the community's mod loader (see [How it hooks in](#how-it-hooks-in)). Then every change only needs a publish, a copy and a game restart.
 - **Logs:** `DiscordPresence.log` (the DLL) and `InGame.log` (in-game errors). Set `DEBUG = true` in `Discord_RPC.rb` to log every status write.
 
+### Tests
+
+`MGQParadox.DiscordPresence.Tests` covers the DLL without the game or Discord: every trivia line and first line with the texts the presence sends, the tooltip, the activity's JSON and Discord's field limits, parsing the status and the number formats. A test builds a status the way the game script publishes it (`StatusFactory.Status`) and passes a fixed time, so idle, the item window and the rotations are reproducible.
+
+The project targets [Microsoft.Testing.Platform](https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-intro) and builds into an executable, so it runs itself:
+
+```powershell
+dotnet run --project MGQParadox.DiscordPresence.Tests
+```
+
+- **32-bit:** the DLL project builds for the 32-bit game, so the tests run 32-bit too and need the x86 .NET 10 runtime (`C:\Program Files (x86)\dotnet`). The release workflow installs it before running them.
+- **Not covered:** `Discord_RPC.rb`, which only runs inside the game. Check it there, with `DiscordPresence.log` showing what was sent.
+
 ## Conventions
 
 - **File headers.** Every `.cs` and `.rb` file starts with a header block listing the file name and a changelog, newest entry first. Entries by the same author on the same day are grouped. Only changes after the first commit are recorded; before that, a file carries just `Created`.
@@ -88,7 +102,7 @@ Patch/    Discord_RPC.rb
 
 1. Push your changes.
 2. On GitHub, go to **Releases → Draft a new release**, create a tag like `v1.0.0`, write the notes, and click **Publish**.
-3. The *Release* workflow builds the mod and attaches `MGQ-Paradox-Discord-RPC-1.0.0.zip` to that release within a few minutes. Check the **Actions** tab if it doesn't appear.
+3. The *Release* workflow runs the tests, builds the mod and attaches `MGQ-Paradox-Discord-RPC-1.0.0.zip` to that release within a few minutes. Check the **Actions** tab if it doesn't appear.
 
 ## How it hooks in
 
