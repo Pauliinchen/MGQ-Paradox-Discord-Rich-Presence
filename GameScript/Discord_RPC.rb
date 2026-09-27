@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added the side taken at the Navy Headquarters to the trivia of Part 2
+#      Paulinchen  2026-09-27: Added the monster queens recruited to the trivia of Part 2
+#                            - Added the side taken at the Navy Headquarters to the trivia of Part 2
 #                            - Added the routes cleared to the trivia of Part 3
 #                            - Added the latest ore unlocked for forging to the trivia of Parts 1 and 2
 #                            - Added the spirits recruited to the trivia of Parts 1 and 2
@@ -1222,6 +1223,12 @@ module MGQ_Discord
     # an ore's equipment while the party holds it, and forging never uses it up. 2.x has no Meteorite.
     FORGING_ORES = [151, 152, 153, 154, 155, 156, 157, 158]
 
+    # Monster queens who join for good in Part 2, by their actor ids, the same in 2.x and 3.x: the Cow
+    # Demon Queen, Miria, Antine Ann, Poseidoness, Candy, Airy, Freya, Alrauna, Lucretia, Laura,
+    # Kraken, the Spider Princess, Fatima, and Lilith & Lilim. 3.x has second actors named like the
+    # Cow Demon Queen and Fatima, so names would be ambiguous.
+    MONSTER_QUEENS = [218, 245, 268, 280, 293, 315, 316, 322, 323, 328, 329, 334, 340, 341]
+
     # Side Luka takes at the Navy Headquarters in Part 2, by the switch that records the choice.
     NAVAL_SIDES = { "Support Pirates" => "Pirates", "Support Navy" => "Marines" }
 
@@ -1281,6 +1288,7 @@ module MGQ_Discord
         :spirits_recruited,
         :forging_ore,
         :naval_side,
+        :queens_recruited,
       ],
       3 => [
         :routes_cleared,
@@ -1574,13 +1582,29 @@ module MGQ_Discord
 
     # How many of the four spirits have joined the party.
     #
-    # Read from the permanent roster, like companions.
-    #
     # @return [String, nil] the line, nil before the first
     def self.spirits_recruited
-      roster = $game_party.instance_variable_get(:@include_actors)
-      recruited = spirit_ids.count { |id| roster.include?(id) }
+      recruited = recruited_count(spirit_ids)
       "Has recruited #{recruited} out of #{spirit_ids.size} spirits!" if recruited > 0
+    end
+
+    # How many of the monster queens have joined the party.
+    #
+    # @return [String, nil] the line, nil before the first
+    def self.queens_recruited
+      recruited = recruited_count(MONSTER_QUEENS)
+      "Has recruited #{recruited} out of #{MONSTER_QUEENS.size} monster queens!" if recruited > 0
+    end
+
+    # Counts the actors that have joined the party.
+    #
+    # Read from the permanent roster, like companions.
+    #
+    # @param ids [Array<Integer>] the actor ids
+    # @return [Integer] how many of them joined
+    def self.recruited_count(ids)
+      roster = $game_party.instance_variable_get(:@include_actors)
+      ids.count { |id| roster.include?(id) }
     end
 
     # The actor ids of the SPIRITS, looked up once.

@@ -37,7 +37,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - The music that's playing, named like in Kagetsumugi's jukebox
 - The three companions with the most affection
 - Gold carried and spent, items synthesized, companions recruited, the deepest Labyrinth of Chaos floor, and more
-- In Parts 1 and 2: how many of the four spirits you recruited, and the latest ore you unlocked for forging; in Part 2 also whether you sided with the pirates or the marines
+- In Parts 1 and 2: how many of the four spirits you recruited, and the latest ore you unlocked for forging; in Part 2 also whether you sided with the pirates or the marines, and how many monster queens you recruited
 - In Part 3 (3.x): how many routes you cleared, how many Randolphs you found, and on the Chaos route how many of the 16 Phenomena of Ruin you defeated (spoilers, see [Options](#options))
 - How many requests you made, and to whom the most (NSFW)
 - How often you were raped after losing, and by whom the most (NSFW)
