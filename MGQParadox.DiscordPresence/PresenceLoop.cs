@@ -133,11 +133,11 @@ internal sealed class PresenceLoop
     /// <summary>
     /// Hands over the game's latest status.
     /// </summary>
-    /// <param name="status">The <c>key=value</c> lines Discord_RPC.rb built.</param>
     /// <remarks>
     /// Called on the game's own thread, so it only stores the text. Everything else happens on the
     /// loop's thread.
     /// </remarks>
+    /// <param name="status">The <c>key=value</c> lines Discord_RPC.rb built.</param>
     public static void Submit(string status) => Volatile.Write(ref _latestStatus, status);
 
     /// <summary>
@@ -230,11 +230,11 @@ internal sealed class PresenceLoop
     /// <summary>
     /// Makes sure Discord is connected, trying again at most every <see cref="ReconnectInterval"/>.
     /// </summary>
-    /// <returns><see langword="true"/> while connected.</returns>
     /// <remarks>
     /// A new connection starts with an empty profile, so the last activity is sent again even if
     /// the game has not changed since.
     /// </remarks>
+    /// <returns><see langword="true"/> while connected.</returns>
     private bool EnsureConnected()
     {
         if (_discord.IsConnected)

@@ -171,14 +171,14 @@ internal static class ActivityBuilder
     /// <summary>
     /// Builds the first line: where the player is and what they are doing.
     /// </summary>
-    /// <param name="status">The status the game published.</param>
-    /// <param name="pocketCastleIndex">Which Pocket Castle line to show, wrapping around.</param>
-    /// <returns>The first line.</returns>
     /// <remarks>
     /// The world map's own name is untranslated kanji, so a fight there names the journey instead.
     /// Battles, the Labyrinth, the Pocket Castle, camp and conversations never show idle, since
     /// auto-battle and their own lines say more than it would.
     /// </remarks>
+    /// <param name="status">The status the game published.</param>
+    /// <param name="pocketCastleIndex">Which Pocket Castle line to show, wrapping around.</param>
+    /// <returns>The first line.</returns>
     private static string DetailsOf(GameStatus status, int pocketCastleIndex)
     {
         if (status.Scene == Scene.Request)
@@ -260,12 +260,12 @@ internal static class ActivityBuilder
     /// <summary>
     /// Reports whether the player has pressed no button for <see cref="IdleAfter"/>.
     /// </summary>
-    /// <param name="status">The status the game published.</param>
-    /// <returns><see langword="true"/> when idle.</returns>
     /// <remarks>
     /// Measured against the DLL's own clock, which keeps running while the game is frozen in the
     /// background and publishes nothing.
     /// </remarks>
+    /// <param name="status">The status the game published.</param>
+    /// <returns><see langword="true"/> when idle.</returns>
     private static bool IsIdle(GameStatus status) =>
         status.LastInputAt is { } lastInputAt &&
         DateTimeOffset.UtcNow.ToUnixTimeSeconds() - lastInputAt >= IdleAfter.TotalSeconds;
@@ -273,11 +273,11 @@ internal static class ActivityBuilder
     /// <summary>
     /// Builds the first line inside the Labyrinth of Chaos.
     /// </summary>
-    /// <param name="status">The status the game published.</param>
-    /// <returns>Kind of run, biome, floor and rare points.</returns>
     /// <remarks>
     /// The biome is left out at the entrance, which is itself called Labyrinth of Chaos.
     /// </remarks>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>Kind of run, biome, floor and rare points.</returns>
     private static string LabyrinthDetailsOf(GameStatus status)
     {
         var biome = status.Area.Length > 0 && !Mentions(status.Area, LabyrinthName)
@@ -290,12 +290,12 @@ internal static class ActivityBuilder
     /// <summary>
     /// Puts the place in front of what happens there.
     /// </summary>
-    /// <param name="status">The status the game published.</param>
-    /// <param name="happening">What happens.</param>
-    /// <returns>The first line.</returns>
     /// <remarks>
     /// Every room of the Pocket Castle has a name of its own, so the place is the castle as a whole.
     /// </remarks>
+    /// <param name="status">The status the game published.</param>
+    /// <param name="happening">What happens.</param>
+    /// <returns>The first line.</returns>
     private static string WithPlace(GameStatus status, string happening)
     {
         var place = status.IsOnWorldMap || status.Scene == Scene.Travel ? WorldMapName
@@ -318,12 +318,12 @@ internal static class ActivityBuilder
     /// Builds the tooltip on the picture: the part of the story, then leader, race and class with
     /// their levels.
     /// </summary>
-    /// <param name="status">The status the game published.</param>
-    /// <returns>The tooltip, leaving out whatever is unknown.</returns>
     /// <remarks>
     /// Discord wraps the tooltip on its own and cuts it at <see cref="Activity.MaxTextLength"/>, so
     /// a tooltip too long for it drops the labels before <see cref="Activity"/> has to cut it.
     /// </remarks>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>The tooltip, leaving out whatever is unknown.</returns>
     private static string TooltipOf(GameStatus status)
     {
         var tooltip = TooltipOf(status, withLabels: true);

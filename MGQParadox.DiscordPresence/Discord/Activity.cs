@@ -60,10 +60,10 @@ internal sealed class Activity
     /// <summary>
     /// Writes the activity object of a SET_ACTIVITY command.
     /// </summary>
-    /// <returns>The JSON object.</returns>
     /// <remarks>
     /// Contains nothing that changes between calls, so equal JSON means an equal activity.
     /// </remarks>
+    /// <returns>The JSON object.</returns>
     public string ToJson()
     {
         var json = new StringBuilder("{\"details\":").Append(Json.Quote(Fit(Details)));

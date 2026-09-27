@@ -164,12 +164,12 @@ internal sealed class DiscordIpcClient
     /// <summary>
     /// Waits for the READY event that confirms a handshake.
     /// </summary>
-    /// <param name="pipe">The pipe the handshake was sent on.</param>
-    /// <returns><see langword="true"/> once READY arrived.</returns>
     /// <remarks>
     /// Discord silently ignores every command sent before READY, so a handshake only counts once
     /// it has been answered.
     /// </remarks>
+    /// <param name="pipe">The pipe the handshake was sent on.</param>
+    /// <returns><see langword="true"/> once READY arrived.</returns>
     private static bool AwaitReady(NamedPipeClientStream pipe)
     {
         var deadline = DateTime.UtcNow + ReadyTimeout;
@@ -195,11 +195,11 @@ internal sealed class DiscordIpcClient
     /// <summary>
     /// Reads everything Discord sends from here on, in the background.
     /// </summary>
-    /// <param name="pipe">The connected pipe.</param>
     /// <remarks>
     /// Discord answers every command and pings now and then. Left unread, those fill the pipe
     /// until writing to it blocks.
     /// </remarks>
+    /// <param name="pipe">The connected pipe.</param>
     private void StartDrainThread(NamedPipeClientStream pipe)
     {
         new Thread(() => Drain(pipe)) { IsBackground = true }.Start();
@@ -208,10 +208,10 @@ internal sealed class DiscordIpcClient
     /// <summary>
     /// Answers pings and logs every other frame until the pipe closes, then lets go of it.
     /// </summary>
-    /// <param name="pipe">The pipe to read.</param>
     /// <remarks>
     /// Ends quietly on any failure. An exception escaping a thread would end the whole game.
     /// </remarks>
+    /// <param name="pipe">The pipe to read.</param>
     private void Drain(NamedPipeClientStream pipe)
     {
         try
