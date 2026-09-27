@@ -2,6 +2,7 @@
 //  Json.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-27: Described the writer as part of the DLL, not an executable
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -12,7 +13,7 @@ using System.Text;
 namespace MGQParadox.DiscordPresence.Discord;
 
 /// <summary>
-/// The little JSON the IPC payloads need, written by hand so the executable needs no library.
+/// The little JSON the IPC payloads need, written by hand so the NativeAOT DLL needs no serializer.
 /// </summary>
 internal static class Json
 {
