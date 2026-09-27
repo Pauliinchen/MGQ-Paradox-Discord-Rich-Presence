@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Published the medals earned
+#      Paulinchen  2026-09-27: Told of a newer release on the title screen, with an Update Check option to turn it off
+#                            - Published the medals earned
 #                            - Published the screen open in a menu
 #                            - Handed the trivia to DiscordPresence.dll as values, which writes the sentences now
 #                            - Added the monster queens recruited to the trivia of Part 2
@@ -140,6 +141,7 @@ module MGQ_Discord
     @frames = 0
     Options.sync
     publish(GameState.scene)
+    UpdateNotice.refresh
   rescue => e
     @frames = 0
     Log.write("tick failed: #{e.class}: #{e.message}")
@@ -259,6 +261,9 @@ module MGQ_Discord
     # Whether the dynamic picture shows a route's logo over its heroines (1) or the logo alone (0).
     LAYERED_ROUTES = :mod_discord_layered_routes
 
+    # Whether the title screen tells of a newer release of the mod (1) or GitHub is never asked (0).
+    UPDATE_CHECK = :mod_discord_update_check
+
     # Art assets the Shown Image option can fix, by its value: every picture of the application.
     FIXED_PICTURES = {
       1  => "ilias_adult",
@@ -283,6 +288,7 @@ module MGQ_Discord
       SHOWN_PICTURE  => "shown_picture",
       SEALED_SIDES   => "sealed_sides",
       LAYERED_ROUTES => "layered_routes",
+      UPDATE_CHECK   => "update_check",
     }
 
     # Every option, by its key in $game_system.conf.
@@ -374,6 +380,15 @@ module MGQ_Discord
         :values => {
           1 => ["Layered", "The route's logo over its heroines."],
           0 => ["Logo",    "The route's logo alone."],
+        },
+      },
+      UPDATE_CHECK => {
+        :name   => "Update Check",
+        :help   => "Look for a new release of the mod when the game starts.",
+        :under  => PRESENCE,
+        :values => {
+          1 => ["On",  "The title screen tells you when a new release is out. The game asks GitHub once per start."],
+          0 => ["Off", "The game never asks GitHub for a new release."],
         },
       },
     }
@@ -499,6 +514,11 @@ module MGQ_Discord
     # @return [Boolean] whether the dynamic picture shows a route's logo over its heroines
     def self.layered_routes?
       self[LAYERED_ROUTES] == 1
+    end
+
+    # @return [Boolean] whether the title screen tells of a newer release of the mod
+    def self.update_check?
+      self[UPDATE_CHECK] == 1
     end
 
     # @param key [Symbol] the option
@@ -1690,10 +1710,69 @@ module MGQ_Discord
     end
   end
 
+  # Two lines on the title screen, below the translation's version, once a newer release of the mod is out.
+  module UpdateNotice
+    # What the notice says, the newer version filled in.
+    LINES = [
+      "Discord Rich Presence %s is out.",
+      "Close the game and run Discord\\Update.bat to update.",
+    ]
+
+    # Height of a line, which the font size follows.
+    LINE_HEIGHT = 20
+
+    # Where the notice starts, below the translation's version.
+    TOP = 24
+
+    # Gap to the left and right edges of the screen, as the translation's version keeps it.
+    MARGIN = 4
+
+    # Layer of the title screen's foreground, which the notice belongs to.
+    Z = 100
+
+    # Shows the notice on the title screen once the DLL found a newer release, and asks the DLL to
+    # look for one the first time the title screen shows. Called every publish.
+    def self.refresh
+      return if @sprite || !SceneManager.scene.is_a?(Scene_Title)
+      return unless Options.presence? && Options.update_check?
+
+      @asked ||= Presence.check_for_update == 1
+      version = Presence.newer_version
+      show(version) unless version.empty?
+    end
+
+    # Takes the notice off the screen. Called when the title screen ends.
+    def self.hide
+      return unless @sprite
+
+      @sprite.bitmap.dispose
+      @sprite.dispose
+      @sprite = nil
+    end
+
+    # Draws the notice.
+    #
+    # @param version [String] the newer release's version
+    def self.show(version)
+      @sprite = Sprite.new
+      @sprite.bitmap = Bitmap.new(Graphics.width, LINE_HEIGHT * LINES.size)
+      @sprite.bitmap.font.size = LINE_HEIGHT
+      @sprite.y = TOP
+      @sprite.z = Z
+
+      LINES.each_with_index do |line, index|
+        @sprite.bitmap.draw_text(MARGIN, index * LINE_HEIGHT, Graphics.width - 2 * MARGIN, LINE_HEIGHT, format(line, version))
+      end
+    end
+  end
+
   # Discord/DiscordPresence.dll, which talks to Discord on a thread of its own.
   module Presence
     # File name inside the mod folder.
     DLL = "DiscordPresence.dll"
+
+    # Bytes the DLL may write a version into, its terminating null included.
+    VERSION_SIZE = 32
 
     # @return [Boolean] whether the DLL is in the mod folder
     def self.installed?
@@ -1710,6 +1789,20 @@ module MGQ_Discord
     # @param status [String] the key=value lines
     def self.update(status)
       function('presence_update', 'p').call(status + "\0")
+    end
+
+    # Has the DLL ask GitHub for a newer release on a thread of its own. The DLL ignores a second call.
+    #
+    # @return [Integer] 1 when the DLL started asking, 0 when it failed
+    def self.check_for_update
+      function('presence_check_for_update', 'v').call
+    end
+
+    # @return [String] the newer release's version the DLL found, "" while it knows of none
+    def self.newer_version
+      buffer = "\0" * VERSION_SIZE
+      length = function('presence_newer_version', 'pl').call(buffer, buffer.size)
+      buffer[0, length]
     end
 
     # @param name [String] the exported function
@@ -1769,6 +1862,20 @@ if MGQ_Discord.hookable?
     end
   rescue => e
     MGQ_Discord::Log.write("Graphics hook FAILED: #{e.class}: #{e.message}")
+  end
+
+  # The title screen takes its sprites off when it ends, the update notice with them.
+  begin
+    class Scene_Title
+      alias mgq_discord_terminate terminate
+      def terminate
+        mgq_discord_terminate
+      ensure
+        MGQ_Discord::UpdateNotice.hide rescue nil
+      end
+    end
+  rescue => e
+    MGQ_Discord::Log.write("title hook FAILED: #{e.class}: #{e.message}")
   end
 
   # Every item use, in menus and in battle, passes item_apply once per target.

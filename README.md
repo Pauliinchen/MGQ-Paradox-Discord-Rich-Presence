@@ -72,7 +72,7 @@ Nothing else needs to be installed.
    ```
 3. Start the game as usual.
 
-**Updating:** close the game and double-click `Discord\Update.bat`: it downloads the latest release, installs it and keeps your options. Versions before 1.4.0 have no `Update.bat` yet, so update to 1.4.0 by hand.
+**Updating:** the title screen tells you when a new release is out (see [Update Check](#options)). Close the game and double-click `Discord\Update.bat`: it downloads the latest release, installs it and keeps your options. Versions before 1.4.0 have no `Update.bat` yet, so update to 1.4.0 by hand.
 
 To update by hand, close the game and extract the new zip over the old one. That resets your options. Versions before 1.3 also left `Discord\Uninstall.exe`, which is no longer used; you can delete it, and `Update.bat` does so.
 
@@ -102,7 +102,11 @@ The mod adds its options to the game: in the community's Mod Config Menu (`Patch
   - **`-> Ilias / Alice`**: **Sealed** (default) or **Adult**.
   - **`-> Routes`**: **Layered** (default), the Judgment or Destroyer route's logo over its heroines, or **Logo**, the logo alone.
 
-The options under `Activity Image` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files. `Update.bat` keeps them, extracting a new zip by hand resets them.
+**`Update Check`**
+- **On** (default): once per game start, the game asks GitHub for the mod's latest release, and the title screen tells you when it is newer than yours. Nothing else is sent.
+- **Off**: the game never asks GitHub.
+
+The options under `Activity Image` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides`, `layered_routes` and `update_check` in `Discord\Settings.ini`, not in your save files. `Update.bat` keeps them, extracting a new zip by hand resets them.
 
 ### After updating the translation
 
