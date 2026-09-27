@@ -27,6 +27,31 @@ The new **Spoilers** option (default *Hide*, under `[Discord] Rich Presence`) pr
 | Defeat scene (NSFW) | `… Raped by <Monster girl> for the <Nth> time!` | `… Raped by a monster girl for the <Nth> time!` |
 | Battle fuck (NSFW) | `… Currently Battlefucking <Battlefucker>!` | `… Currently Battlefucking a battlefucker!` |
 
+### Menu screens
+
+A menu screen with a text of its own shows it instead of `In menu . . .`, as `<Location> - <Text>`. In the Pocket Castle it replaces the castle's rotating line: `Pocket Castle - <Text>`. Idle still takes over after a minute, except in the Pocket Castle. Every other screen stays `In menu . . .`.
+
+| Screen | Text |
+|---|---|
+| Items | `Checking the inventory . . .` |
+| Skills | `Checking skills . . .` |
+| Status | `Checking the party . . .` |
+| Shop | `Shopping . . .` |
+| Synthesis | `Synthesizing . . .` |
+| Blacksmith reinforcement | `Reinforcing equipment . . .` |
+| Equipment | `Changing equipment . . .` |
+| Gems | `Setting gems . . .` |
+| Abilities | `Setting abilities . . .` |
+| Job and race change | `Changing jobs and races . . .` |
+| Party formation | `Rearranging the party . . .` |
+| Library | `Browsing the Library . . .` |
+| Storehouse | `Checking the storehouse . . .` |
+| Warp | `Choosing where to warp . . .` |
+| Casino poker | `Playing poker at the casino . . .` |
+| Casino slots | `Playing the slots at the casino . . .` |
+| Casino prizes | `Trading in casino coins . . .` |
+| Saving | `Saving . . .` |
+
 ### Options
 
 | Change | Before | Now |

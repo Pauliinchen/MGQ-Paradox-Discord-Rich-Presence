@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Handed the trivia to DiscordPresence.dll as values, which writes the sentences now
+#      Paulinchen  2026-09-27: Published the screen open in a menu
+#                            - Handed the trivia to DiscordPresence.dll as values, which writes the sentences now
 #                            - Added the monster queens recruited to the trivia of Part 2
 #                            - Added the side taken at the Navy Headquarters to the trivia of Part 2
 #                            - Added the routes cleared to the trivia of Part 3
@@ -722,6 +723,14 @@ module MGQ_Discord
       "menu"
     rescue
       "map"
+    end
+
+    # Names the screen open in a menu, by the game's own class name, which DiscordPresence.dll
+    # turns into what the player is doing there.
+    #
+    # @return [String] the class name, such as "Scene_Shop", or "" when unknown
+    def self.screen
+      MGQ_Discord.text_of { SceneManager.scene.class.name }
     end
 
     # Reports whether the camp music plays, which the game starts while the party sets up camp.
@@ -1623,6 +1632,7 @@ module MGQ_Discord
       }
 
       fields["vehicle"] = GameState.vehicle if scene == "travel"
+      fields["screen"] = GameState.screen if scene == "menu"
       fields["overworld"] = 1 if (scene == "battle" || scene == "defeat_scene") && GameState.on_world_map?
       fields["camping"] = 1 if GameState.camping?
 

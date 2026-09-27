@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Read the values behind the trivia instead of finished trivia lines
+//      Paulinchen  2026-09-27: Read the screen open in a menu
+//                            - Read the values behind the trivia instead of finished trivia lines
 //                            - Read the Labyrinth's rare points as a number
 //                            - Read whether Part 3 spoilers are hidden
 //                            - Read whether the player turned the Rich Presence option off
@@ -83,6 +84,11 @@ internal sealed class GameStatus
         "air" => Vehicle.Air,
         _ => Vehicle.Foot,
     };
+
+    /// <summary>
+    /// The game's class name of the screen open in <see cref="Scene.Menu"/>, such as "Scene_Shop".
+    /// </summary>
+    public string Screen => Value("screen");
 
     /// <summary>
     /// Name of the current map.

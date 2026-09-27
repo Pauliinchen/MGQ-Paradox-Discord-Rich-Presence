@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Showed the trivia TriviaBuilder writes, and took the time from the caller
+//      Paulinchen  2026-09-27: Named what the player does in a menu screen, the Pocket Castle's too
+//                            - Showed the trivia TriviaBuilder writes, and took the time from the caller
 //                            - Added a button that links to the mod's page
 //                            - Left the names, map names and route names that spoil Part 3 out while spoilers are hidden
 //                            - Showed the default art asset whenever the game picks no picture, instead of the looked-up app icon
@@ -131,6 +132,35 @@ internal static class ActivityBuilder
     };
 
     /// <summary>
+    /// What the player is shown doing in a menu screen, by the game's class name of the screen. Any
+    /// other screen shows as being in the menu.
+    /// </summary>
+    private static readonly Dictionary<string, string> ScreenTexts = new()
+    {
+        ["Scene_Item"] = "Checking the inventory . . .",
+        ["Scene_Skill"] = "Checking skills . . .",
+        ["Scene_Status"] = "Checking the party . . .",
+        ["Scene_Shop"] = "Shopping . . .",
+        ["Scene_Synthesize"] = "Synthesizing . . .",
+        ["Scene_Smith"] = "Reinforcing equipment . . .",
+        ["Scene_Equip"] = "Changing equipment . . .",
+        ["Scene_EquipStone"] = "Setting gems . . .",
+        ["Scene_EquipStoneActor"] = "Setting gems . . .",
+        ["Scene_EquipStoneItem"] = "Setting gems . . .",
+        ["Scene_Ability"] = "Setting abilities . . .",
+        ["Scene_JobChange"] = "Changing jobs and races . . .",
+        ["Scene_PartyEdit"] = "Rearranging the party . . .",
+        ["Scene_MultiPartyEdit"] = "Rearranging the party . . .",
+        ["Scene_Library"] = "Browsing the Library . . .",
+        ["Scene_Storehouse"] = "Checking the storehouse . . .",
+        ["Scene_Warp"] = "Choosing where to warp . . .",
+        ["Scene_Poker"] = "Playing poker at the casino . . .",
+        ["Scene_Slot"] = "Playing the slots at the casino . . .",
+        ["Scene_CasinoPrize"] = "Trading in casino coins . . .",
+        ["Scene_Save"] = "Saving . . .",
+    };
+
+    /// <summary>
     /// What the player is shown doing in the Pocket Castle, one at a time.
     /// </summary>
     private static readonly string[] PocketCastleLines =
@@ -241,12 +271,14 @@ internal static class ActivityBuilder
             return $"{WorldMapName} - {StateText(Scene.Battle)}";
         }
 
+        var screen = ScreenText(status);
+
         if (status.Scene != Scene.Battle && Mentions(status.Area, PocketCastleName))
         {
-            return $"{PocketCastleName} - {PocketCastleLines[pocketCastleIndex % PocketCastleLines.Length]}";
+            return $"{PocketCastleName} - {screen ?? PocketCastleLines[pocketCastleIndex % PocketCastleLines.Length]}";
         }
 
-        var state = status.Scene != Scene.Battle && IsIdle(status, now) ? IdleText : StateText(status.Scene);
+        var state = status.Scene != Scene.Battle && IsIdle(status, now) ? IdleText : screen ?? StateText(status.Scene);
 
         var area = AreaOf(status);
 
@@ -418,6 +450,14 @@ internal static class ActivityBuilder
     /// <returns>The value, labeled or not.</returns>
     private static string Labeled(string label, string value, bool withLabel) =>
         withLabel ? $"{label}: {value}" : value;
+
+    /// <summary>
+    /// Describes what the player is doing in the menu screen that is open.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>The description, or <see langword="null"/> outside a menu and for a screen without one of its own.</returns>
+    private static string? ScreenText(GameStatus status) =>
+        status.Scene == Scene.Menu && ScreenTexts.TryGetValue(status.Screen, out var text) ? text : null;
 
     /// <summary>
     /// Describes what the player is doing on a map.

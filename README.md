@@ -11,6 +11,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 | Where you are | What Discord shows |
 |---|---|
 | Anywhere | `<Location> - Exploring . . .` / `In combat!` / `In menu . . .` |
+| In a shop, the forge, the casino and other menu screens | `<Location> - Shopping . . .` / `Synthesizing . . .` / `Playing poker at the casino . . .` and more |
 | World map | `Traveling the world - On foot . . .` / `Sailing . . .` / `Flying . . .` |
 | Pocket Castle | `Pocket Castle - Currently in crafting hell...` and other rotating lines |
 | Setting up camp | `<Location> - Setting up for Camp . . .` |

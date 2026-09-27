@@ -2,7 +2,8 @@
 //  ActivityBuilderTests.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Created
+//      Paulinchen  2026-09-27: Covered the menu screens
+//                            - Created
 //
 //----------------------------------------------------------------
 
@@ -59,6 +60,39 @@ public sealed class ActivityBuilderTests
     [InlineData("battle", "Iliasville - In combat!")]
     public void Details_NameTheMapAndTheScene(string scene, string expected) =>
         Assert.Equal(expected, Build(Status(("scene", scene), ("area", "Iliasville"))).Details);
+
+    /// <summary>
+    /// Asserts that a menu screen with a text of its own names what the player does there, and any
+    /// other screen shows as being in the menu.
+    /// </summary>
+    /// <param name="screen">The game's class name of the screen.</param>
+    /// <param name="expected">The first line.</param>
+    [Theory]
+    [InlineData("Scene_Item", "Iliasville - Checking the inventory . . .")]
+    [InlineData("Scene_Skill", "Iliasville - Checking skills . . .")]
+    [InlineData("Scene_Status", "Iliasville - Checking the party . . .")]
+    [InlineData("Scene_Shop", "Iliasville - Shopping . . .")]
+    [InlineData("Scene_Synthesize", "Iliasville - Synthesizing . . .")]
+    [InlineData("Scene_EquipStoneItem", "Iliasville - Setting gems . . .")]
+    [InlineData("Scene_Poker", "Iliasville - Playing poker at the casino . . .")]
+    [InlineData("Scene_Library", "Iliasville - Browsing the Library . . .")]
+    [InlineData("Scene_Menu", "Iliasville - In menu . . .")]
+    [InlineData("", "Iliasville - In menu . . .")]
+    public void Details_NameTheMenuScreen(string screen, string expected) =>
+        Assert.Equal(expected, Build(Status(("scene", "menu"), ("screen", screen), ("area", "Iliasville"))).Details);
+
+    /// <summary>
+    /// Asserts that a named menu screen replaces the Pocket Castle's own line, and idle still wins
+    /// outside it.
+    /// </summary>
+    [Fact]
+    public void Details_PreferTheMenuScreenInThePocketCastle()
+    {
+        Assert.Equal("Pocket Castle - Setting abilities . . .",
+                     Build(Status(("scene", "menu"), ("screen", "Scene_Ability"), ("area", "Pocket Castle Lobby"))).Details);
+        Assert.Equal("Iliasville - Idle . . .",
+                     Build(Status(("scene", "menu"), ("screen", "Scene_Shop"), ("area", "Iliasville"), ("last_input", 1))).Details);
+    }
 
     /// <summary>
     /// Asserts that the world map names the journey and how the party travels.
