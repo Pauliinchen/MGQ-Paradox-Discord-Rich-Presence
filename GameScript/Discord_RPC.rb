@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added the Phenomena of Ruin defeated to the trivia of the Chaos route
+#      Paulinchen  2026-09-27: Added the spirits recruited to the trivia of Parts 1 and 2
+#                            - Added the Phenomena of Ruin defeated to the trivia of the Chaos route
 #                            - Renamed the Picture and Shown Picture options to Activity Image and Shown Image
 #                            - Added a Spoilers option that hides Part 3 spoilers
 #                            - Added the Randolphs found to the trivia of Part 3
@@ -1210,6 +1211,9 @@ module MGQ_Discord
     # has none.
     RANDOLPH_FOUND = "親方発見"
 
+    # The four spirits Luka recruits in Parts 1 and 2, by their names in the database.
+    SPIRITS = ["Sylph", "Gnome", "Undine", "Salamander"]
+
     # Phenomena of Ruin the Chaos route sends the party after.
     PHENOMENA_OF_RUIN = 16
 
@@ -1253,6 +1257,12 @@ module MGQ_Discord
         :most_raped_by,
         :battlefucks_won,
         :gold_carried,
+      ],
+      1 => [
+        :spirits_recruited,
+      ],
+      2 => [
+        :spirits_recruited,
       ],
       3 => [
         :randolphs_found,
@@ -1541,6 +1551,24 @@ module MGQ_Discord
     # @return [String] the line
     def self.gold_carried
       "Currently carrying #{NumberFormat.grouped($game_party.gold)} gold!"
+    end
+
+    # How many of the four spirits have joined the party.
+    #
+    # Read from the permanent roster, like companions.
+    #
+    # @return [String, nil] the line, nil before the first
+    def self.spirits_recruited
+      roster = $game_party.instance_variable_get(:@include_actors)
+      recruited = spirit_ids.count { |id| roster.include?(id) }
+      "Has recruited #{recruited} out of #{spirit_ids.size} spirits!" if recruited > 0
+    end
+
+    # The actor ids of the SPIRITS, looked up once.
+    #
+    # @return [Array<Integer>] the ids, the first actor of each name
+    def self.spirit_ids
+      @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && actor.name == name } }.compact
     end
 
     # How many of Randolph's hiding places this playthrough has found.
