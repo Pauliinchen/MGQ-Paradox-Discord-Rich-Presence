@@ -51,6 +51,7 @@ The new **Spoilers** option (default *Hide*, under `[Discord] Rich Presence`) pr
 |---|---|---|
 | Spirits recruited (Parts 1 and 2) | `Has recruited <X> out of 4 spirits!` | In Parts 1 and 2, from the first of Sylph, Gnome, Undine and Salamander in the party. |
 | Forging ore (Parts 1 and 2) | `Has unlocked <Ore> for forging!` | In Parts 1 and 2, the best ore held: Lump of Iron, Gold Ore, Mithril Ore, Crystal, Dragon Scale Fossil, Orichalcum, Rainbow Crystal, or Meteorite (3.x). Comes after *Spirits recruited*. |
+| Naval side (Part 2) | `Sided with the <Pirates/Marines> this playthrough!` | In Part 2, once Luka has aided the Fishy Pirates or boarded the naval vessel at the Navy Headquarters. Comes after *Forging ore*. |
 | Routes cleared (Part 3) | `Has cleared <X> out of 3 routes!` | In Part 3 on 3.x, from the first route cleared (Destroyer, Judgment or Chaos). Comes before *Randolphs found*. |
 | Randolphs found (Part 3, spoiler) | `Has found <X> out of <Y> Randolphs!` | In Part 3 on 3.x, from the first Randolph found. Hidden while spoilers are hidden. |
 | Phenomena of Ruin defeated (Chaos route, spoiler) | `<X> out of 16 Phenomena of Ruin have been defeated!` | On the Chaos route, from the first Phenomenon of Ruin defeated, counted like the game's own "Remaining Phenomena of Ruin" message. Hidden while spoilers are hidden. |

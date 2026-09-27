@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added the routes cleared to the trivia of Part 3
+#      Paulinchen  2026-09-27: Added the side taken at the Navy Headquarters to the trivia of Part 2
+#                            - Added the routes cleared to the trivia of Part 3
 #                            - Added the latest ore unlocked for forging to the trivia of Parts 1 and 2
 #                            - Added the spirits recruited to the trivia of Parts 1 and 2
 #                            - Added the Phenomena of Ruin defeated to the trivia of the Chaos route
@@ -1221,6 +1222,9 @@ module MGQ_Discord
     # an ore's equipment while the party holds it, and forging never uses it up. 2.x has no Meteorite.
     FORGING_ORES = [151, 152, 153, 154, 155, 156, 157, 158]
 
+    # Side Luka takes at the Navy Headquarters in Part 2, by the switch that records the choice.
+    NAVAL_SIDES = { "Support Pirates" => "Pirates", "Support Navy" => "Marines" }
+
     # Switches the game turns on when a route of the final chapter is cleared: Destroyer, Judgment,
     # Chaos. 2.x has none.
     ROUTE_CLEARS = ["Angelic Dominion Route Clear", "Monster Realm Route Clear", "混沌ルートクリア"]
@@ -1276,6 +1280,7 @@ module MGQ_Discord
       2 => [
         :spirits_recruited,
         :forging_ore,
+        :naval_side,
       ],
       3 => [
         :routes_cleared,
@@ -1591,6 +1596,14 @@ module MGQ_Discord
     def self.forging_ore
       ore = FORGING_ORES.reverse.map { |id| $data_items[id] }.find { |item| item && $game_party.has_item?(item) }
       "Has unlocked #{ore.name} for forging!" if ore
+    end
+
+    # Whether Luka sided with the pirates or the marines at the Navy Headquarters.
+    #
+    # @return [String, nil] the line, nil before the choice
+    def self.naval_side
+      switch = NAVAL_SIDES.keys.find { |name| GameState.switch_on?(name) }
+      "Sided with the #{NAVAL_SIDES[switch]} this playthrough!" if switch
     end
 
     # How many routes of the final chapter this playthrough has cleared.
