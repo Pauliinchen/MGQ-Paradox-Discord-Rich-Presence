@@ -27,7 +27,11 @@ jobs:
           Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
           ./dotnet-install.ps1 -Channel 10.0 -Runtime dotnet -Architecture x86 -InstallDir "${env:ProgramFiles(x86)}\dotnet"
 
+      # setup-dotnet points DOTNET_ROOT at the x64 install, which a 32-bit app would follow and fail
+      # to load. DOTNET_ROOT_X86 comes first for a 32-bit app.
       - name: Test
+        env:
+          DOTNET_ROOT_X86: C:\Program Files (x86)\dotnet
         run: dotnet run --project MGQParadox.DiscordPresence.Tests
 
       # The runner's Visual Studio brings the C++ linker NativeAOT needs for the DLL.

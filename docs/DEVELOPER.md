@@ -88,7 +88,7 @@ The project targets [Microsoft.Testing.Platform](https://learn.microsoft.com/dot
 dotnet run --project MGQParadox.DiscordPresence.Tests
 ```
 
-- **32-bit:** the DLL project builds for the 32-bit game, so the tests run 32-bit too and need the x86 .NET 10 runtime (`C:\Program Files (x86)\dotnet`). The release workflow installs it before running them.
+- **32-bit:** the DLL project builds for the 32-bit game, so the tests run 32-bit too and need the x86 .NET 10 runtime (`C:\Program Files (x86)\dotnet`). The release workflow installs it before running them. When `DOTNET_ROOT` points at the x64 install, as `setup-dotnet` sets it, the tests fail to start (`hostfxr.dll … failed`) unless `DOTNET_ROOT_X86` points at the x86 one.
 - **Not covered:** `Discord_RPC.rb`, which only runs inside the game, and `Update.ps1`, which needs a published release to update to. Check it there, with `DiscordPresence.log` showing what was sent.
 
 ## Conventions
