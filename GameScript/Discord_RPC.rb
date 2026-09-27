@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added the spirits recruited to the trivia of Parts 1 and 2
+#      Paulinchen  2026-09-27: Added the routes cleared to the trivia of Part 3
+#                            - Added the spirits recruited to the trivia of Parts 1 and 2
 #                            - Added the Phenomena of Ruin defeated to the trivia of the Chaos route
 #                            - Renamed the Picture and Shown Picture options to Activity Image and Shown Image
 #                            - Added a Spoilers option that hides Part 3 spoilers
@@ -1214,6 +1215,10 @@ module MGQ_Discord
     # The four spirits Luka recruits in Parts 1 and 2, by their names in the database.
     SPIRITS = ["Sylph", "Gnome", "Undine", "Salamander"]
 
+    # Switches the game turns on when a route of the final chapter is cleared: Destroyer, Judgment,
+    # Chaos. 2.x has none.
+    ROUTE_CLEARS = ["Angelic Dominion Route Clear", "Monster Realm Route Clear", "混沌ルートクリア"]
+
     # Phenomena of Ruin the Chaos route sends the party after.
     PHENOMENA_OF_RUIN = 16
 
@@ -1265,6 +1270,7 @@ module MGQ_Discord
         :spirits_recruited,
       ],
       3 => [
+        :routes_cleared,
         :randolphs_found,
       ],
       "chaos" => [
@@ -1569,6 +1575,14 @@ module MGQ_Discord
     # @return [Array<Integer>] the ids, the first actor of each name
     def self.spirit_ids
       @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && actor.name == name } }.compact
+    end
+
+    # How many routes of the final chapter this playthrough has cleared.
+    #
+    # @return [String, nil] the line, nil before the first or on 2.x
+    def self.routes_cleared
+      cleared = ROUTE_CLEARS.count { |name| GameState.switch_on?(name) }
+      "Has cleared #{cleared} out of #{ROUTE_CLEARS.size} routes!" if cleared > 0
     end
 
     # How many of Randolph's hiding places this playthrough has found.

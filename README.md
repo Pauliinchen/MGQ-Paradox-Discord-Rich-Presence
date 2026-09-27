@@ -36,7 +36,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - The three companions with the most affection
 - Gold carried and spent, items synthesized, companions recruited, the deepest Labyrinth of Chaos floor, and more
 - In Parts 1 and 2: how many of the four spirits you recruited
-- In Part 3 (3.x): how many Randolphs you found, and on the Chaos route how many of the 16 Phenomena of Ruin you defeated (spoilers, see [Options](#options))
+- In Part 3 (3.x): how many routes you cleared, how many Randolphs you found, and on the Chaos route how many of the 16 Phenomena of Ruin you defeated (spoilers, see [Options](#options))
 - How many requests you made, and to whom the most (NSFW)
 - How often you were raped after losing, and by whom the most (NSFW)
 - How many battle fucks you won (NSFW)
