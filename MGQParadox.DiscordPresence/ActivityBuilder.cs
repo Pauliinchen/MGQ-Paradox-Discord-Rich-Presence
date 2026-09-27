@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
+//      Paulinchen  2026-09-27: Showed the default art asset whenever the game picks no picture, instead of the looked-up app icon
+//                            - Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
 //                            - Put the act of the Collaboration Scenario in front of the tooltip while it is played
 //                            - Put the part of the story in front of the tooltip, dropping the labels when it gets too long
 //                            - Showed the art asset the Picture option picked instead of the app icon
@@ -59,6 +60,11 @@ internal static class ActivityBuilder
     private const string TooltipSeparator = " | ";
 
     /// <summary>
+    /// Art asset shown whenever the game picks no picture of its own: the game's icon.
+    /// </summary>
+    private const string DefaultPicture = "default";
+
+    /// <summary>
     /// Time without a button press after which the player counts as idle.
     /// </summary>
     private static readonly TimeSpan IdleAfter = TimeSpan.FromMinutes(1);
@@ -105,11 +111,10 @@ internal static class ActivityBuilder
     /// Builds the activity for a game status.
     /// </summary>
     /// <param name="status">The status the game published.</param>
-    /// <param name="largeImage">The app icon, shown unless the game published a picture of its own.</param>
     /// <param name="triviaIndex">Which trivia line to show, wrapping around.</param>
     /// <param name="pocketCastleIndex">Which Pocket Castle line to show, wrapping around.</param>
     /// <returns>The activity.</returns>
-    public static Activity Build(GameStatus status, string? largeImage, int triviaIndex, int pocketCastleIndex)
+    public static Activity Build(GameStatus status, int triviaIndex, int pocketCastleIndex)
     {
         if (status.Scene == Scene.Title)
         {
@@ -117,7 +122,7 @@ internal static class ActivityBuilder
             {
                 Details = "At the title screen",
                 StartedAt = status.StartedAt,
-                LargeImage = largeImage,
+                LargeImage = DefaultPicture,
             };
         }
 
@@ -126,7 +131,7 @@ internal static class ActivityBuilder
             Details = DetailsOf(status, pocketCastleIndex),
             State = TriviaAt(status.Trivia, triviaIndex),
             StartedAt = status.StartedAt,
-            LargeImage = status.Picture.Length > 0 ? status.Picture : largeImage,
+            LargeImage = status.Picture.Length > 0 ? status.Picture : DefaultPicture,
             LargeText = TooltipOf(status),
         };
     }

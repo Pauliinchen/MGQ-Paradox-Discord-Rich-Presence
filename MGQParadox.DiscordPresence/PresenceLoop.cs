@@ -2,7 +2,8 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Cleared the profile while the player turned the presence off
+//      Paulinchen  2026-09-27: Stopped looking up the app icon, the default art asset stands in for it
+//                            - Cleared the profile while the player turned the presence off
 //      Paulinchen  2026-09-26: Sent the status every 4 seconds and rotated the trivia every 4th update
 //                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
@@ -65,11 +66,6 @@ internal sealed class PresenceLoop
     private readonly DiscordIpcClient _discord;
 
     /// <summary>
-    /// The picture the presence shows, if there is one.
-    /// </summary>
-    private readonly string? _largeImage;
-
-    /// <summary>
     /// The game process, which the presence belongs to.
     /// </summary>
     private readonly int _processId = Environment.ProcessId;
@@ -121,7 +117,6 @@ internal sealed class PresenceLoop
     private PresenceLoop(string clientId)
     {
         _discord = new DiscordIpcClient(clientId);
-        _largeImage = PresenceImage.Resolve(clientId);
     }
 
     /// <summary>
@@ -221,7 +216,7 @@ internal sealed class PresenceLoop
 
         var activity = status.IsHidden
             ? NoActivity
-            : ActivityBuilder.Build(status, _largeImage, Rotation, Rotation + _pocketCastleOffset).ToJson();
+            : ActivityBuilder.Build(status, Rotation, Rotation + _pocketCastleOffset).ToJson();
 
         if (activity == _lastSentActivity)
         {

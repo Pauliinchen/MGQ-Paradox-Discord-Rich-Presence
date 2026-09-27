@@ -148,7 +148,7 @@ internal sealed class GameStatus
     public string ConversationPartner => Value("talking_to");
 
     /// <summary>
-    /// The Discord application's art asset to show as the picture, empty for the app icon.
+    /// The Discord application's art asset to show as the picture, empty for the default picture.
     /// </summary>
     public string Picture => Value("picture");
 
