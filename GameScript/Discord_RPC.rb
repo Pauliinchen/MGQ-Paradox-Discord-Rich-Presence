@@ -3,6 +3,7 @@
 #
 #  Changelog:
 #      Paulinchen  2026-09-27: Added the routes cleared to the trivia of Part 3
+#                            - Added the latest ore unlocked for forging to the trivia of Parts 1 and 2
 #                            - Added the spirits recruited to the trivia of Parts 1 and 2
 #                            - Added the Phenomena of Ruin defeated to the trivia of the Chaos route
 #                            - Renamed the Picture and Shown Picture options to Activity Image and Shown Image
@@ -1215,6 +1216,11 @@ module MGQ_Discord
     # The four spirits Luka recruits in Parts 1 and 2, by their names in the database.
     SPIRITS = ["Sylph", "Gnome", "Undine", "Salamander"]
 
+    # Ores that unlock forging in Parts 1 and 2, by their item ids, weakest first: Iron, Gold,
+    # Mithril, Crystal, Dragon Scale, Orichalcum, Rainbow Crystal, Meteorite. The blacksmiths forge
+    # an ore's equipment while the party holds it, and forging never uses it up. 2.x has no Meteorite.
+    FORGING_ORES = [151, 152, 153, 154, 155, 156, 157, 158]
+
     # Switches the game turns on when a route of the final chapter is cleared: Destroyer, Judgment,
     # Chaos. 2.x has none.
     ROUTE_CLEARS = ["Angelic Dominion Route Clear", "Monster Realm Route Clear", "混沌ルートクリア"]
@@ -1265,9 +1271,11 @@ module MGQ_Discord
       ],
       1 => [
         :spirits_recruited,
+        :forging_ore,
       ],
       2 => [
         :spirits_recruited,
+        :forging_ore,
       ],
       3 => [
         :routes_cleared,
@@ -1575,6 +1583,14 @@ module MGQ_Discord
     # @return [Array<Integer>] the ids, the first actor of each name
     def self.spirit_ids
       @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && actor.name == name } }.compact
+    end
+
+    # The best ore the party holds for forging, the one found last.
+    #
+    # @return [String, nil] the line, nil before the first ore
+    def self.forging_ore
+      ore = FORGING_ORES.reverse.map { |id| $data_items[id] }.find { |item| item && $game_party.has_item?(item) }
+      "Has unlocked #{ore.name} for forging!" if ore
     end
 
     # How many routes of the final chapter this playthrough has cleared.
