@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Grouped the options under a Rich Presence option that turns the whole status off
+#      Paulinchen  2026-09-27: Added a Shown Picture option under Picture, the picture shown while Picture is Static
+#                            - Grouped the options under a Rich Presence option that turns the whole status off
 #                            - Published the act of the Collaboration Scenario while it is played
 #                            - Published the part of the story, the side chosen and the route, and dropped the chosen side from the trivia
 #                            - Told a Carnage run by the Labyrinth's type, which the Carnage floor counter never did
@@ -227,12 +228,27 @@ module MGQ_Discord
     # Whether the picture follows the story (1) or is always the app icon (0).
     PICTURE = :mod_discord_picture
 
+    # Which picture shows while the picture is static: 0 the app icon, any other value one of
+    # FIXED_PICTURES.
+    SHOWN_PICTURE = :mod_discord_shown_picture
+
+    # Art assets the Shown Picture option can fix, by its value.
+    FIXED_PICTURES = {
+      1 => "ilias",
+      2 => "alice",
+      3 => "monster_realm",
+      4 => "angelic_dominion",
+      5 => "chaos",
+      6 => "collab",
+    }
+
     # Every option by its key in $game_system.conf, with its key in FILE.
     NAMES = {
-      PRESENCE  => "presence",
-      NSFW      => "nsfw",
-      ALL_SAVES => "all_saves",
-      PICTURE   => "picture",
+      PRESENCE      => "presence",
+      NSFW          => "nsfw",
+      ALL_SAVES     => "all_saves",
+      PICTURE       => "picture",
+      SHOWN_PICTURE => "shown_picture",
     }
 
     # Every option, by its key in $game_system.conf.
@@ -273,8 +289,23 @@ module MGQ_Discord
         :help   => "Show the game's icon on Discord, or a picture that follows the story.",
         :under  => PRESENCE,
         :values => {
-          0 => ["Static",  "Always the game's icon."],
+          0 => ["Static",  "Always the same picture, the game's icon unless Shown Picture picks another."],
           1 => ["Dynamic", "Ilias or Alice, whoever you chose, and later the route you are on."],
+        },
+      },
+      SHOWN_PICTURE => {
+        :name   => "Shown Picture",
+        :help   => "The picture shown while Picture is Static.",
+        :under  => PICTURE,
+        :when   => 0,
+        :values => {
+          0 => ["Default",                "The game's icon."],
+          1 => ["Ilias",                  "Always Ilias."],
+          2 => ["Alice",                  "Always Alice."],
+          3 => ["Monster Realm",          "Always the Monster Realm route's logo."],
+          4 => ["Angelic Dominion",       "Always the Angelic Dominion route's logo."],
+          5 => ["Chaos",                  "Always the Chaos route's logo."],
+          6 => ["Collaboration Scenario", "Always the collab's heroes."],
         },
       },
     }
@@ -347,6 +378,11 @@ module MGQ_Discord
     # @return [Boolean] whether the picture follows the story instead of being the app icon
     def self.dynamic_picture?
       self[PICTURE] == 1
+    end
+
+    # @return [String, nil] the art asset the Shown Picture option picks, nil for the app icon
+    def self.fixed_picture
+      FIXED_PICTURES[self[SHOWN_PICTURE]]
     end
 
     # @param key [Symbol] the option
@@ -1497,7 +1533,7 @@ module MGQ_Discord
       talking_to = MGQ_Discord.text_of { Conversations.current }
       fields["talking_to"] = talking_to unless talking_to.empty?
 
-      picture = Options.dynamic_picture? ? MGQ_Discord.text_of { Story.picture } : ""
+      picture = MGQ_Discord.text_of { Options.dynamic_picture? ? Story.picture : Options.fixed_picture }
       fields["picture"] = picture unless picture.empty?
 
       if GameState.save_loaded?

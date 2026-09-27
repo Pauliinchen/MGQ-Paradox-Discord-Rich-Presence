@@ -64,14 +64,18 @@ of enemies defeated, escapes, wipeouts, items synthesized, gold spent and
 the biggest hit across every save. This save counts them for the save
 you're playing instead, since you installed the mod.
 
-  Picture: Static (the default) shows the game's icon. Dynamic shows
-Ilias or Alice, whoever you picked this playthrough, in the final chapter
-the route you are on, and the collab's heroes during the Collaboration
-Scenario.
+  Picture: Static (the default) always shows the same picture, the one
+picked under Shown Picture. Dynamic shows Ilias or Alice, whoever you
+picked this playthrough, in the final chapter the route you are on, and
+the collab's heroes during the Collaboration Scenario.
+
+    -> Shown Picture: the picture while Picture is Static. Default (the
+    game's icon), Ilias, Alice, Monster Realm, Angelic Dominion, Chaos or
+    Collaboration Scenario.
 
 The options are the same for every save and are kept in
-Discord\Settings.ini (presence, nsfw, all_saves and picture), not in
-your saves.
+Discord\Settings.ini (presence, nsfw, all_saves, picture and
+shown_picture), not in your saves.
 Updating the mod resets them.
 
 
