@@ -52,7 +52,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `Discord/DiscordIpcClient.cs` | Discord's local named-pipe protocol. `Opcode.cs` holds the frame kinds. |
 | `Discord/Activity.cs`, `Discord/ActivityButton.cs`, `Discord/Json.cs` | The activity, its link buttons and its JSON, with Discord's field limits. |
 
-**`package/Discord/`:** `Settings.ini` (the options `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes`, which the game script reads and writes) and the player `README.txt`.
+**`package/Discord/`:** `Settings.ini` (the options `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes`, which the game script reads and writes), the player `README.txt`, and the updater: `Update.bat` runs `Update.ps1` (Windows PowerShell 5.1), which downloads the latest release's zip, extracts it over the game folder and puts the old option values back into the new `Settings.ini`. It reads the installed version from the DLL's `ProductVersion`, so it needs no version file.
 
 ## Build and test
 
@@ -61,7 +61,7 @@ You need the .NET 10 SDK and the Visual Studio workload **Desktop development wi
 Everything is in the projects; there is no separate build script. Publishing the DLL project assembles the complete release layout in `Shipping/` at the repository root. Copy its content into a game folder to install or update the mod there:
 
 ```
-Discord/  DiscordPresence.dll  Settings.ini  README.txt
+Discord/  DiscordPresence.dll  Settings.ini  README.txt  Update.bat  Update.ps1
 Patch/    Discord_RPC.rb
 ```
 
@@ -88,11 +88,11 @@ dotnet run --project MGQParadox.DiscordPresence.Tests
 ```
 
 - **32-bit:** the DLL project builds for the 32-bit game, so the tests run 32-bit too and need the x86 .NET 10 runtime (`C:\Program Files (x86)\dotnet`). The release workflow installs it before running them.
-- **Not covered:** `Discord_RPC.rb`, which only runs inside the game. Check it there, with `DiscordPresence.log` showing what was sent.
+- **Not covered:** `Discord_RPC.rb`, which only runs inside the game, and `Update.ps1`, which needs a published release to update to. Check it there, with `DiscordPresence.log` showing what was sent.
 
 ## Conventions
 
-- **File headers.** Every `.cs` and `.rb` file starts with a header block listing the file name and a changelog, newest entry first. Entries by the same author on the same day are grouped. Only changes after the first commit are recorded; before that, a file carries just `Created`.
+- **File headers.** Every `.cs`, `.rb`, `.ps1` and `.bat` file starts with a header block listing the file name and a changelog, newest entry first. Entries by the same author on the same day are grouped. Only changes after the first commit are recorded; before that, a file carries just `Created`.
 - **Documentation comments.** Every type and member is documented: XML comments in C#, YARD-style comments in Ruby. The summary is mandatory, parameters and return values whenever they apply, and remarks only where they add something. Keep them short, and always describe the current state.
 - **Inline comments.** Kept to a minimum. The code has to speak for itself through its names and structure. A comment is only added where the code cannot say something itself: a constraint, a trap, or the failure a line prevents.
 - **Names.** Magic strings and numbers get a named constant. Enums replace string states.
@@ -179,6 +179,6 @@ Requests are counted from the `Game_Novel#setup` hook, defeat scenes from the `B
 `Options::MENU` describes each option's name, help, parent (`:under`), the parent's value it shows under (`:when`, optional) and values (the first is the default). Like EXP Overlord, the options are layered: `[Discord] Rich Presence` (`presence`) comes first and turns the whole status off; `NSFW`, `Statistics`, `Spoilers` and `Activity Image` (`picture`) sit under it. `Spoilers` (`spoilers`, default 0 *Hide*) makes `Story.hides_spoilers?` true in Part 3, which publishes `hide_spoilers=1`; `TriviaBuilder` then drops its `IsSpoiler` lines and `ActivityBuilder` leaves the map name off the first line (`AreaOf`), names nobody there (`NameOf`) and uses `SpoilerFreeRouteNames` in the tooltip. Under `Activity Image`, `Shown Image` (`shown_picture`) has `:when` 0 (*Static*), `Ilias / Alice` (`sealed_sides`) and `Routes` (`layered_routes`) `:when` 1 (*Dynamic*). `Options::INDENTS` puts the layer's indent in front of each name. An option without `:when` greys out while its parent is off (`Options.enabled?`, an `:enable` rule the game's own Config menu ignores); one with `:when` is taken out of the menu while its parent holds another value, and any option under a greyed out one is too (`Options.shown?`). `Options.arrange` rebuilds the mod's run of entries in the menu array, right below `Rich Presence`, which always shows; a `refresh` hook on `Window_Config` and `Window_ModConfig` calls it before every draw, as both windows refresh after each change and count the array anew. When it changed, the hook recreates the window's contents (the game's window sizes them to the option count, the Mod Config Menu measures its width) first. `Shown Image` picks one of `Options::FIXED_PICTURES`, every art asset of the application, published as `picture` like the story picture, or 0 for `default`. The story picture shows the side as `Story::ADULT_SIDES` or `Story::SEALED_SIDES`, and the route by its key (the logo) or as `Story::LAYERED_ROUTES`, as those options say. While it is off, `StatusText` publishes only `hidden=1`, and the DLL sends a `null` activity, which clears the profile. `Options.register` adds them to `NWConst::Config`: to `MOD_CONTENTS` when the community's Mod Config Menu (`Patch/0_ModConfigMenu.rb`) defined it, which the loader's file name order runs first, to the game's own `CONTENTS` otherwise. Both menus read `DATA`, `DATA_TEXT` and `DEFAULT` and store the value in `$game_system.conf`.
 
 `$game_system.conf` is part of every save, but the options are meant to be the same for all saves and saves must stay untouched. So:
-- **`Discord/Settings.ini`** holds them under short keys (`presence = 1`, `nsfw = 0`, `all_saves = 1`, `spoilers = 0`, `picture = 0`, `shown_picture = 0`, `sealed_sides = 1`, `layered_routes = 1`, mapped in `Options::NAMES`). `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
+- **`Discord/Settings.ini`** holds them under short keys (`presence = 1`, `nsfw = 0`, `all_saves = 1`, `spoilers = 0`, `picture = 0`, `shown_picture = 0`, `sealed_sides = 1`, `layered_routes = 1`, mapped in `Options::NAMES`). `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so extracting a new zip by hand resets the options; `Update.ps1` puts them back.
 - **`Options.sync`** runs before every publish. A new `$game_system.conf` (a save loaded, a new game, the title screen) gets the stored values; any other difference was made in a menu and is stored.
 - **`Options.left_out_of_save`** wraps the save, autosave and backup-save methods and takes the options out of `$game_system.conf` while the game writes the file.

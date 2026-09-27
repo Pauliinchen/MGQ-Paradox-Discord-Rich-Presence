@@ -40,9 +40,16 @@ INSTALL
    and "Share your detected activities" must be enabled in Discord's
    Settings > Activity Privacy.
 
-Updating works the same way: close the game and extract the new download
-over the old one. Versions before 1.3 also left Discord\Uninstall.exe,
-which is no longer used; you can delete it.
+
+UPDATE
+------
+Close the game and double-click Discord\Update.bat: it downloads the
+latest release, installs it and keeps your options.
+
+To update by hand, close the game and extract the new download over the
+old one. That resets your options. Versions before 1.3 also left
+Discord\Uninstall.exe, which is no longer used; you can delete it, and
+Update.bat does so.
 
 
 OPTIONS
@@ -87,7 +94,7 @@ The options under Activity Image only show while they apply. The options
 are the same for every save and are kept in Discord\Settings.ini
 (presence, nsfw, all_saves, spoilers, picture, shown_picture,
 sealed_sides and layered_routes), not in your saves.
-Updating the mod resets them.
+Update.bat keeps them, extracting a new download by hand resets them.
 
 
 AFTER UPDATING THE TRANSLATION

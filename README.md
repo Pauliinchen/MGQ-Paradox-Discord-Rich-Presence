@@ -66,13 +66,15 @@ Nothing else needs to be installed.
 2. Close the game and extract the zip **into your game folder**, the one that contains `Game.exe`:
    ```
    Game.exe
-   Discord\                 <- new
+   Discord\                 <- new, with Update.bat for later updates
    Patch\Discord_RPC.rb     <- new
    ...
    ```
 3. Start the game as usual.
 
-**Updating** works the same way: close the game and extract the new zip over the old one. Versions before 1.3 also left `Discord\Uninstall.exe`, which is no longer used; you can delete it.
+**Updating:** close the game and double-click `Discord\Update.bat`: it downloads the latest release, installs it and keeps your options. Versions before 1.4.0 have no `Update.bat` yet, so update to 1.4.0 by hand.
+
+To update by hand, close the game and extract the new zip over the old one. That resets your options. Versions before 1.3 also left `Discord\Uninstall.exe`, which is no longer used; you can delete it, and `Update.bat` does so.
 
 ### Options
 
@@ -100,7 +102,7 @@ The mod adds its options to the game: in the community's Mod Config Menu (`Patch
   - **`-> Ilias / Alice`**: **Sealed** (default) or **Adult**.
   - **`-> Routes`**: **Layered** (default), the Judgment or Destroyer route's logo over its heroines, or **Logo**, the logo alone.
 
-The options under `Activity Image` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
+The options under `Activity Image` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides` and `layered_routes` in `Discord\Settings.ini`, not in your save files. `Update.bat` keeps them, extracting a new zip by hand resets them.
 
 ### After updating the translation
 
