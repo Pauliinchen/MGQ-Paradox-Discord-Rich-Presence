@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Renamed the Picture and Shown Picture options to Activity Image and Shown Image
+#      Paulinchen  2026-09-27: Added the Phenomena of Ruin defeated to the trivia of the Chaos route
+#                            - Renamed the Picture and Shown Picture options to Activity Image and Shown Image
 #                            - Added a Spoilers option that hides Part 3 spoilers
 #                            - Added the Randolphs found to the trivia of Part 3
 #                            - Grouped the trivia by the part and route they belong to
@@ -1209,6 +1210,17 @@ module MGQ_Discord
     # has none.
     RANDOLPH_FOUND = "親方発見"
 
+    # Phenomena of Ruin the Chaos route sends the party after.
+    PHENOMENA_OF_RUIN = 16
+
+    # Variable holding the Phenomena of Ruin still left, despite its name ("number defeated"): the
+    # Chaos route's prologue sets it to PHENOMENA_OF_RUIN and every defeat takes one off. 2.x has none.
+    RUIN_LEFT = "十六の破滅事象撃破数"
+
+    # Switch the game turns on when the last Phenomenon of Ruin falls, telling a RUIN_LEFT of 0 at
+    # the end from the 0 it holds before the prologue.
+    RUIN_ALL_DEFEATED = "図鑑フラグ：十六の破滅事象全撃破"
+
     # The last item an actor used, on whom and when.
     ItemUse = Struct.new(:item, :target, :used_at)
 
@@ -1245,10 +1257,13 @@ module MGQ_Discord
       3 => [
         :randolphs_found,
       ],
+      "chaos" => [
+        :phenomena_of_ruin_defeated,
+      ],
     }
 
     # Lines that spoil Part 3, left out while Story.hides_spoilers?.
-    SPOILERS = [:randolphs_found]
+    SPOILERS = [:randolphs_found, :phenomena_of_ruin_defeated]
 
     # The lines that currently apply.
     #
@@ -1541,6 +1556,17 @@ module MGQ_Discord
     # @return [Array<Integer>] the switch ids, none on 2.x
     def self.randolph_switches
       @randolph_switches ||= GameState.switches_named(RANDOLPH_FOUND)
+    end
+
+    # How many of the Phenomena of Ruin the Chaos route has defeated.
+    #
+    # @return [String, nil] the line, nil before the first or on 2.x
+    def self.phenomena_of_ruin_defeated
+      left = GameState.variable(RUIN_LEFT)
+      return nil if left <= 0 && !GameState.switch_on?(RUIN_ALL_DEFEATED)
+
+      defeated = PHENOMENA_OF_RUIN - [left, 0].max
+      "#{defeated} out of #{PHENOMENA_OF_RUIN} Phenomena of Ruin have been defeated!" if defeated > 0
     end
   end
 

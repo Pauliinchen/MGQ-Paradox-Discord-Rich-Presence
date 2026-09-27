@@ -44,6 +44,7 @@ The new **Spoilers** option (default *Hide*, under `[Discord] Rich Presence`) pr
 | Activity | Text | When |
 |---|---|---|
 | Randolphs found (Part 3, spoiler) | `Has found <X> out of <Y> Randolphs!` | In Part 3 on 3.x, from the first Randolph found. Hidden while spoilers are hidden. |
+| Phenomena of Ruin defeated (Chaos route, spoiler) | `<X> out of 16 Phenomena of Ruin have been defeated!` | On the Chaos route, from the first Phenomenon of Ruin defeated, counted like the game's own "Remaining Phenomena of Ruin" message. Hidden while spoilers are hidden. |
 
 ## 1.3.5
 
