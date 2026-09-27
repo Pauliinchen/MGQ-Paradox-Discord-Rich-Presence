@@ -2,7 +2,8 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Stopped looking up the app icon, the default art asset stands in for it
+//      Paulinchen  2026-09-27: Fixed the Discord application instead of reading it from Settings.ini
+//                            - Stopped looking up the app icon, the default art asset stands in for it
 //                            - Cleared the profile while the player turned the presence off
 //      Paulinchen  2026-09-26: Sent the status every 4 seconds and rotated the trivia every 4th update
 //                            - Named the game script by its new file name
@@ -26,6 +27,12 @@ internal sealed class PresenceLoop
     /// Size at which the log starts over.
     /// </summary>
     private const long MaxLogBytes = 200_000;
+
+    /// <summary>
+    /// The Discord application that shows as "Playing Monster Girl Quest! Paradox RPG" and holds the
+    /// art assets the pictures name.
+    /// </summary>
+    private const string ClientId = "1553096377959981117";
 
     /// <summary>
     /// Ticks each trivia line stays up, 16 seconds.
@@ -63,7 +70,7 @@ internal sealed class PresenceLoop
     /// <summary>
     /// The connection to Discord.
     /// </summary>
-    private readonly DiscordIpcClient _discord;
+    private readonly DiscordIpcClient _discord = new(ClientId);
 
     /// <summary>
     /// The game process, which the presence belongs to.
@@ -111,15 +118,6 @@ internal sealed class PresenceLoop
     private int Rotation => _ticks / TicksPerTriviaLine;
 
     /// <summary>
-    /// Creates the loop.
-    /// </summary>
-    /// <param name="clientId">The Discord application the presence is shown for.</param>
-    private PresenceLoop(string clientId)
-    {
-        _discord = new DiscordIpcClient(clientId);
-    }
-
-    /// <summary>
     /// Starts the loop on a background thread, once per game session.
     /// </summary>
     public static void Start()
@@ -154,14 +152,7 @@ internal sealed class PresenceLoop
         {
             Log.ClearIfLargerThan(MaxLogBytes);
             Log.Write("--- presence started ---");
-
-            if (Settings.ClientId is not { Length: > 0 } clientId)
-            {
-                Log.Write("No client_id set in Settings.ini - nothing to do.");
-                return;
-            }
-
-            new PresenceLoop(clientId).Mirror();
+            new PresenceLoop().Mirror();
         }
         catch (Exception ex)
         {

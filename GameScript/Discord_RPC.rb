@@ -214,7 +214,7 @@ module MGQ_Discord
   # they live in Discord/Settings.ini, are handed to whichever save is loaded and left out of the
   # save files.
   module Options
-    # File inside the mod folder, shared with DiscordPresence.dll and edited by players too.
+    # File inside the mod folder, edited by players too.
     FILE = "Settings.ini"
 
     # What an option starts its name with in the menu, by how many options it sits under, as in
@@ -546,7 +546,7 @@ module MGQ_Discord
       end
     end
 
-    # Reads the key of a line in FILE, compared without regard to case like DiscordPresence.dll does.
+    # Reads the key of a line in FILE, compared without regard to case.
     #
     # @param line [String] the line
     # @return [String, nil] the key in lower case, nil for a comment, a section header or a line without one
