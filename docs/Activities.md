@@ -74,6 +74,7 @@ A menu screen with a text of its own shows it instead of `In menu . . .`, as `<L
 
 | Activity | Text | When |
 |---|---|---|
+| Medals earned | `Has earned <X> out of <Y> medals!` | From the first medal, counted by the game across all saves (189 medals in 2.41, 394 in 3.06). Comes after *Deepest floor*. |
 | Spirits recruited (Parts 1 and 2) | `Has recruited <X> out of 4 spirits!` | In Parts 1 and 2, from the first of Sylph, Gnome, Undine and Salamander in the party. |
 | Forging ore (Parts 1 and 2) | `Has unlocked <Ore> for forging!` | In Parts 1 and 2, the best ore held: Lump of Iron, Gold Ore, Mithril Ore, Crystal, Dragon Scale Fossil, Orichalcum, Rainbow Crystal, or Meteorite (3.x). Comes after *Spirits recruited*. |
 | Naval side (Part 2) | `Sided with the <Pirates/Marines> this playthrough!` | In Part 2, once Luka has aided the Fishy Pirates or boarded the naval vessel at the Navy Headquarters. Comes after *Forging ore*. |

@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Read the screen open in a menu
+//      Paulinchen  2026-09-27: Read the medals earned
+//                            - Read the screen open in a menu
 //                            - Read the values behind the trivia instead of finished trivia lines
 //                            - Read the Labyrinth's rare points as a number
 //                            - Read whether Part 3 spoilers are hidden
@@ -341,6 +342,11 @@ internal sealed class GameStatus
     /// Which monster girl this save saw the most defeat scenes of and how often, an empty name before the first.
     /// </summary>
     public (string Name, long Count) MostRapedBy => (Value("most_raped_by"), Number("most_raped_count") ?? 0);
+
+    /// <summary>
+    /// The game's medals earned, out of how many there are, across all saves.
+    /// </summary>
+    public (long Done, long Total) MedalsEarned => OutOf("medals", "medals_total");
 
     /// <summary>
     /// The four spirits recruited, out of how many there are.

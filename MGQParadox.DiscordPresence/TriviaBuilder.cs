@@ -2,7 +2,8 @@
 //  TriviaBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Created
+//      Paulinchen  2026-09-27: Added the medals earned
+//                            - Created
 //
 //----------------------------------------------------------------
 
@@ -105,6 +106,7 @@ internal static class TriviaBuilder
         Line(GoldSpent),
         Line(ItemsSynthesized),
         Line(DeepestLabyrinthFloor),
+        Line(MedalsEarned),
         Line(RequestsMade) with { IsNsfw = true },
         Line(MostRequested) with { IsNsfw = true },
         Line(TimesRaped) with { IsNsfw = true },
@@ -353,6 +355,14 @@ internal static class TriviaBuilder
     /// <returns>The line, or <see langword="null"/> before the first floor.</returns>
     private static string? DeepestLabyrinthFloor(GameStatus status) =>
         status.LabyrinthRecord > 0 ? $"Has reached floor {status.LabyrinthRecord} in the Labyrinth of Chaos!" : null;
+
+    /// <summary>
+    /// How many of the game's medals have been earned, across all saves like the game counts them.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>The line, or <see langword="null"/> before the first.</returns>
+    private static string? MedalsEarned(GameStatus status) =>
+        OutOf(status.MedalsEarned, "Has earned {0} out of {1} medals!");
 
     /// <summary>
     /// How many requests this save has made.

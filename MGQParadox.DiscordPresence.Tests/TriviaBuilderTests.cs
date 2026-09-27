@@ -2,7 +2,8 @@
 //  TriviaBuilderTests.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Created
+//      Paulinchen  2026-09-27: Covered the medals earned
+//                            - Created
 //
 //----------------------------------------------------------------
 
@@ -121,6 +122,16 @@ public sealed class TriviaBuilderTests
         Assert.Contains("Most affection with Alice (2,093), Lucretia (1,612) and La Croix (1,611)!", LinesOf(three));
         Assert.Contains("Most affection with Alice (2,093) and Melk (689)!", LinesOf(two));
         Assert.Contains("Most affection with Alice (2,093)!", LinesOf(one));
+    }
+
+    /// <summary>
+    /// Asserts that the medals earned show out of all medals, from the first one.
+    /// </summary>
+    [Fact]
+    public void MedalsEarned_CountOutOfAllMedals()
+    {
+        Assert.Contains("Has earned 120 out of 394 medals!", LinesOf(Status(("medals", 120), ("medals_total", 394))));
+        Assert.DoesNotContain(LinesOf(Status(("medals", 0), ("medals_total", 394))), line => line.Contains("medals", StringComparison.Ordinal));
     }
 
     /// <summary>

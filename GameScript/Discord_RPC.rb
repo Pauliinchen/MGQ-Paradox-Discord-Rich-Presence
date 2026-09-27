@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Published the screen open in a menu
+#      Paulinchen  2026-09-27: Published the medals earned
+#                            - Published the screen open in a menu
 #                            - Handed the trivia to DiscordPresence.dll as values, which writes the sentences now
 #                            - Added the monster queens recruited to the trivia of Part 2
 #                            - Added the side taken at the Navy Headquarters to the trivia of Part 2
@@ -1219,7 +1220,7 @@ module MGQ_Discord
 
     # Every reader. Each returns its values by key, or nil while it has none.
     READERS = [
-      :party, :affection, :progress, :last_item, :track, :masters, :top_stats, :statistics,
+      :party, :affection, :progress, :last_item, :track, :masters, :top_stats, :statistics, :medals,
       :nsfw_counts, :spirits, :queens, :ore, :naval_side, :routes_cleared, :randolphs, :phenomena,
     ]
 
@@ -1392,6 +1393,17 @@ module MGQ_Discord
       monster, count = SaveStats.top(:rapes)
       values.update("most_raped_by" => monster, "most_raped_count" => count) if monster
       values
+    end
+
+    # How many of the game's medals, its achievements, have been earned.
+    #
+    # The game keeps them in $game_library, which all saves share, and leaves out the ones in
+    # NO_USE_MEDAL, like its own Library does.
+    #
+    # @return [Hash{String => Integer}] the earned and the total
+    def self.medals
+      valid = NWConst::Library::MEDAL_DATA.keys - NWConst::Library::NO_USE_MEDAL
+      { "medals" => valid.count { |id| $game_library.has_medal?(id) }, "medals_total" => valid.size }
     end
 
     # How many of the four spirits have joined the party.
