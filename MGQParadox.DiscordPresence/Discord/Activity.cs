@@ -2,6 +2,7 @@
 //  Activity.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-27: Shared the longest text Discord accepts, so texts can shorten themselves first
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -18,7 +19,7 @@ internal sealed class Activity
     /// <summary>
     /// Longest text Discord accepts in a single field.
     /// </summary>
-    private const int MaxTextLength = 128;
+    public const int MaxTextLength = 128;
 
     /// <summary>
     /// Shortest text Discord accepts in a single field.

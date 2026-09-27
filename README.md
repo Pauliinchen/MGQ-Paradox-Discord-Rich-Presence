@@ -21,9 +21,9 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 | After losing a battle (NSFW) | `<Location> - Raped by <Monster girl> for the <Nth> time!` |
 | In a battle fuck (NSFW) | `<Location> - Currently Battlefucking <Battlefucker>!` |
 
-**Hover the picture** to see your party leader: `Party leader: <Name> Lv <X> | Race: <Race> Lv <Y> | Class: <Job> Lv <Z>`
+**Hover the picture** to see where your story stands and your party leader: `Part <N>: <Ilias/Alice> side | Party leader: <Name> Lv <X> | Race: <Race> Lv <Y> | Class: <Job> Lv <Z>`, with the route instead of the side in Part 3 (`Part 3: Chaos route | …`), and the act instead of the part during the Collaboration Scenario (`Collaboration Scenario: Act 5 | …`).
 
-**The picture** is the game's icon, or if you [choose so](#options) Ilias or Alice, whoever you picked, and later the route you are on.
+**The picture** is the game's icon, or if you [choose so](#options) Ilias or Alice, whoever you picked, later the route you are on, and the collab's heroes during the Collaboration Scenario.
 
 **Trivia** rotates every 16 seconds:
 
@@ -34,7 +34,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 - The last item you used, and on whom
 - The music that's playing, named like in Kagetsumugi's jukebox
 - The three companions with the most affection
-- Gold carried and spent, items synthesized, companions recruited, your Ilias or Alice choice, the deepest Labyrinth of Chaos floor, and more
+- Gold carried and spent, items synthesized, companions recruited, the deepest Labyrinth of Chaos floor, and more
 - How many requests you made, and to whom the most (NSFW)
 - How often you were raped after losing, and by whom the most (NSFW)
 - How many battle fucks you won (NSFW)
@@ -82,7 +82,7 @@ The mod adds three options to the game: in the community's Mod Config Menu (`Pat
 
 **`[Discord] Picture`**
 - **Static** (default): the game's icon.
-- **Dynamic**: Ilias or Alice, whoever you picked this playthrough, and in the final chapter the route you are on. Before you pick, it stays the game's icon.
+- **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon.
 
 The options are the same for every save. They are kept as `nsfw`, `all_saves` and `picture` (`0` or `1`) in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
 
@@ -109,7 +109,7 @@ The trivia comes from two places:
 
 | Read from your save | Counted by the mod |
 |---|---|
-| Battles fought, gold carried, playtime, difficulty, companions recruited, deepest Labyrinth of Chaos floor, your Ilias or Alice choice, top stat, mastered jobs and races, battle fucks won | Enemies defeated, escapes, wipeouts, items synthesized, gold spent in shops, biggest hit, requests, defeat scenes |
+| Battles fought, gold carried, playtime, difficulty, companions recruited, deepest Labyrinth of Chaos floor, top stat, mastered jobs and races, battle fucks won | Enemies defeated, escapes, wipeouts, items synthesized, gold spent in shops, biggest hit, requests, defeat scenes |
 | Covers your **whole playthrough** and shows up right away, even on old saves. | Covers only the time **since you installed the mod**. |
 
 The game counts most of the second group only **across all saves combined**. To show them per playthrough, the mod counts these events itself for each save (the [Statistics option](#options) shows the game's counts across all saves instead):

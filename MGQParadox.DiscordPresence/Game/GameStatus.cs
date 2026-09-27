@@ -2,7 +2,9 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Read the art asset the Picture option picked
+//      Paulinchen  2026-09-27: Read the act of the Collaboration Scenario
+//                            - Read the part of the story, the side chosen and the route
+//                            - Read the art asset the Picture option picked
 //      Paulinchen  2026-09-26: Read who the player is talking to
 //                            - Read who plays a running battle fuck
 //                            - Read whether the camp music plays
@@ -143,6 +145,26 @@ internal sealed class GameStatus
     /// The Discord application's art asset to show as the picture, empty for the app icon.
     /// </summary>
     public string Picture => Value("picture");
+
+    /// <summary>
+    /// The part of the story, 1 to 3, or 0 when unknown.
+    /// </summary>
+    public int Part => Count("part");
+
+    /// <summary>
+    /// The act of the Collaboration Scenario being played, 1 to 12, or 0 outside it.
+    /// </summary>
+    public int CollabAct => Count("collab_act");
+
+    /// <summary>
+    /// The side this playthrough chose, "ilias" or "alice", empty before the choice.
+    /// </summary>
+    public string Side => Value("side");
+
+    /// <summary>
+    /// The route of the final chapter, "monster_realm", "angelic_dominion" or "chaos", empty while unknown.
+    /// </summary>
+    public string Route => Value("route");
 
     /// <summary>
     /// Name of the party leader.

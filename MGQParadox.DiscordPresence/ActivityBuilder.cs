@@ -2,7 +2,9 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Showed the art asset the Picture option picked instead of the app icon
+//      Paulinchen  2026-09-27: Put the act of the Collaboration Scenario in front of the tooltip while it is played
+//                            - Put the part of the story in front of the tooltip, dropping the labels when it gets too long
+//                            - Showed the art asset the Picture option picked instead of the app icon
 //      Paulinchen  2026-09-26: Showed who the player is talking to during a conversation
 //                            - Showed a running battle fuck with the battlefucker
 //                            - Showed the player setting up for camp while the camp music plays
@@ -51,9 +53,33 @@ internal static class ActivityBuilder
     private const string CampText = "Setting up for Camp . . .";
 
     /// <summary>
+    /// What stands between the parts of the tooltip.
+    /// </summary>
+    private const string TooltipSeparator = " | ";
+
+    /// <summary>
     /// Time without a button press after which the player counts as idle.
     /// </summary>
     private static readonly TimeSpan IdleAfter = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// Names of the sides a playthrough chooses, by the key the game script publishes.
+    /// </summary>
+    private static readonly Dictionary<string, string> SideNames = new()
+    {
+        ["ilias"] = "Ilias",
+        ["alice"] = "Alice",
+    };
+
+    /// <summary>
+    /// Names of the final chapter's routes, by the key the game script publishes.
+    /// </summary>
+    private static readonly Dictionary<string, string> RouteNames = new()
+    {
+        ["monster_realm"] = "Monster Realm",
+        ["angelic_dominion"] = "Angelic Dominion",
+        ["chaos"] = "Chaos",
+    };
 
     /// <summary>
     /// What the player is shown doing in the Pocket Castle, one at a time.
@@ -227,31 +253,92 @@ internal static class ActivityBuilder
         trivia.Count > 0 ? trivia[index % trivia.Count] : string.Empty;
 
     /// <summary>
-    /// Builds the tooltip on the picture: leader, race and class with their levels.
+    /// Builds the tooltip on the picture: the part of the story, then leader, race and class with
+    /// their levels.
     /// </summary>
     /// <param name="status">The status the game published.</param>
     /// <returns>The tooltip, leaving out whatever is unknown.</returns>
+    /// <remarks>
+    /// Discord wraps the tooltip on its own and cuts it at <see cref="Activity.MaxTextLength"/>, so
+    /// a tooltip too long for it drops the labels before <see cref="Activity"/> has to cut it.
+    /// </remarks>
     private static string TooltipOf(GameStatus status)
+    {
+        var tooltip = TooltipOf(status, withLabels: true);
+
+        return tooltip.Length <= Activity.MaxTextLength ? tooltip : TooltipOf(status, withLabels: false);
+    }
+
+    /// <summary>
+    /// Builds the tooltip on the picture, with or without the labels of leader, race and class.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <param name="withLabels">Whether "Party leader:", "Race:" and "Class:" name the values.</param>
+    /// <returns>The tooltip, leaving out whatever is unknown.</returns>
+    private static string TooltipOf(GameStatus status, bool withLabels)
     {
         var parts = new List<string>();
 
+        if (StoryOf(status) is { Length: > 0 } story)
+        {
+            parts.Add(story);
+        }
+
         if (status.LeaderName.Length > 0)
         {
-            parts.Add($"Party leader: {WithLevel(status.LeaderName, status.LeaderLevel)}");
+            parts.Add(Labeled("Party leader", WithLevel(status.LeaderName, status.LeaderLevel), withLabels));
         }
 
         if (status.RaceName.Length > 0)
         {
-            parts.Add($"Race: {WithLevel(status.RaceName, status.RaceLevel)}");
+            parts.Add(Labeled("Race", WithLevel(status.RaceName, status.RaceLevel), withLabels));
         }
 
         if (status.ClassName.Length > 0)
         {
-            parts.Add($"Class: {WithLevel(status.ClassName, status.ClassLevel)}");
+            parts.Add(Labeled("Class", WithLevel(status.ClassName, status.ClassLevel), withLabels));
         }
 
-        return string.Join(" | ", parts);
+        return string.Join(TooltipSeparator, parts);
     }
+
+    /// <summary>
+    /// Describes where the story stands: "Part 1: Ilias side", "Part 3: Chaos route",
+    /// "Collaboration Scenario: Act 5".
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>The act of the Collaboration Scenario while it is played, else the part with the route in the final chapter or with the side, or an empty string when the part is unknown.</returns>
+    private static string StoryOf(GameStatus status)
+    {
+        if (status.CollabAct > 0)
+        {
+            return $"Collaboration Scenario: Act {status.CollabAct}";
+        }
+
+        if (status.Part == 0)
+        {
+            return string.Empty;
+        }
+
+        var part = $"Part {status.Part}";
+
+        if (RouteNames.TryGetValue(status.Route, out var route))
+        {
+            return $"{part}: {route} route";
+        }
+
+        return SideNames.TryGetValue(status.Side, out var side) ? $"{part}: {side} side" : part;
+    }
+
+    /// <summary>
+    /// Puts a label in front of a value, when wanted.
+    /// </summary>
+    /// <param name="label">The label.</param>
+    /// <param name="value">The value.</param>
+    /// <param name="withLabel">Whether to put the label in front.</param>
+    /// <returns>The value, labeled or not.</returns>
+    private static string Labeled(string label, string value, bool withLabel) =>
+        withLabel ? $"{label}: {value}" : value;
 
     /// <summary>
     /// Describes what the player is doing on a map.

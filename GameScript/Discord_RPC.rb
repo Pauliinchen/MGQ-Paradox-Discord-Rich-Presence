@@ -2,7 +2,9 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Told a Carnage run by the Labyrinth's type, which the Carnage floor counter never did
+#      Paulinchen  2026-09-27: Published the act of the Collaboration Scenario while it is played
+#                            - Published the part of the story, the side chosen and the route, and dropped the chosen side from the trivia
+#                            - Told a Carnage run by the Labyrinth's type, which the Carnage floor counter never did
 #                            - Named the monster girl of a defeat scene on 2.x too, which does not record her
 #                            - Added a Picture option that shows Ilias or Alice, and later the route, instead of the app icon
 #      Paulinchen  2026-09-26: Added the companions with the most affection to the trivia
@@ -823,54 +825,63 @@ module MGQ_Discord
     end
   end
 
-  # The picture the Picture option shows: Ilias or Alice, whoever this playthrough chose, and in
-  # the final chapter the route. The pictures are art assets of the Discord application, named here.
+  # Where the story stands: the part, the side this playthrough chose, in the final chapter the
+  # route, and the act of the Collaboration Scenario while it is played. The keys of the side, the
+  # route and the collab double as the Discord application's art assets that the Picture option shows.
   module Story
-    # Art asset of the side chosen, by the switch that records the choice.
+    # Side chosen, by the switch that records the choice.
     SIDES = { "Ilias Chosen" => "ilias", "Alice Chosen" => "alice" }
 
-    # Art asset of the Chaos route.
-    CHAOS = "chaos"
+    # Variable the story events raise at each checkpoint, from 0 at the intro to 40 at the Great
+    # Decision.
+    PROGRESS = "Overall Events Progress"
 
-    # Switch the game turns on when the Chaos route opens, after both other routes are cleared.
-    CHAOS_OPEN = "Chaos Route Open"
+    # First progress of each part, latest first: the escape from Tartarus ends Part 1, the Great
+    # Decision ends Part 2.
+    PART_STARTS = [[3, 40], [2, 20], [1, 0]]
 
-    # Art asset of each route, by the top folder of the editor's map tree that holds its maps.
+    # Route of the final chapter, by the variable that counts its progress: Chaos, Angelic Dominion,
+    # Monster Realm. The Great Decision starts the counter of the route chosen, and a route that is
+    # not being played holds 0. 2.x has none of them.
     ROUTES = {
-      438  => CHAOS,
-      1001 => "monster_realm",
-      1193 => "angelic_dominion",
-      1287 => CHAOS,
+      "混沌ルート進行度" => "chaos",
+      "天界ルート進行度" => "angelic_dominion",
+      "魔界ルート進行度" => "monster_realm",
     }
+
+    # Art asset shown during the Collaboration Scenario.
+    COLLAB = "collab"
+
+    # Top folder of the editor's map tree that holds the Collaboration Scenario's maps.
+    COLLAB_FOLDER = 920
+
+    # Variables counting the progress of each act of the Collaboration Scenario, in order.
+    COLLAB_ACTS = (1..12).map { |act| "Collab:C#{act}" }
 
     # Maps per block of the game's map folders: Data holds 1 to 999, Data/Map/Data 1001 to 1999.
     MAPS_PER_BLOCK = 1000
 
     # Names the art asset for the current point of the story.
     #
-    # @return [String, nil] the asset, nil before the side is chosen
+    # @return [String, nil] the collab during the Collaboration Scenario, the route in the final
+    #   chapter, else the side, nil before the side is chosen
     def self.picture
-      route_asset = route
-      return route_asset if route_asset
+      return COLLAB if collab_act
 
-      switch = SIDES.keys.find { |name| GameState.switch_on?(name) }
-      SIDES[switch]
+      (part == 3 && route) || side
     end
 
-    # Names the route of the final chapter.
+    # Tells the act of the Collaboration Scenario being played.
     #
-    # Maps shared by the routes, like the Pocket Castle, belong to none. There the Chaos route counts
-    # once it is open, and otherwise the route seen last in this save.
+    # The end of Part 2 closes an unfinished Collaboration Scenario by filling in its last act, so
+    # only its maps tell that it is being played.
     #
-    # @return [String, nil] the route's asset, nil while none is known
-    def self.route
-      current = ROUTES[top_folder($game_map.map_id)]
-      @route = [current, $game_system] if current
-      return current if current
-      return CHAOS if GameState.switch_on?(CHAOS_OPEN)
+    # @return [Integer, nil] the act, 1 to 12, nil outside the Collaboration Scenario
+    def self.collab_act
+      return nil unless top_folder($game_map.map_id) == COLLAB_FOLDER
 
-      seen, game = @route
-      seen if game.equal?($game_system)
+      index = COLLAB_ACTS.rindex { |name| GameState.variable(name) > 0 }
+      index && index + 1
     end
 
     # Finds the top folder of the editor's map tree that holds a map.
@@ -887,6 +898,24 @@ module MGQ_Discord
       end
 
       map_id
+    end
+
+    # @return [Integer] the part the story is in, 1 to 3
+    def self.part
+      progress = GameState.variable(PROGRESS)
+      PART_STARTS.find { |_, start| progress >= start }[0]
+    end
+
+    # @return [String, nil] the side this playthrough chose, nil before the choice
+    def self.side
+      switch = SIDES.keys.find { |name| GameState.switch_on?(name) }
+      SIDES[switch]
+    end
+
+    # @return [String, nil] the route of the final chapter being played, nil while none is
+    def self.route
+      variable = ROUTES.keys.find { |name| GameState.variable(name) > 0 }
+      ROUTES[variable]
     end
   end
 
@@ -942,7 +971,6 @@ module MGQ_Discord
       :battles_fought,
       :difficulty,
       :playtime,
-      :chosen_side,
       :last_item_used,
       :current_track,
       :top_master,
@@ -1067,17 +1095,6 @@ module MGQ_Discord
         "Is less than an hour in. #{comment}!"
       else
         "Is #{NumberFormat.counted(hours, 'hour')} in. #{comment}!"
-      end
-    end
-
-    # Whether Ilias or Alice was chosen.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.chosen_side
-      if GameState.switch_on?("Ilias Chosen")
-        "Has chosen Ilias this playthrough!"
-      elsif GameState.switch_on?("Alice Chosen")
-        "Has chosen Alice this playthrough!"
       end
     end
 
@@ -1414,6 +1431,16 @@ module MGQ_Discord
 
       picture = Options.dynamic_picture? ? MGQ_Discord.text_of { Story.picture } : ""
       fields["picture"] = picture unless picture.empty?
+
+      if GameState.save_loaded?
+        collab_act = MGQ_Discord.text_of { Story.collab_act }
+        fields["collab_act"] = collab_act unless collab_act.empty?
+
+        part = MGQ_Discord.text_of { Story.part }
+        fields["part"] = part unless part.empty?
+        fields["side"] = MGQ_Discord.text_of { Story.side }
+        fields["route"] = MGQ_Discord.text_of { Story.route } if part == "3"
+      end
 
       if (labyrinth = GameState.labyrinth)
         fields["loc_floor"] = labyrinth.floor

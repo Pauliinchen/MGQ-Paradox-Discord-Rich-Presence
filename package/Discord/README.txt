@@ -6,8 +6,9 @@ Discord profile: where you are and what you're doing (exploring,
 traveling, in combat, setting up camp, who you're talking to, idle,
 Labyrinth of Chaos floor and rare points),
 rotating trivia about your playthrough (the music that's playing
-included), and your party leader's level, race and class when someone
-hovers the picture. Requests, defeat scenes and battle fucks only show if
+included), and the part of the story you're in with your side or route,
+and your party leader's level, race and class, when someone hovers the
+picture. Requests, defeat scenes and battle fucks only show if
 you turn on the NSFW option (see OPTIONS).
 
 
@@ -59,8 +60,9 @@ the biggest hit across every save. This save counts them for the save
 you're playing instead, since you installed the mod.
 
 [Discord] Picture: Static (the default) shows the game's icon. Dynamic
-shows Ilias or Alice, whoever you picked this playthrough, and in the
-final chapter the route you are on.
+shows Ilias or Alice, whoever you picked this playthrough, in the final
+chapter the route you are on, and the collab's heroes during the
+Collaboration Scenario.
 
 The options are the same for every save and are kept in
 Discord\Settings.ini (nsfw, all_saves and picture, 0 or 1), not in your

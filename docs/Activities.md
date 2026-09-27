@@ -17,12 +17,14 @@ When you add or change an activity, add it under the version it will ship in.
 |---|---|---|
 | Labyrinth of Chaos Carnage | Always shown as *Normal*, with the floor of the last Normal run | Shown as *Carnage*, with the Carnage run's floor |
 | Defeat scene (NSFW) on 2.x | Never shown or counted | Shown and counted like on 3.x |
+| Tooltip | `Party leader: <Name> Lv <X> \| Race: <Race> Lv <Y> \| Class: <Job> Lv <Z>` | `Part <N>: <Ilias/Alice> side \| Party leader: …`, in Part 3 `Part 3: <Monster Realm/Angelic Dominion/Chaos> route \| …` once the route is chosen, and `Collaboration Scenario: Act <N> \| …` without the part while the Collaboration Scenario is played. Part 1 ends with the escape from Tartarus, Part 2 with the Great Decision. Over 128 characters, the labels *Party leader*, *Race* and *Class* are left out. |
+| Chosen side (trivia) | `Has chosen Ilias this playthrough!` / `Has chosen Alice this playthrough!` | Removed, the tooltip shows the side all the time |
 
 ### Picture
 
 | Activity | Picture | When |
 |---|---|---|
-| Story picture | Ilias or Alice / the route: Monster Realm, Angelic Dominion or Chaos | With the new Picture option on *Dynamic* (default *Static*: the app icon). Ilias or Alice, whoever this playthrough chose; in the final chapter the route, taken from the map you are on. On maps all routes share, like the Pocket Castle, the Chaos route once it is open, otherwise the route seen last. The app icon before the choice and at the title screen. |
+| Story picture | Ilias or Alice / the route: Monster Realm, Angelic Dominion or Chaos / the collab's heroes | With the new Picture option on *Dynamic* (default *Static*: the app icon). Ilias or Alice, whoever this playthrough chose; in the final chapter the route, from the moment it is chosen at the Great Decision; the collab picture during the Collaboration Scenario. The app icon before the choice and at the title screen. |
 
 ## 1.3
 
