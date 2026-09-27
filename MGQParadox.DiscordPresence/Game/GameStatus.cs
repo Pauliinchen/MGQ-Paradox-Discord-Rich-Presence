@@ -2,7 +2,8 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Read the act of the Collaboration Scenario
+//      Paulinchen  2026-09-27: Read whether the player turned the Rich Presence option off
+//                            - Read the act of the Collaboration Scenario
 //                            - Read the part of the story, the side chosen and the route
 //                            - Read the art asset the Picture option picked
 //      Paulinchen  2026-09-26: Read who the player is talking to
@@ -50,6 +51,11 @@ internal sealed class GameStatus
     /// When the player last pressed a button, in Unix seconds, <see langword="null"/> when unknown.
     /// </summary>
     public long? LastInputAt => UnixSeconds("last_input");
+
+    /// <summary>
+    /// Whether the player turned the Rich Presence option off, so Discord shows nothing.
+    /// </summary>
+    public bool IsHidden => Value("hidden") == "1";
 
     /// <summary>
     /// What the game is showing.

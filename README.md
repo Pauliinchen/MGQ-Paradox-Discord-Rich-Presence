@@ -70,21 +70,25 @@ Nothing else needs to be installed.
 
 ### Options
 
-The mod adds three options to the game: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise.
+The mod adds its options to the game: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise. They are grouped under **`[Discord] Rich Presence`**; the ones below it are indented, and greyed out in the Mod Config Menu while it is off.
 
-**`[Discord] NSFW`**
+**`[Discord] Rich Presence`**
+- **On** (default): Discord shows what you're doing in the game.
+- **Off**: Discord shows nothing about the game, without uninstalling the mod. The options below keep their values.
+
+**`NSFW`**
 - **Off** (default): Discord never mentions requests, defeat scenes or battle fucks.
 - **On**: Discord shows a request, defeat scene or battle fuck while it plays, and their counters in the trivia. Requests and defeat scenes are counted either way, so turning it on later shows the full count since you installed the mod.
 
-**`[Discord] Statistics`**, for enemies defeated, escapes, wipeouts, items synthesized, gold spent, the biggest hit and battle fucks won:
+**`Statistics`**, for enemies defeated, escapes, wipeouts, items synthesized, gold spent, the biggest hit and battle fucks won:
 - **All saves** (default): the game's own counts, across every save and from before you installed the mod.
 - **This save**: counted by the mod for the save you're playing, see [Per-save statistics](#per-save-statistics). Battle fucks won are the game's own count for the save.
 
-**`[Discord] Picture`**
+**`Picture`**
 - **Static** (default): the game's icon.
 - **Dynamic**: Ilias or Alice, whoever you picked this playthrough, in the final chapter the route you are on, and the collab's heroes during the Collaboration Scenario. Before you pick, it stays the game's icon.
 
-The options are the same for every save. They are kept as `nsfw`, `all_saves` and `picture` (`0` or `1`) in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
+The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves` and `picture` in `Discord\Settings.ini`, not in your save files, so updating the mod resets them.
 
 ### After updating the translation
 

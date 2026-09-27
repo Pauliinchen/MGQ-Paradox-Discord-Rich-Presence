@@ -47,26 +47,31 @@ which is no longer used; you can delete it.
 
 OPTIONS
 -------
-The mod adds three options to the game: in the Mod Config Menu if you
-have it installed, in the game's own Config menu otherwise.
+The mod adds its options to the game: in the Mod Config Menu if you have
+it installed, in the game's own Config menu otherwise. They are grouped
+under [Discord] Rich Presence, with the others indented below it.
 
-[Discord] NSFW: Off (the default) never mentions requests, defeat scenes
+[Discord] Rich Presence: On (the default) shows what you're doing on
+Discord. Off shows nothing about the game, without uninstalling the mod;
+the options below keep their values.
+
+  NSFW: Off (the default) never mentions requests, defeat scenes
 or battle fucks on Discord. On shows a request, defeat scene or battle
 fuck while it plays, and how often they happened.
 
-[Discord] Statistics: All saves (the default) shows the game's own counts
+  Statistics: All saves (the default) shows the game's own counts
 of enemies defeated, escapes, wipeouts, items synthesized, gold spent and
 the biggest hit across every save. This save counts them for the save
 you're playing instead, since you installed the mod.
 
-[Discord] Picture: Static (the default) shows the game's icon. Dynamic
-shows Ilias or Alice, whoever you picked this playthrough, in the final
-chapter the route you are on, and the collab's heroes during the
-Collaboration Scenario.
+  Picture: Static (the default) shows the game's icon. Dynamic shows
+Ilias or Alice, whoever you picked this playthrough, in the final chapter
+the route you are on, and the collab's heroes during the Collaboration
+Scenario.
 
 The options are the same for every save and are kept in
-Discord\Settings.ini (nsfw, all_saves and picture, 0 or 1), not in your
-saves.
+Discord\Settings.ini (presence, nsfw, all_saves and picture), not in
+your saves.
 Updating the mod resets them.
 
 
@@ -95,8 +100,8 @@ the mod simply does nothing.
 Some trivia (enemies defeated, escapes, wipeouts, biggest hit, gold spent,
 items synthesized, requests, defeat scenes) is counted per save by the
 mod itself, because the game doesn't count those per save. The first six
-show the game's counts across all saves unless you set [Discord]
-Statistics to This save. Battle fucks won are counted by the game itself,
+show the game's counts across all saves unless you set Statistics to
+This save. Battle fucks won are counted by the game itself,
 across all saves or, with This save, for the save you're playing.
 
 The mod keeps these counters inside your saves, so copies, the autosave

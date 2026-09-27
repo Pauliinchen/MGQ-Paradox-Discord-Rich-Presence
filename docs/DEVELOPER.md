@@ -50,7 +50,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `Discord/DiscordIpcClient.cs` | Discord's local named-pipe protocol. `Opcode.cs` holds the frame kinds. |
 | `Discord/Activity.cs`, `Discord/Json.cs` | The activity and its JSON, with Discord's field limits. |
 
-**`package/Discord/`:** `Settings.ini` (`client_id`, and the options `nsfw`, `all_saves` and `picture`, which the game script reads and writes) and the player `README.txt`.
+**`package/Discord/`:** `Settings.ini` (`client_id`, and the options `presence`, `nsfw`, `all_saves` and `picture`, which the game script reads and writes) and the player `README.txt`.
 
 ## Build and test
 
@@ -153,9 +153,9 @@ Requests are counted from the `Game_Novel#setup` hook, defeat scenes from the `B
 
 ## Options
 
-`Options::MENU` describes each option's name, help and values (the first is the default). `Options.register` adds them to `NWConst::Config`: to `MOD_CONTENTS` when the community's Mod Config Menu (`Patch/0_ModConfigMenu.rb`) defined it, which the loader's file name order runs first, to the game's own `CONTENTS` otherwise. Both menus read `DATA`, `DATA_TEXT` and `DEFAULT` and store the value in `$game_system.conf`.
+`Options::MENU` describes each option's name, help, parent (`:under`), the value that parent needs for the option to apply (`:when`, 1 by default) and values (the first is the default). Like EXP Overlord, the options are layered: `[Discord] Rich Presence` (`presence`) comes first and turns the whole status off; `NSFW`, `Statistics` and `Picture` sit under it. `Options::INDENTS` puts the layer's indent in front of each name, and an `:enable` rule greys an option out in the Mod Config Menu while any parent does not hold the value it needs (the game's own Config menu ignores `:enable`). While `Rich Presence` is off, `StatusText` publishes only `hidden=1`, and the DLL sends a `null` activity, which clears the profile. `Options.register` adds them to `NWConst::Config`: to `MOD_CONTENTS` when the community's Mod Config Menu (`Patch/0_ModConfigMenu.rb`) defined it, which the loader's file name order runs first, to the game's own `CONTENTS` otherwise. Both menus read `DATA`, `DATA_TEXT` and `DEFAULT` and store the value in `$game_system.conf`.
 
 `$game_system.conf` is part of every save, but the options are meant to be the same for all saves and saves must stay untouched. So:
-- **`Discord/Settings.ini`** holds them under short keys (`nsfw = 0`, `all_saves = 1`, `picture = 0`, mapped in `Options::NAMES`), next to the DLL's settings. `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
+- **`Discord/Settings.ini`** holds them under short keys (`presence = 1`, `nsfw = 0`, `all_saves = 1`, `picture = 0`, mapped in `Options::NAMES`), next to the DLL's settings. `Options.write` replaces only their lines and appends missing ones, so comments and hand edits survive. The file ships with the mod, so an update resets the options.
 - **`Options.sync`** runs before every publish. A new `$game_system.conf` (a save loaded, a new game, the title screen) gets the stored values; any other difference was made in a menu and is stored.
 - **`Options.left_out_of_save`** wraps the save, autosave and backup-save methods and takes the options out of `$game_system.conf` while the game writes the file.

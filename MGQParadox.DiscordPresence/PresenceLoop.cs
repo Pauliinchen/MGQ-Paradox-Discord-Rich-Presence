@@ -2,6 +2,7 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-27: Cleared the profile while the player turned the presence off
 //      Paulinchen  2026-09-26: Sent the status every 4 seconds and rotated the trivia every 4th update
 //                            - Named the game script by its new file name
 //      Paulinchen  2026-09-25: Created
@@ -29,6 +30,11 @@ internal sealed class PresenceLoop
     /// Ticks each trivia line stays up, 16 seconds.
     /// </summary>
     private const int TicksPerTriviaLine = 4;
+
+    /// <summary>
+    /// The activity that clears the profile, sent while the player turned the presence off.
+    /// </summary>
+    private const string NoActivity = "null";
 
     /// <summary>
     /// Gap between two ticks, each of which sends the latest status if it changed.
@@ -213,7 +219,9 @@ internal sealed class PresenceLoop
             return;
         }
 
-        var activity = ActivityBuilder.Build(status, _largeImage, Rotation, Rotation + _pocketCastleOffset).ToJson();
+        var activity = status.IsHidden
+            ? NoActivity
+            : ActivityBuilder.Build(status, _largeImage, Rotation, Rotation + _pocketCastleOffset).ToJson();
 
         if (activity == _lastSentActivity)
         {

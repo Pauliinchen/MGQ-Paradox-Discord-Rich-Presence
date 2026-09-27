@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Published the act of the Collaboration Scenario while it is played
+#      Paulinchen  2026-09-27: Grouped the options under a Rich Presence option that turns the whole status off
+#                            - Published the act of the Collaboration Scenario while it is played
 #                            - Published the part of the story, the side chosen and the route, and dropped the chosen side from the trivia
 #                            - Told a Carnage run by the Labyrinth's type, which the Carnage floor counter never did
 #                            - Named the monster girl of a defeat scene on 2.x too, which does not record her
@@ -210,6 +211,13 @@ module MGQ_Discord
     # File inside the mod folder, shared with DiscordPresence.dll and edited by players too.
     FILE = "Settings.ini"
 
+    # What an option starts its name with in the menu, by how many options it sits under, as in
+    # EXP Overlord.
+    INDENTS = ["", "     ", "         -> "]
+
+    # Whether Discord shows the game at all, 0 or 1. The other options sit under it in the menu.
+    PRESENCE = :mod_discord_presence
+
     # Whether requests, defeat scenes and battle fucks show on Discord, 0 or 1.
     NSFW = :mod_discord_nsfw
 
@@ -220,33 +228,50 @@ module MGQ_Discord
     PICTURE = :mod_discord_picture
 
     # Every option by its key in $game_system.conf, with its key in FILE.
-    NAMES = { NSFW => "nsfw", ALL_SAVES => "all_saves", PICTURE => "picture" }
+    NAMES = {
+      PRESENCE  => "presence",
+      NSFW      => "nsfw",
+      ALL_SAVES => "all_saves",
+      PICTURE   => "picture",
+    }
 
     # Every option, by its key in $game_system.conf.
     KEYS = NAMES.keys
 
-    # How each option shows in the menu: its name, its help, and a name and help per value. The
-    # first value is the default.
+    # How each option shows in the menu, in this order: its name, its help, the option it sits
+    # under and the value that option needs for this one to apply (1 unless :when says otherwise),
+    # and a name and help per value. The first value is the default.
     MENU = {
+      PRESENCE => {
+        :name   => "[Discord] Rich Presence",
+        :help   => "Show what you are doing in the game on your Discord profile.",
+        :values => {
+          1 => ["On",  "Discord shows where you are, what you are doing and trivia about your playthrough."],
+          0 => ["Off", "Discord shows nothing about the game. The options below wait until it is on again."],
+        },
+      },
       NSFW => {
-        :name   => "[Discord] NSFW",
+        :name   => "NSFW",
         :help   => "Show requests, defeat scenes and battle fucks on Discord.",
+        :under  => PRESENCE,
         :values => {
           0 => ["Off", "Discord never mentions requests, defeat scenes or battle fucks."],
           1 => ["On",  "Discord shows a running request, defeat scene or battle fuck, and their counters."],
         },
       },
       ALL_SAVES => {
-        :name   => "[Discord] Statistics",
+        :name   => "Statistics",
         :help   => "Count the trivia per save or across all saves.",
+        :under  => PRESENCE,
         :values => {
           1 => ["All saves", "The game's own counts across every save."],
           0 => ["This save", "Counted by the mod for the loaded save, since the mod was installed."],
         },
       },
       PICTURE => {
-        :name   => "[Discord] Picture",
+        :name   => "Picture",
         :help   => "Show the game's icon on Discord, or a picture that follows the story.",
+        :under  => PRESENCE,
         :values => {
           0 => ["Static",  "Always the game's icon."],
           1 => ["Dynamic", "Ilias or Alice, whoever you chose, and later the route you are on."],
@@ -254,21 +279,59 @@ module MGQ_Discord
       },
     }
 
-    # Adds the options to the menu.
+    # Adds the options to the menu, each one under its parents, which grey it out while one of them
+    # does not hold the value it needs.
     #
     # The Mod Config Menu defines MOD_CONTENTS in 0_ModConfigMenu.rb, which the mod loader runs
-    # before this script.
+    # before this script. The game's own Config menu ignores :enable.
     def self.register
       config = NWConst::Config
       menu = config.const_defined?(:MOD_CONTENTS) ? config::MOD_CONTENTS : config::CONTENTS
 
       MENU.each do |key, option|
-        menu.insert(-2, { :key => key, :name => option[:name], :sub => true, :help => "#{option[:help]}\r\n←/→ Toggle" })
+        needs = needs_of(key)
+        entry = {
+          :key  => key,
+          :name => INDENTS[needs.size] + option[:name],
+          :sub  => true,
+          :help => "#{option[:help]}\r\n←/→ Toggle",
+        }
+        entry[:enable] = proc { needs.all? { |parent, value| in_menu(parent) == value } } unless needs.empty?
+
+        menu.insert(-2, entry)
         config::DATA[key] = option[:values].keys
         config::DATA_TEXT[key] = {}
         option[:values].each { |value, (name, help)| config::DATA_TEXT[key][value] = { :name => name, :help => help } }
         config::DEFAULT[key] = option[:values].keys.first
       end
+    end
+
+    # @param key [Symbol] the option
+    # @return [Array(Symbol, Integer)] each option it sits under in the menu with the value that
+    #   option needs for this one to apply, the nearest first
+    def self.needs_of(key)
+      needs = []
+
+      while (parent = MENU[key][:under])
+        needs << [parent, MENU[key].fetch(:when, 1)]
+        key = parent
+      end
+
+      needs
+    end
+
+    # Reads an option as the menu currently shows it, which may not be stored yet.
+    #
+    # @param key [Symbol] the option
+    # @return [Integer] its value
+    def self.in_menu(key)
+      value = $game_system.conf[key] rescue nil
+      value.nil? ? self[key] : value
+    end
+
+    # @return [Boolean] whether Discord shows the game at all
+    def self.presence?
+      self[PRESENCE] == 1
     end
 
     # @return [Boolean] whether requests, defeat scenes and battle fucks show on Discord
@@ -1389,11 +1452,16 @@ module MGQ_Discord
 
   # The status as DiscordPresence.dll reads it, one key=value line per value.
   module StatusText
+    # The whole status while the Rich Presence option is off, which clears the profile.
+    HIDDEN = "hidden=1\n"
+
     # Builds the status.
     #
     # @param scene [String] what the game is showing, see GameState.scene
     # @return [String] the key=value lines
     def self.build(scene)
+      return HIDDEN unless Options.presence?
+
       leader = $game_party.leader rescue nil
 
       # Paradox keeps a personal level plus one for the job (class) and one for the race (tribe).
