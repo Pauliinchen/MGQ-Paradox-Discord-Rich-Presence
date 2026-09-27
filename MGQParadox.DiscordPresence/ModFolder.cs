@@ -2,7 +2,8 @@
 //  ModFolder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Left the uninstaller out of the folder's contents, it is gone
+//      Paulinchen  2026-09-27: Dropped the folder's name, which nothing read
+//                            - Left the uninstaller out of the folder's contents, it is gone
 //      Paulinchen  2026-09-26: Removed the game script's file name, the script lives in the Patch folder now
 //      Paulinchen  2026-09-25: Created
 //
@@ -18,14 +19,6 @@ namespace MGQParadox.DiscordPresence;
 /// </summary>
 internal static class ModFolder
 {
-    /// <summary>
-    /// Name the folder must have inside the game folder.
-    /// </summary>
-    /// <remarks>
-    /// The game script finds the DLL by this path, so a renamed folder is never used.
-    /// </remarks>
-    public const string Name = "Discord";
-
     /// <summary>
     /// Full path of the folder, without a trailing separator.
     /// </summary>

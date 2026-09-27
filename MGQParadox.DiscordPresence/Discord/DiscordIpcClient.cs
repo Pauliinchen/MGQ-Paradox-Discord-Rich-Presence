@@ -2,7 +2,8 @@
 //  DiscordIpcClient.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Documented that a null activity clears the profile
+//      Paulinchen  2026-09-27: Dropped IDisposable, nothing disposed the client
+//                            - Documented that a null activity clears the profile
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -17,7 +18,7 @@ namespace MGQParadox.DiscordPresence.Discord;
 /// <summary>
 /// A connection to the local Discord client over its IPC pipe.
 /// </summary>
-internal sealed class DiscordIpcClient : IDisposable
+internal sealed class DiscordIpcClient
 {
     /// <summary>
     /// Number of pipe names Discord may listen on.
@@ -106,7 +107,7 @@ internal sealed class DiscordIpcClient : IDisposable
     /// Shows an activity on the profile.
     /// </summary>
     /// <param name="processId">The process the activity belongs to, Discord clears it when that ends.</param>
-    /// <param name="activityJson">The activity, as written by <see cref="Activity.ToJson"/>, or <c>null</c> to clear the profile.</param>
+    /// <param name="activityJson">The activity, as written by <see cref="Activity.ToJson"/>, or the JSON <c>null</c> to clear the profile.</param>
     public void SetActivity(int processId, string activityJson)
     {
         var pipe = Volatile.Read(ref _pipe) ?? throw new InvalidOperationException("Not connected to Discord.");
@@ -120,9 +121,6 @@ internal sealed class DiscordIpcClient : IDisposable
     /// Closes the pipe, if one is open.
     /// </summary>
     public void Disconnect() => Close(Interlocked.Exchange(ref _pipe, null));
-
-    /// <inheritdoc />
-    public void Dispose() => Disconnect();
 
     /// <summary>
     /// Opens one pipe and completes the handshake on it.

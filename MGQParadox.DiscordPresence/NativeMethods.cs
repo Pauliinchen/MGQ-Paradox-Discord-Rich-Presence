@@ -2,6 +2,7 @@
 //  NativeMethods.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-27: Stopped keeping the Windows error, which nothing read
 //      Paulinchen  2026-09-25: Created
 //
 //----------------------------------------------------------------
@@ -58,7 +59,7 @@ internal static unsafe partial class NativeMethods
     /// <param name="address">An address inside the module.</param>
     /// <param name="module">The module handle.</param>
     /// <returns><see langword="true"/> when the module was found.</returns>
-    [LibraryImport("kernel32.dll", SetLastError = true)]
+    [LibraryImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool GetModuleHandleExW(uint flags, nint address, out nint module);
 
@@ -69,6 +70,6 @@ internal static unsafe partial class NativeMethods
     /// <param name="fileName">The buffer that receives the path.</param>
     /// <param name="size">The size of the buffer, in characters.</param>
     /// <returns>The length of the path, 0 when it failed.</returns>
-    [LibraryImport("kernel32.dll", SetLastError = true)]
+    [LibraryImport("kernel32.dll")]
     private static partial uint GetModuleFileNameW(nint module, char* fileName, uint size);
 }
