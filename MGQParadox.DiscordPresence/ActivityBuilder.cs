@@ -2,7 +2,8 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Added a button that links to the mod's page
+//      Paulinchen  2026-09-27: Showed the trivia TriviaBuilder writes, and took the time from the caller
+//                            - Added a button that links to the mod's page
 //                            - Left the names, map names and route names that spoil Part 3 out while spoilers are hidden
 //                            - Showed the default art asset whenever the game picks no picture, instead of the looked-up app icon
 //                            - Called the Angelic Dominion and Monster Realm routes Destroyer and Judgment, after their logos
@@ -20,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using MGQParadox.DiscordPresence.Discord;
 using MGQParadox.DiscordPresence.Game;
 
@@ -155,8 +155,9 @@ internal static class ActivityBuilder
     /// <param name="status">The status the game published.</param>
     /// <param name="triviaIndex">Which trivia line to show, wrapping around.</param>
     /// <param name="pocketCastleIndex">Which Pocket Castle line to show, wrapping around.</param>
+    /// <param name="now">The current time, which idle and some trivia lines depend on.</param>
     /// <returns>The activity.</returns>
-    public static Activity Build(GameStatus status, int triviaIndex, int pocketCastleIndex)
+    public static Activity Build(GameStatus status, int triviaIndex, int pocketCastleIndex, DateTimeOffset now)
     {
         if (status.Scene == Scene.Title)
         {
@@ -171,8 +172,8 @@ internal static class ActivityBuilder
 
         return new Activity
         {
-            Details = DetailsOf(status, pocketCastleIndex),
-            State = TriviaAt(status.Trivia, triviaIndex),
+            Details = DetailsOf(status, pocketCastleIndex, now),
+            State = TriviaAt(TriviaBuilder.LinesOf(status, now), triviaIndex),
             StartedAt = status.StartedAt,
             LargeImage = status.Picture.Length > 0 ? status.Picture : DefaultPicture,
             LargeText = TooltipOf(status),
@@ -190,21 +191,22 @@ internal static class ActivityBuilder
     /// </remarks>
     /// <param name="status">The status the game published.</param>
     /// <param name="pocketCastleIndex">Which Pocket Castle line to show, wrapping around.</param>
+    /// <param name="now">The current time.</param>
     /// <returns>The first line.</returns>
-    private static string DetailsOf(GameStatus status, int pocketCastleIndex)
+    private static string DetailsOf(GameStatus status, int pocketCastleIndex, DateTimeOffset now)
     {
         if (status.Scene == Scene.Request)
         {
             var companion = NameOf(status, status.RequestCharacter, SpoilerFreeCompanion);
 
-            return WithPlace(status, $"In a request with {companion} for the {Ordinal(status.RequestCount)} time!");
+            return WithPlace(status, $"In a request with {companion} for the {NumberFormat.Ordinal(status.RequestCount)} time!");
         }
 
         if (status.Scene == Scene.DefeatScene)
         {
             var monsterGirl = NameOf(status, status.RapedBy, SpoilerFreeMonsterGirl);
 
-            return WithPlace(status, $"Raped by {monsterGirl} for the {Ordinal(status.RapedCount)} time!");
+            return WithPlace(status, $"Raped by {monsterGirl} for the {NumberFormat.Ordinal(status.RapedCount)} time!");
         }
 
         if (status.Scene == Scene.Battlefuck)
@@ -231,7 +233,7 @@ internal static class ActivityBuilder
 
         if (status.Scene == Scene.Travel)
         {
-            return $"{WorldMapName} - {(IsIdle(status) ? IdleText : TravelText(status.Vehicle))}";
+            return $"{WorldMapName} - {(IsIdle(status, now) ? IdleText : TravelText(status.Vehicle))}";
         }
 
         if (status.Scene == Scene.Battle && status.IsOnWorldMap)
@@ -244,7 +246,7 @@ internal static class ActivityBuilder
             return $"{PocketCastleName} - {PocketCastleLines[pocketCastleIndex % PocketCastleLines.Length]}";
         }
 
-        var state = status.Scene != Scene.Battle && IsIdle(status) ? IdleText : StateText(status.Scene);
+        var state = status.Scene != Scene.Battle && IsIdle(status, now) ? IdleText : StateText(status.Scene);
 
         var area = AreaOf(status);
 
@@ -277,10 +279,11 @@ internal static class ActivityBuilder
     /// background and publishes nothing.
     /// </remarks>
     /// <param name="status">The status the game published.</param>
+    /// <param name="now">The current time.</param>
     /// <returns><see langword="true"/> when idle.</returns>
-    private static bool IsIdle(GameStatus status) =>
+    private static bool IsIdle(GameStatus status, DateTimeOffset now) =>
         status.LastInputAt is { } lastInputAt &&
-        DateTimeOffset.UtcNow.ToUnixTimeSeconds() - lastInputAt >= IdleAfter.TotalSeconds;
+        now.ToUnixTimeSeconds() - lastInputAt >= IdleAfter.TotalSeconds;
 
     /// <summary>
     /// Builds the first line inside the Labyrinth of Chaos.
@@ -296,7 +299,7 @@ internal static class ActivityBuilder
             ? $" ({status.Area})"
             : string.Empty;
 
-        return $"{LabyrinthName} {status.LabyrinthType}{biome} - Floor {status.LabyrinthFloor} | {status.LabyrinthRarePoints} Rare Points!";
+        return $"{LabyrinthName} {status.LabyrinthType}{biome} - Floor {status.LabyrinthFloor} | {NumberFormat.Grouped(status.LabyrinthRarePoints)} Rare Points!";
     }
 
     /// <summary>
@@ -448,28 +451,6 @@ internal static class ActivityBuilder
     /// <returns>The name with its level.</returns>
     private static string WithLevel(string name, string level) =>
         level.Length > 0 ? $"{name} Lv {level}" : name;
-
-    /// <summary>
-    /// Writes a count as an ordinal: 1st, 2nd, 3rd, 4th, 11th, 1,021st.
-    /// </summary>
-    /// <param name="number">The count.</param>
-    /// <returns>The ordinal, with thousands grouped like the trivia.</returns>
-    private static string Ordinal(int number)
-    {
-        var suffix = (number % 100) switch
-        {
-            11 or 12 or 13 => "th",
-            _ => (number % 10) switch
-            {
-                1 => "st",
-                2 => "nd",
-                3 => "rd",
-                _ => "th",
-            },
-        };
-
-        return number.ToString("N0", CultureInfo.InvariantCulture) + suffix;
-    }
 
     /// <summary>
     /// Reports whether a map name contains a place name, ignoring case.

@@ -2,7 +2,8 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Fixed the Discord application instead of reading it from Settings.ini
+//      Paulinchen  2026-09-27: Handed the current time to the activity
+//                            - Fixed the Discord application instead of reading it from Settings.ini
 //                            - Stopped looking up the app icon, the default art asset stands in for it
 //                            - Cleared the profile while the player turned the presence off
 //      Paulinchen  2026-09-26: Sent the status every 4 seconds and rotated the trivia every 4th update
@@ -207,7 +208,7 @@ internal sealed class PresenceLoop
 
         var activity = status.IsHidden
             ? NoActivity
-            : ActivityBuilder.Build(status, Rotation, Rotation + _pocketCastleOffset).ToJson();
+            : ActivityBuilder.Build(status, Rotation, Rotation + _pocketCastleOffset, DateTimeOffset.UtcNow).ToJson();
 
         if (activity == _lastSentActivity)
         {

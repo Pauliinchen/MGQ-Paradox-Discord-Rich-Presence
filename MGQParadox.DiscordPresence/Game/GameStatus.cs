@@ -2,7 +2,9 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-27: Read whether Part 3 spoilers are hidden
+//      Paulinchen  2026-09-27: Read the values behind the trivia instead of finished trivia lines
+//                            - Read the Labyrinth's rare points as a number
+//                            - Read whether Part 3 spoilers are hidden
 //                            - Read whether the player turned the Rich Presence option off
 //                            - Read the act of the Collaboration Scenario
 //                            - Read the part of the story, the side chosen and the route
@@ -40,7 +42,6 @@ internal sealed class GameStatus
     private GameStatus(Dictionary<string, string> values)
     {
         _values = values;
-        Trivia = ReadTrivia();
     }
 
     /// <summary>
@@ -114,9 +115,9 @@ internal sealed class GameStatus
     public string LabyrinthType => Value("loc_type");
 
     /// <summary>
-    /// Rare points collected in the Labyrinth of Chaos, already formatted.
+    /// Rare points collected in the Labyrinth of Chaos.
     /// </summary>
-    public string LabyrinthRarePoints => Value("loc_rare");
+    public long LabyrinthRarePoints => Number("loc_rare") ?? 0;
 
     /// <summary>
     /// Who plays the running request, only set in <see cref="Scene.Request"/>.
@@ -179,6 +180,11 @@ internal sealed class GameStatus
     public bool HidesSpoilers => Value("hide_spoilers") == "1";
 
     /// <summary>
+    /// Whether requests, defeat scenes and battle fucks may show.
+    /// </summary>
+    public bool IsNsfw => Value("nsfw") == "1";
+
+    /// <summary>
     /// Name of the party leader.
     /// </summary>
     public string LeaderName => Value("leader");
@@ -209,9 +215,171 @@ internal sealed class GameStatus
     public string RaceLevel => Value("race_level");
 
     /// <summary>
-    /// The trivia lines that currently apply, in the order Discord_RPC.rb lists them.
+    /// How many of the active party are down.
     /// </summary>
-    public IReadOnlyList<string> Trivia { get; }
+    public long DeadMembers => Number("dead_members") ?? 0;
+
+    /// <summary>
+    /// How many companions have joined, Luka not counted, <see langword="null"/> before a save is loaded.
+    /// </summary>
+    public long? Companions => Number("companions");
+
+    /// <summary>
+    /// Gold the party carries, <see langword="null"/> before a save is loaded.
+    /// </summary>
+    public long? Gold => Number("gold");
+
+    /// <summary>
+    /// Battles this save has fought, <see langword="null"/> before a save is loaded.
+    /// </summary>
+    public long? Battles => Number("battles");
+
+    /// <summary>
+    /// The game's difficulty value, -2 (Very Easy) to 4 (Paradox), <see langword="null"/> when unknown.
+    /// </summary>
+    public long? Difficulty => Number("difficulty");
+
+    /// <summary>
+    /// Full hours played in this save, <see langword="null"/> before a save is loaded.
+    /// </summary>
+    public long? PlaytimeHours => Number("playtime_hours");
+
+    /// <summary>
+    /// Deepest Labyrinth of Chaos floor reached.
+    /// </summary>
+    public long LabyrinthRecord => Number("labyrinth_record") ?? 0;
+
+    /// <summary>
+    /// The item an actor used last this session, empty before the first.
+    /// </summary>
+    public string ItemUsed => Value("item_used");
+
+    /// <summary>
+    /// Who <see cref="ItemUsed"/> was used on.
+    /// </summary>
+    public string ItemTarget => Value("item_target");
+
+    /// <summary>
+    /// When <see cref="ItemUsed"/> was used, in Unix seconds, <see langword="null"/> when unknown.
+    /// </summary>
+    public long? ItemUsedAt => UnixSeconds("item_used_at");
+
+    /// <summary>
+    /// Title of the music that is playing, empty when the jukebox does not know it.
+    /// </summary>
+    public string Track => Value("track");
+
+    /// <summary>
+    /// The recruited companions with the most affection, highest first.
+    /// </summary>
+    public IReadOnlyList<(string Name, long Love)> MostAffection =>
+        Ranked("affection_name", rank => (Value($"affection_name{rank}"), Number($"affection_love{rank}") ?? 0));
+
+    /// <summary>
+    /// The actors in the active party with the most mastered jobs and races, most first.
+    /// </summary>
+    public IReadOnlyList<(string Name, long Jobs, long Races)> TopMasters =>
+        Ranked("master_name", rank => (Value($"master_name{rank}"), Number($"master_jobs{rank}") ?? 0, Number($"master_races{rank}") ?? 0));
+
+    /// <summary>
+    /// Enemies defeated, in this save or all saves as the Statistics option says.
+    /// </summary>
+    public long EnemiesDefeated => Number("defeated") ?? 0;
+
+    /// <summary>
+    /// Battles run away from, in this save or all saves.
+    /// </summary>
+    public long BattlesEscaped => Number("escaped") ?? 0;
+
+    /// <summary>
+    /// Times the party was wiped out, in this save or all saves.
+    /// </summary>
+    public long Wipeouts => Number("wipeouts") ?? 0;
+
+    /// <summary>
+    /// Items synthesized, in this save or all saves.
+    /// </summary>
+    public long ItemsSynthesized => Number("synthesized") ?? 0;
+
+    /// <summary>
+    /// Gold spent in shops, in this save or all saves.
+    /// </summary>
+    public long GoldSpent => Number("gold_spent") ?? 0;
+
+    /// <summary>
+    /// The biggest hit dealt, formatted the way the game writes large numbers, empty before the first.
+    /// </summary>
+    public string BiggestHit => Value("biggest_hit");
+
+    /// <summary>
+    /// Battle fucks won, in this save or all saves.
+    /// </summary>
+    public long BattlefucksWon => Number("battlefucks_won") ?? 0;
+
+    /// <summary>
+    /// Requests this save has made.
+    /// </summary>
+    public long RequestsMade => Number("requests") ?? 0;
+
+    /// <summary>
+    /// Who this save made the most requests to and how often, an empty name before the first.
+    /// </summary>
+    public (string Name, long Count) MostRequested => (Value("most_requested"), Number("most_requested_count") ?? 0);
+
+    /// <summary>
+    /// Defeat scenes this save has seen.
+    /// </summary>
+    public long TimesRaped => Number("rapes") ?? 0;
+
+    /// <summary>
+    /// Which monster girl this save saw the most defeat scenes of and how often, an empty name before the first.
+    /// </summary>
+    public (string Name, long Count) MostRapedBy => (Value("most_raped_by"), Number("most_raped_count") ?? 0);
+
+    /// <summary>
+    /// The four spirits recruited, out of how many there are.
+    /// </summary>
+    public (long Done, long Total) SpiritsRecruited => OutOf("spirits", "spirits_total");
+
+    /// <summary>
+    /// The monster queens recruited, out of how many there are.
+    /// </summary>
+    public (long Done, long Total) QueensRecruited => OutOf("queens", "queens_total");
+
+    /// <summary>
+    /// The routes of the final chapter cleared, out of how many there are.
+    /// </summary>
+    public (long Done, long Total) RoutesCleared => OutOf("routes_cleared", "routes_total");
+
+    /// <summary>
+    /// Randolph's hiding places found, out of how many there are.
+    /// </summary>
+    public (long Done, long Total) RandolphsFound => OutOf("randolphs", "randolphs_total");
+
+    /// <summary>
+    /// The Phenomena of Ruin defeated, out of how many there are.
+    /// </summary>
+    public (long Done, long Total) PhenomenaDefeated => OutOf("phenomena", "phenomena_total");
+
+    /// <summary>
+    /// Name of the best ore the party holds for forging, empty before the first.
+    /// </summary>
+    public string ForgingOre => Value("ore");
+
+    /// <summary>
+    /// Side taken at the Navy Headquarters, "pirates" or "marines", empty before the choice.
+    /// </summary>
+    public string NavalSide => Value("naval_side");
+
+    /// <summary>
+    /// Who in the active party leads in a stat.
+    /// </summary>
+    /// <param name="paramId">The stat, from 0 like the game counts its base parameters.</param>
+    /// <returns>The stat's name, its leader and the value as the game writes it, or <see langword="null"/> when unknown.</returns>
+    public (string Stat, string Holder, string Value)? TopStat(int paramId) =>
+        Value($"stat_holder{paramId}") is { Length: > 0 } holder
+            ? (Value($"stat_name{paramId}"), holder, Value($"stat_value{paramId}"))
+            : null;
 
     /// <summary>
     /// Parses the published text.
@@ -261,18 +429,37 @@ internal sealed class GameStatus
         int.TryParse(Value(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var count) ? count : 0;
 
     /// <summary>
-    /// Collects <c>trivia0</c>, <c>trivia1</c> and so on up to the first gap.
+    /// Looks up a published number, which may be negative or larger than an <see cref="int"/>.
     /// </summary>
-    /// <returns>The trivia lines.</returns>
-    private List<string> ReadTrivia()
-    {
-        var trivia = new List<string>();
+    /// <param name="key">The key Discord_RPC.rb published it under.</param>
+    /// <returns>The number, or <see langword="null"/> when absent or invalid.</returns>
+    private long? Number(string key) =>
+        long.TryParse(Value(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var number) ? number : null;
 
-        for (var index = 0; Value($"trivia{index}") is { Length: > 0 } line; index++)
+    /// <summary>
+    /// Looks up a count together with the total it is out of.
+    /// </summary>
+    /// <param name="key">The key of the count.</param>
+    /// <param name="totalKey">The key of the total.</param>
+    /// <returns>Both, 0 when absent or invalid.</returns>
+    private (long Done, long Total) OutOf(string key, string totalKey) => (Number(key) ?? 0, Number(totalKey) ?? 0);
+
+    /// <summary>
+    /// Collects a ranked list published as <c>name0</c>, <c>name1</c> and so on up to the first gap.
+    /// </summary>
+    /// <typeparam name="T">The kind of entry.</typeparam>
+    /// <param name="nameKey">The key of an entry's name, without its rank.</param>
+    /// <param name="read">Reads the entry of a rank.</param>
+    /// <returns>The entries, highest rank first.</returns>
+    private List<T> Ranked<T>(string nameKey, Func<int, T> read)
+    {
+        var entries = new List<T>();
+
+        for (var rank = 0; Value($"{nameKey}{rank}").Length > 0; rank++)
         {
-            trivia.Add(line);
+            entries.Add(read(rank));
         }
 
-        return trivia;
+        return entries;
     }
 }

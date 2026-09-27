@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-27: Added the monster queens recruited to the trivia of Part 2
+#      Paulinchen  2026-09-27: Handed the trivia to DiscordPresence.dll as values, which writes the sentences now
+#                            - Added the monster queens recruited to the trivia of Part 2
 #                            - Added the side taken at the Navy Headquarters to the trivia of Part 2
 #                            - Added the routes cleared to the trivia of Part 3
 #                            - Added the latest ore unlocked for forging to the trivia of Parts 1 and 2
@@ -587,7 +588,8 @@ module MGQ_Discord
     end
   end
 
-  # Numbers the way the presence writes them.
+  # Large numbers the way the game writes them, which only the game can do. DiscordPresence.dll
+  # formats every other number.
   module NumberFormat
     # Groups the thousands with commas: 1234567 becomes "1,234,567".
     #
@@ -595,16 +597,6 @@ module MGQ_Discord
     # @return [String] the grouped number
     def self.grouped(number)
       number.to_i.to_s.reverse.scan(/\d{1,3}/).join(",").reverse
-    end
-
-    # Writes a count together with its noun: "1 battle", "2,345 battles".
-    #
-    # @param number [Integer] the count
-    # @param singular [String] the noun for exactly one
-    # @param plural [String] the noun for any other count
-    # @return [String] the count with its noun
-    def self.counted(number, singular, plural = singular + "s")
-      "#{grouped(number)} #{number.to_i == 1 ? singular : plural}"
     end
 
     # Shortens a large number the way the game does: 28879000000000000 becomes "28.879Qdr.".
@@ -1153,14 +1145,6 @@ module MGQ_Discord
       ROUTES[variable]
     end
 
-    # Names the groups of trivia that belong to the current point of the story.
-    #
-    # @return [Array<Symbol, Integer, String>] :general, the part, and in the final chapter the route
-    #   once it is being played
-    def self.groups
-      [:general, part, (route if part == 3)].compact
-    end
-
     # Reports whether Discord leaves out what spoils Part 3, which it does while Part 3 is played
     # unless the Spoilers option shows it.
     #
@@ -1170,46 +1154,20 @@ module MGQ_Discord
     end
   end
 
-  # The second Discord line. The presence shows one of these at a time.
+  # The values behind the second Discord line. DiscordPresence.dll writes the sentences and picks
+  # the ones that apply, so every value is published whatever the part, the route or the options.
   module Trivia
-    # Seconds the lines are kept before they are worked out again.
+    # Seconds the values are kept before they are read again.
     RECOMPUTE_SECONDS = 5
-
-    # Seconds a used item stays among the lines.
-    ITEM_USE_SECONDS = 90
-
-    # Seconds before the top stat and top master lines move on to the next one.
-    ROTATION_SECONDS = 45
 
     # Number of base parameters an actor has.
     PARAM_COUNT = 8
 
-    # Companions the affection line names at most.
+    # Companions the affection values name at most.
     TOP_AFFECTION_COUNT = 3
 
-    # Name and comment by the value of the game's difficulty variable.
-    DIFFICULTIES = {
-      -2 => ["Very Easy", "Here for the story, and that's fine"],
-      -1 => ["Easy",      "Taking it nice and slow"],
-      0  => ["Normal",    "The way it's meant to be played"],
-      1  => ["Hard",      "Starting to sweat a little"],
-      2  => ["Very Hard", "Pain is a choice, and they chose it"],
-      3  => ["Hell",      "Welcome to hell, enjoy your stay"],
-      4  => ["Paradox",   "Has lost all sense of self-preservation"],
-    }
-
-    # Comment on the playtime by the hours it takes, the highest one reached is shown.
-    PLAYTIME_COMMENTS = [
-      [0,    "Still an Apprentice Hero fresh out of Iliasville"],
-      [10,   "Has learned that every loss is a new bad end"],
-      [25,   "Starting to understand the job system... probably"],
-      [50,   "The Pocket Castle is starting to feel like home"],
-      [100,  "The job and race grind has begun in earnest"],
-      [200,  "Has seen more of the Labyrinth of Chaos than the sun"],
-      [400,  "Ilias has stopped answering their prayers"],
-      [700,  "The grind never ends, and neither do they"],
-      [1000, "Has become the true Paradox"],
-    ]
+    # Actors the mastery values name at most.
+    TOP_MASTER_COUNT = 3
 
     # Name in the editor of the switches that record each Randolph found, one per hiding place. 2.x
     # has none.
@@ -1230,7 +1188,7 @@ module MGQ_Discord
     MONSTER_QUEENS = [218, 245, 268, 280, 293, 315, 316, 322, 323, 328, 329, 334, 340, 341]
 
     # Side Luka takes at the Navy Headquarters in Part 2, by the switch that records the choice.
-    NAVAL_SIDES = { "Support Pirates" => "Pirates", "Support Navy" => "Marines" }
+    NAVAL_SIDES = { "Support Pirates" => "pirates", "Support Navy" => "marines" }
 
     # Switches the game turns on when a route of the final chapter is cleared: Destroyer, Judgment,
     # Chaos. 2.x has none.
@@ -1250,81 +1208,31 @@ module MGQ_Discord
     # The last item an actor used, on whom and when.
     ItemUse = Struct.new(:item, :target, :used_at)
 
-    # Every line by the group it belongs to, see Story.groups: :general always, a part (1 to 3) or a
-    # route of the final chapter ("chaos", "destroyer", "judgment") only while it is played. The
-    # general lines rotate first, then the part's, then the route's, each in their order here. Each
-    # returns its text, or nil to be left out for now.
-    LINES = {
-      :general => [
-        :dead_party_members,
-        :recruited_members,
-        :most_affection,
-        :battles_fought,
-        :difficulty,
-        :playtime,
-        :last_item_used,
-        :current_track,
-        :top_master,
-        :enemies_defeated,
-        :battles_escaped,
-        :wipeouts,
-        :top_stat,
-        :biggest_hit,
-        :gold_spent,
-        :items_synthesized,
-        :deepest_labyrinth_floor,
-        :requests_made,
-        :most_requested,
-        :times_raped,
-        :most_raped_by,
-        :battlefucks_won,
-        :gold_carried,
-      ],
-      1 => [
-        :spirits_recruited,
-        :forging_ore,
-      ],
-      2 => [
-        :spirits_recruited,
-        :forging_ore,
-        :naval_side,
-        :queens_recruited,
-      ],
-      3 => [
-        :routes_cleared,
-        :randolphs_found,
-      ],
-      "chaos" => [
-        :phenomena_of_ruin_defeated,
-      ],
-    }
+    # Every reader. Each returns its values by key, or nil while it has none.
+    READERS = [
+      :party, :affection, :progress, :last_item, :track, :masters, :top_stats, :statistics,
+      :nsfw_counts, :spirits, :queens, :ore, :naval_side, :routes_cleared, :randolphs, :phenomena,
+    ]
 
-    # Lines that spoil Part 3, left out while Story.hides_spoilers?.
-    SPOILERS = [:randolphs_found, :phenomena_of_ruin_defeated]
-
-    # The lines that currently apply.
+    # The values that currently apply.
     #
-    # Worked out at most every RECOMPUTE_SECONDS, and at once when another save is loaded.
+    # Read at most every RECOMPUTE_SECONDS, and at once when another save is loaded. A reader that
+    # fails leaves out only its own values.
     #
-    # @return [Array<String>] the lines, none before a save is loaded
-    def self.lines
-      return [] unless GameState.save_loaded?
+    # @return [Hash{String => Object}] the values by key, none before a save is loaded
+    def self.values
+      return {} unless GameState.save_loaded?
 
       now = Time.now.to_i
       game = $game_system.object_id
-      return @lines if @lines && @game == game && now - @computed_at < RECOMPUTE_SECONDS
+      return @values if @values && @game == game && now - @computed_at < RECOMPUTE_SECONDS
 
       @computed_at = now
       @game = game
-      @lines = current_lines.map { |line| MGQ_Discord.text_of { send(line) } }.reject { |text| text.empty? }
-    end
-
-    # The lines of the groups the story is at, without the spoilers while they are hidden.
-    #
-    # @return [Array<Symbol>] the lines, in the order they rotate
-    def self.current_lines
-      lines = Story.groups.flat_map { |group| LINES.fetch(group, []) }
-      Story.hides_spoilers? ? lines - SPOILERS : lines
+      @values = READERS.each_with_object({}) do |reader, values|
+        read = (send(reader) rescue nil)
+        values.update(read) if read
+      end
     end
 
     # Remembers an item an actor just used. Called from the Game_Battler#item_apply hook.
@@ -1335,40 +1243,33 @@ module MGQ_Discord
       @item_use = ItemUse.new(item.name.to_s, target.name.to_s, Time.now.to_i)
     end
 
-    # Counts up every ROTATION_SECONDS, which picks the top stat and the top master.
+    # The party: members down, companions recruited and gold carried.
     #
-    # @return [Integer] the current rotation
-    def self.rotation
-      Time.now.to_i / ROTATION_SECONDS
-    end
-
-    # How many of the active party are down.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.dead_party_members
-      count = $game_party.battle_members.count { |actor| actor.dead? }
-      "Currently has #{NumberFormat.counted(count, 'dead party member')}!" if count > 0
-    end
-
-    # How many companions have joined, Luka not counted.
-    #
-    # @return [String] the line
-    def self.recruited_members
-      "Has recruited #{companions.size} party members this playthrough!"
+    # @return [Hash{String => Integer}] the values
+    def self.party
+      {
+        "dead_members" => $game_party.battle_members.count { |actor| actor.dead? },
+        "companions"   => companions.size,
+        "gold"         => $game_party.gold,
+      }
     end
 
     # The recruited companions with the most affection, up to TOP_AFFECTION_COUNT.
     #
     # The game reads affection from $game_global_system, which all saves share.
     #
-    # @return [String, nil] the line, nil while no companion has any affection
-    def self.most_affection
+    # @return [Hash{String => Object}] names and affection by rank, from 0
+    def self.affection
       ranked = companions.map { |actor| [actor.name, actor.actor.love.to_i] }
                          .select { |_, love| love > 0 }
                          .sort_by { |_, love| -love }.first(TOP_AFFECTION_COUNT)
-      return nil if ranked.empty?
 
-      "Most affection with #{listed(ranked.map { |name, love| "#{name} (#{NumberFormat.grouped(love)})" })}!"
+      values = {}
+      ranked.each_with_index do |(name, love), rank|
+        values["affection_name#{rank}"] = name
+        values["affection_love#{rank}"] = love
+      end
+      values
     end
 
     # Every companion who has joined, Luka left out.
@@ -1381,59 +1282,35 @@ module MGQ_Discord
       $game_party.instance_variable_get(:@include_actors).map { |id| $game_actors[id] }.reject { |actor| actor.luca? }
     end
 
-    # Joins items the way a sentence lists them: "A", "A and B", "A, B and C".
+    # Battles fought, difficulty, playtime and the deepest Labyrinth of Chaos floor.
     #
-    # @param items [Array<String>] the items
-    # @return [String] the list
-    def self.listed(items)
-      items.size < 2 ? items.join : "#{items[0..-2].join(', ')} and #{items[-1]}"
+    # @return [Hash{String => Integer}] the values
+    def self.progress
+      {
+        "battles"          => $game_system.battle_count,
+        "difficulty"       => $game_variables[NWConst::Var::CURRENT_DIFFICULTY],
+        "playtime_hours"   => $game_system.playtime / 3600,
+        "labyrinth_record" => $game_variables[NWConst::Var::EX_DUNGEON_REACH],
+      }
     end
 
-    # How many battles this save has fought.
+    # The item an actor used last, on whom and when.
     #
-    # @return [String] the line
-    def self.battles_fought
-      "Has fought #{NumberFormat.grouped($game_system.battle_count)} battles!"
-    end
-
-    # The difficulty, with a comment on it.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.difficulty
-      name, comment = DIFFICULTIES[$game_variables[NWConst::Var::CURRENT_DIFFICULTY]]
-      "Currently playing on #{name} - #{comment}!" if name
-    end
-
-    # The playtime in hours, with a comment on it.
-    #
-    # @return [String] the line
-    def self.playtime
-      hours = $game_system.playtime / 3600
-      comment = PLAYTIME_COMMENTS.select { |minimum, _| hours >= minimum }.last[1]
-
-      if hours == 0
-        "Is less than an hour in. #{comment}!"
-      else
-        "Is #{NumberFormat.counted(hours, 'hour')} in. #{comment}!"
-      end
-    end
-
-    # The item an actor used last, for ITEM_USE_SECONDS.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.last_item_used
+    # @return [Hash{String => Object}, nil] the values, nil before the first use this session
+    def self.last_item
       use = @item_use
-      "Just used #{use.item} on #{use.target}!" if use && Time.now.to_i - use.used_at <= ITEM_USE_SECONDS
+      use && { "item_used" => use.item, "item_target" => use.target, "item_used_at" => use.used_at }
     end
 
     # The music that is playing, named like in the music room of Kagetsumugi's jukebox.
     #
     # RPG::BGM.last is the game's own record of the music started last, emptied when it stops.
     #
-    # @return [String, nil] the line, nil when no music plays or the jukebox does not know the track
-    def self.current_track
+    # @return [Hash{String => String}, nil] the title, nil when no music plays or the jukebox does
+    #   not know the track
+    def self.track
       title = track_titles[File.basename(RPG::BGM.last.name.to_s, ".*").downcase]
-      "Currently vibing to #{title}!" if title
+      title && { "track" => title }
     end
 
     # Track names by BGM file name, read from the music room once.
@@ -1445,155 +1322,88 @@ module MGQ_Discord
       end
     end
 
-    # Names one of the three actors in the active party with the most mastered jobs and races,
-    # taking turns every ROTATION_SECONDS.
+    # The actors in the active party with the most mastered jobs and races, up to TOP_MASTER_COUNT.
     #
-    # @return [String, nil] the line, nil while nobody has mastered anything
-    def self.top_master
+    # @return [Hash{String => Object}] names, jobs and races by rank, from 0
+    def self.masters
       ranked = $game_party.battle_members.map { |actor| [actor, GameState.mastery(actor)] }
                           .select { |_, mastery| mastery.total > 0 }
-                          .sort_by { |_, mastery| -mastery.total }.first(3)
-      return nil if ranked.empty?
+                          .sort_by { |_, mastery| -mastery.total }.first(TOP_MASTER_COUNT)
 
-      actor, mastery = ranked[rotation % ranked.size]
-      "#{actor.name} has mastered #{mastery.jobs} Jobs and #{mastery.races} Races already!"
+      values = {}
+      ranked.each_with_index do |(actor, mastery), rank|
+        values["master_name#{rank}"] = actor.name
+        values["master_jobs#{rank}"] = mastery.jobs
+        values["master_races#{rank}"] = mastery.races
+      end
+      values
     end
 
-    # How many enemies were defeated, in this save or all saves.
+    # Who in the active party leads in each stat.
     #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.enemies_defeated
-      count = Statistics[:defeat]
-      "Has defeated #{NumberFormat.counted(count, 'enemy', 'enemies')}!" if count > 0
+    # @return [Hash{String => String}] the stat's name, its leader and the value by stat, from 0
+    def self.top_stats
+      (0...PARAM_COUNT).each_with_object({}) do |param_id, values|
+        best = $game_party.battle_members.max_by { |actor| actor.param(param_id) }
+        next unless best
+
+        values["stat_name#{param_id}"] = Vocab.param(param_id)
+        values["stat_holder#{param_id}"] = best.name
+        values["stat_value#{param_id}"] = NumberFormat.large(best.param(param_id))
+      end
     end
 
-    # How many battles were run away from, in this save or all saves.
+    # Defeats, escapes, wipeouts, syntheses, gold spent, the biggest hit and battle fucks won, in
+    # this save or all saves.
     #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.battles_escaped
-      count = Statistics[:escape]
-      "Has run away from #{NumberFormat.counted(count, 'battle')}!" if count > 0
-    end
-
-    # How often the party was wiped out, in this save or all saves.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.wipeouts
-      count = Statistics[:lose]
-      "Has been wiped out #{NumberFormat.counted(count, 'time')}!" if count > 0
-    end
-
-    # Names who in the active party leads in one stat, a different stat every ROTATION_SECONDS.
-    #
-    # Only that one stat is compared, and the result is kept until the rotation moves on.
-    #
-    # @return [String, nil] the line, nil with an empty party
-    def self.top_stat
-      slot = rotation
-      game = $game_system.object_id
-      return @top_stat if @top_stat_slot == slot && @top_stat_game == game
-
-      @top_stat_slot = slot
-      @top_stat_game = game
-
-      param_id = slot % PARAM_COUNT
-      best = $game_party.battle_members.max_by { |actor| actor.param(param_id) }
-      @top_stat = best && "#{best.name} has the highest #{Vocab.param(param_id)} (#{NumberFormat.large(best.param(param_id))}) in the party!"
-    end
-
-    # The biggest hit dealt, in this save or all saves.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.biggest_hit
+    # @return [Hash{String => Object}] the values
+    def self.statistics
+      values = {
+        "defeated"        => Statistics[:defeat],
+        "escaped"         => Statistics[:escape],
+        "wipeouts"        => Statistics[:lose],
+        "synthesized"     => Statistics[:synthesize],
+        "gold_spent"      => Statistics[:gold_spent],
+        "battlefucks_won" => Statistics.battlefucks_won,
+      }
       damage = Statistics[:best_hit]
-      "Biggest hit dealt: #{NumberFormat.large(damage)} damage!" if damage > 0
+      values["biggest_hit"] = NumberFormat.large(damage) if damage > 0
+      values
     end
 
-    # How much gold was spent in shops, in this save or all saves.
+    # Requests made and defeat scenes seen in this save, in total and who the most.
     #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.gold_spent
-      gold = Statistics[:gold_spent]
-      "Has spent #{NumberFormat.grouped(gold)} gold in shops!" if gold > 0
-    end
+    # @return [Hash{String => Object}] the values
+    def self.nsfw_counts
+      values = { "requests" => SaveStats[:requests], "rapes" => SaveStats[:rapes] }
 
-    # How many items were synthesized, in this save or all saves.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.items_synthesized
-      count = Statistics[:synthesize]
-      "Has synthesized #{NumberFormat.counted(count, 'item')}!" if count > 0
-    end
-
-    # The deepest Labyrinth of Chaos floor reached.
-    #
-    # @return [String, nil] the line, nil when it does not apply
-    def self.deepest_labyrinth_floor
-      floor = $game_variables[NWConst::Var::EX_DUNGEON_REACH]
-      "Has reached floor #{floor} in the Labyrinth of Chaos!" if floor > 0
-    end
-
-    # How many requests this save has made.
-    #
-    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
-    def self.requests_made
-      count = SaveStats[:requests]
-      "Has made #{NumberFormat.counted(count, 'request')}!" if Options.nsfw? && count > 0
-    end
-
-    # Who this save has made the most requests to.
-    #
-    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
-    def self.most_requested
       character, count = SaveStats.top(:requests)
-      "Has requested #{character} the most, #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && character
-    end
+      values.update("most_requested" => character, "most_requested_count" => count) if character
 
-    # How many defeat scenes this save has seen.
-    #
-    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
-    def self.times_raped
-      count = SaveStats[:rapes]
-      "Has been raped #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && count > 0
-    end
-
-    # Which monster girl this save has seen the most defeat scenes of.
-    #
-    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
-    def self.most_raped_by
       monster, count = SaveStats.top(:rapes)
-      "Raped by #{monster} the most, #{NumberFormat.counted(count, 'time')}!" if Options.nsfw? && monster
-    end
-
-    # How many battle fucks were won, in this save or all saves.
-    #
-    # @return [String, nil] the line, nil when it does not apply or the NSFW option is off
-    def self.battlefucks_won
-      count = Statistics.battlefucks_won
-      "Has won #{NumberFormat.counted(count, 'battlefuck')}!" if Options.nsfw? && count > 0
-    end
-
-    # How much gold the party carries.
-    #
-    # @return [String] the line
-    def self.gold_carried
-      "Currently carrying #{NumberFormat.grouped($game_party.gold)} gold!"
+      values.update("most_raped_by" => monster, "most_raped_count" => count) if monster
+      values
     end
 
     # How many of the four spirits have joined the party.
     #
-    # @return [String, nil] the line, nil before the first
-    def self.spirits_recruited
-      recruited = recruited_count(spirit_ids)
-      "Has recruited #{recruited} out of #{spirit_ids.size} spirits!" if recruited > 0
+    # @return [Hash{String => Integer}] the recruited and the total
+    def self.spirits
+      { "spirits" => recruited_count(spirit_ids), "spirits_total" => spirit_ids.size }
+    end
+
+    # The actor ids of the SPIRITS, looked up once.
+    #
+    # @return [Array<Integer>] the ids, the first actor of each name
+    def self.spirit_ids
+      @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && actor.name == name } }.compact
     end
 
     # How many of the monster queens have joined the party.
     #
-    # @return [String, nil] the line, nil before the first
-    def self.queens_recruited
-      recruited = recruited_count(MONSTER_QUEENS)
-      "Has recruited #{recruited} out of #{MONSTER_QUEENS.size} monster queens!" if recruited > 0
+    # @return [Hash{String => Integer}] the recruited and the total
+    def self.queens
+      { "queens" => recruited_count(MONSTER_QUEENS), "queens_total" => MONSTER_QUEENS.size }
     end
 
     # Counts the actors that have joined the party.
@@ -1607,43 +1417,36 @@ module MGQ_Discord
       ids.count { |id| roster.include?(id) }
     end
 
-    # The actor ids of the SPIRITS, looked up once.
-    #
-    # @return [Array<Integer>] the ids, the first actor of each name
-    def self.spirit_ids
-      @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && actor.name == name } }.compact
-    end
-
     # The best ore the party holds for forging, the one found last.
     #
-    # @return [String, nil] the line, nil before the first ore
-    def self.forging_ore
+    # @return [Hash{String => String}, nil] the ore's name, nil before the first ore
+    def self.ore
       ore = FORGING_ORES.reverse.map { |id| $data_items[id] }.find { |item| item && $game_party.has_item?(item) }
-      "Has unlocked #{ore.name} for forging!" if ore
+      ore && { "ore" => ore.name }
     end
 
     # Whether Luka sided with the pirates or the marines at the Navy Headquarters.
     #
-    # @return [String, nil] the line, nil before the choice
+    # @return [Hash{String => String}, nil] "pirates" or "marines", nil before the choice
     def self.naval_side
       switch = NAVAL_SIDES.keys.find { |name| GameState.switch_on?(name) }
-      "Sided with the #{NAVAL_SIDES[switch]} this playthrough!" if switch
+      switch && { "naval_side" => NAVAL_SIDES[switch] }
     end
 
     # How many routes of the final chapter this playthrough has cleared.
     #
-    # @return [String, nil] the line, nil before the first or on 2.x
+    # @return [Hash{String => Integer}] the cleared and the total
     def self.routes_cleared
       cleared = ROUTE_CLEARS.count { |name| GameState.switch_on?(name) }
-      "Has cleared #{cleared} out of #{ROUTE_CLEARS.size} routes!" if cleared > 0
+      { "routes_cleared" => cleared, "routes_total" => ROUTE_CLEARS.size }
     end
 
     # How many of Randolph's hiding places this playthrough has found.
     #
-    # @return [String, nil] the line, nil before the first or on 2.x
-    def self.randolphs_found
+    # @return [Hash{String => Integer}] the found and the total, which is 0 on 2.x
+    def self.randolphs
       found = randolph_switches.count { |id| $game_switches[id] }
-      "Has found #{found} out of #{randolph_switches.size} Randolphs!" if found > 0
+      { "randolphs" => found, "randolphs_total" => randolph_switches.size }
     end
 
     # The switches recording each Randolph found, looked up once.
@@ -1655,13 +1458,13 @@ module MGQ_Discord
 
     # How many of the Phenomena of Ruin the Chaos route has defeated.
     #
-    # @return [String, nil] the line, nil before the first or on 2.x
-    def self.phenomena_of_ruin_defeated
+    # @return [Hash{String => Integer}, nil] the defeated and the total, nil before the Chaos
+    #   route's prologue or on 2.x
+    def self.phenomena
       left = GameState.variable(RUIN_LEFT)
       return nil if left <= 0 && !GameState.switch_on?(RUIN_ALL_DEFEATED)
 
-      defeated = PHENOMENA_OF_RUIN - [left, 0].max
-      "#{defeated} out of #{PHENOMENA_OF_RUIN} Phenomena of Ruin have been defeated!" if defeated > 0
+      { "phenomena" => PHENOMENA_OF_RUIN - [left, 0].max, "phenomena_total" => PHENOMENA_OF_RUIN }
     end
   end
 
@@ -1855,10 +1658,11 @@ module MGQ_Discord
       if (labyrinth = GameState.labyrinth)
         fields["loc_floor"] = labyrinth.floor
         fields["loc_type"] = labyrinth.kind
-        fields["loc_rare"] = NumberFormat.grouped(labyrinth.rare_points)
+        fields["loc_rare"] = labyrinth.rare_points
       end
 
-      Trivia.lines.each_with_index { |line, index| fields["trivia#{index}"] = line } unless scene == "title"
+      fields["nsfw"] = 1 if Options.nsfw?
+      fields.update(Trivia.values) unless scene == "title"
 
       fields.map { |key, value| "#{key}=#{value.to_s.gsub(/[\r\n]/, ' ')}\n" }.join
     end
