@@ -86,7 +86,7 @@ internal sealed class Activity
     /// What Discord hands the game of a friend who joins, <see langword="null"/> while nobody can.
     /// </summary>
     /// <remarks>
-    /// The buttons are left out while it is set. Whether Discord accepts both at once is untested.
+    /// The buttons are left out while it is set, since whether Discord accepts both is untested.
     /// </remarks>
     public string? JoinSecret { get; set; }
 

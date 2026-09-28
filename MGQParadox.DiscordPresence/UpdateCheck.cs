@@ -109,7 +109,7 @@ internal static class UpdateCheck
     /// Asks GitHub and keeps the answer.
     /// </summary>
     /// <remarks>
-    /// Catches everything. An exception escaping this thread would end the whole game.
+    /// Catches everything, since an exception escaping this thread would end the whole game.
     /// </remarks>
     /// <param name="installed">The version of this DLL.</param>
     private static void Run(Version installed)

@@ -19,7 +19,7 @@ namespace MGQParadox.DiscordPresence;
 /// DiscordPresence.log in the mod folder, written by the DLL.
 /// </summary>
 /// <remarks>
-/// Never throws. A failing log must not take down the code writing it, least of all the game.
+/// Never throws, since a failing log must not take down the code writing it, least of all the game.
 /// </remarks>
 internal static class Log
 {

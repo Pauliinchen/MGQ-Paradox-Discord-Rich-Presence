@@ -232,8 +232,8 @@ internal sealed class DiscordIpcClient
     /// Reads everything Discord sends from here on, in the background.
     /// </summary>
     /// <remarks>
-    /// Discord answers every command and pings now and then. Left unread, those fill the pipe
-    /// until writing to it blocks.
+    /// Discord answers every command and pings now and then, which fill the pipe until writing to
+    /// it blocks when left unread.
     /// </remarks>
     /// <param name="pipe">The connected pipe.</param>
     private void StartDrainThread(NamedPipeClientStream pipe)
@@ -246,7 +246,7 @@ internal sealed class DiscordIpcClient
     /// the pipe closes, then lets go of it.
     /// </summary>
     /// <remarks>
-    /// Ends quietly on any failure. An exception escaping a thread would end the whole game.
+    /// Ends quietly on any failure, since an exception escaping a thread would end the whole game.
     /// </remarks>
     /// <param name="pipe">The pipe to read.</param>
     private void Drain(NamedPipeClientStream pipe)

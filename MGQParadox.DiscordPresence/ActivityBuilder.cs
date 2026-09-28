@@ -237,7 +237,6 @@ internal static class ActivityBuilder
     /// Builds the first line: where the player is and what they are doing.
     /// </summary>
     /// <remarks>
-    /// The world map's own name is untranslated kanji, so a fight there names the journey instead.
     /// Battles, the Labyrinth, the Pocket Castle, camp and conversations never show idle, since
     /// auto-battle and their own lines say more than it would.
     /// </remarks>

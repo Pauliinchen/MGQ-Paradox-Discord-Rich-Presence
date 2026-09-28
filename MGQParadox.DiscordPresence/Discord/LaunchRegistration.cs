@@ -15,9 +15,8 @@ namespace MGQParadox.DiscordPresence.Discord;
 /// Tells Discord how to start the game, so accepting an invite while it is closed opens it.
 /// </summary>
 /// <remarks>
-/// Discord starts a game by its application's URL scheme, <c>discord-&lt;application id&gt;://</c>,
-/// which Windows looks up under the current user without admin rights. The game that started last
-/// owns it, which matters when several game folders are installed.
+/// The URL scheme sits under the current user, which needs no admin rights, and belongs to the game
+/// that started last, which matters when several game folders are installed.
 /// </remarks>
 internal static class LaunchRegistration
 {

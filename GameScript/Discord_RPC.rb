@@ -81,7 +81,7 @@ module MGQ_Discord
   # Another copy of this script or an earlier version wraps the same methods under the same names,
   # and each hook would then call itself until the stack overflows.
   #
-  # @return [Boolean] false when the hooks are in place already, or the earlier version would add them
+  # @return [Boolean] false when the hooks are in place already, or the earlier version would add them.
   def self.hookable?
     retired = retire_legacy_script
 
@@ -98,7 +98,7 @@ module MGQ_Discord
 
   # Deletes the game script of the earlier versions, so their block in Patch.rb finds nothing to load.
   #
-  # @return [Boolean] whether it is gone
+  # @return [Boolean] Whether it is gone.
   def self.retire_legacy_script
     return true unless File.exist?(LEGACY_SCRIPT)
 
@@ -112,7 +112,7 @@ module MGQ_Discord
 
   # Reports whether Patch.rb still holds the block of the earlier versions, which loads LEGACY_SCRIPT.
   #
-  # @return [Boolean] whether the block is present, true when Patch.rb cannot be read
+  # @return [Boolean] Whether the block is present, true when Patch.rb cannot be read.
   def self.legacy_block_present?
     File.open(PATCH_FILE, "rb") { |file| file.read }.include?(LEGACY_BLOCK_MARKER)
   rescue
@@ -150,7 +150,7 @@ module MGQ_Discord
 
   # Publishes the status, unless it is unchanged since the last time.
   #
-  # @param scene [String] what the game is showing, see GameState.scene
+  # @param scene [String] What the game is showing, see GameState.scene.
   def self.publish(scene)
     status = StatusText.build(scene)
     return if status == @published
@@ -164,15 +164,15 @@ module MGQ_Discord
 
   # When the player last pressed a button, in Unix seconds.
   #
-  # @return [Integer] the time, the start of the game session until the first press
+  # @return [Integer] The time, the start of the game session until the first press.
   def self.last_input_at
     @last_input_at || STARTED_AT
   end
 
   # Builds the path of a file inside the mod folder.
   #
-  # @param name [String] the file name, relative to the mod folder
-  # @return [String] the full path
+  # @param name [String] The file name, relative to the mod folder.
+  # @return [String] The full path.
   def self.path(name)
     "#{game_dir}/#{MOD_DIR}/#{name}"
   end
@@ -181,7 +181,7 @@ module MGQ_Discord
   #
   # Asked of Windows, the working directory is wherever a shortcut or Steam started the game.
   #
-  # @return [String] the folder, with forward slashes
+  # @return [String] The folder, with forward slashes.
   def self.game_dir
     @game_dir ||= begin
       buffer = "\0" * 512
@@ -196,8 +196,8 @@ module MGQ_Discord
   #
   # At the title screen $game_map exists but holds no map, so even display_name raises.
   #
-  # @yieldreturn [Object] the value
-  # @return [String] the value as text, or "" when it is nil or reading it failed
+  # @yieldreturn [Object] The value.
+  # @return [String] The value as text, or "" when it is nil or reading it failed.
   def self.text_of
     value = yield
     value.nil? ? "" : value.to_s
@@ -214,7 +214,7 @@ module MGQ_Discord
 
     # Appends a line, prefixed with the time.
     #
-    # @param message [String] the line to append
+    # @param message [String] The line to append.
     def self.write(message)
       return if @lines >= MAX_LINES
       @lines += 1
@@ -226,9 +226,8 @@ module MGQ_Discord
 
   # The mod's options, in the Mod Config Menu when it is installed, in the game's Config menu otherwise.
   #
-  # The game keeps its options inside each save. The mod's options are the same for every save, so
-  # they live in Discord/Settings.ini, are handed to whichever save is loaded and left out of the
-  # save files.
+  # The game keeps its options inside each save, but the mod's are the same for every save, so they
+  # live in Discord/Settings.ini, are handed to whichever save is loaded and left out of the saves.
   module Options
     # File inside the mod folder, edited by players too.
     FILE = "Settings.ini"
@@ -295,10 +294,10 @@ module MGQ_Discord
     # Every option, by its key in $game_system.conf.
     KEYS = NAMES.keys
 
-    # How each option shows in the menu, in this order: its name, its help, the option it sits
-    # under, and a name and help per value. The first value is the default. An option greys out
-    # while the one it sits under is off; one with :when only shows while the one it sits under
-    # holds that value. An option under a greyed out one leaves the menu.
+    # How each option shows in the menu, its first value being the default.
+    #
+    # An option greys out while the one it sits under is off, shows only while that one holds its
+    # :when value, and leaves the menu while that one is greyed out.
     MENU = {
       PRESENCE => {
         :name   => "[Discord] Rich Presence",
@@ -394,11 +393,11 @@ module MGQ_Discord
       },
     }
 
-    # Adds the options to the menu, each one under its parents, and takes out the ones that do not
-    # apply. Every entry is kept, so arrange can put them back.
+    # Adds the options to the menu, each one under its parents, and keeps every entry, so arrange
+    # can take out and put back the ones that do not apply.
     #
-    # The Mod Config Menu defines MOD_CONTENTS in 0_ModConfigMenu.rb, which the mod loader runs
-    # before this script. The game's own Config menu ignores :enable.
+    # The Mod Config Menu's MOD_CONTENTS exists already, since the mod loader runs
+    # 0_ModConfigMenu.rb before this script, and the game's own Config menu ignores :enable.
     def self.register
       config = NWConst::Config
       @menu = config.const_defined?(:MOD_CONTENTS) ? config::MOD_CONTENTS : config::CONTENTS
@@ -427,7 +426,7 @@ module MGQ_Discord
     # Puts the options that apply into the menu, below Rich Presence, which always shows, and takes
     # the others out. The config windows call it before they draw, so the menu follows every change.
     #
-    # @return [Boolean] whether the menu changed
+    # @return [Boolean] Whether the menu changed.
     def self.arrange
       return false unless @entries
 
@@ -441,15 +440,19 @@ module MGQ_Discord
       true
     end
 
-    # @param key [Symbol] the option
-    # @return [Integer] how many options it sits under
+    # Counts the options an option sits under in the menu.
+    #
+    # @param key [Symbol] The option.
+    # @return [Integer] How many options it sits under.
     def self.depth_of(key)
       parent = MENU[key][:under]
       parent ? depth_of(parent) + 1 : 0
     end
 
-    # @param key [Symbol] the option
-    # @return [Boolean] whether it is in the menu as it currently shows
+    # Tells whether an option is in the menu.
+    #
+    # @param key [Symbol] The option.
+    # @return [Boolean] Whether it is in the menu as it currently shows.
     def self.shown?(key)
       option = MENU[key]
       parent = option[:under]
@@ -458,8 +461,10 @@ module MGQ_Discord
       shown?(parent) && enabled?(parent) && (!option.key?(:when) || in_menu(parent) == option[:when])
     end
 
-    # @param key [Symbol] the option
-    # @return [Boolean] whether it can be changed, rather than greyed out, as the menu currently shows
+    # Tells whether an option can be changed.
+    #
+    # @param key [Symbol] The option.
+    # @return [Boolean] Whether it can be changed, rather than greyed out, as the menu currently shows.
     def self.enabled?(key)
       option = MENU[key]
       parent = option[:under]
@@ -470,68 +475,88 @@ module MGQ_Discord
 
     # Reads an option as the menu currently shows it, which may not be stored yet.
     #
-    # @param key [Symbol] the option
-    # @return [Integer] its value
+    # @param key [Symbol] The option.
+    # @return [Integer] Its value.
     def self.in_menu(key)
       value = $game_system.conf[key] rescue nil
       value.nil? ? self[key] : value
     end
 
-    # @return [Boolean] whether Discord shows the game at all
+    # Reads the Rich Presence option.
+    #
+    # @return [Boolean] Whether Discord shows the game at all.
     def self.presence?
       self[PRESENCE] == 1
     end
 
-    # @return [Boolean] whether requests, defeat scenes and battle fucks show on Discord
+    # Reads the NSFW option.
+    #
+    # @return [Boolean] Whether requests, defeat scenes and battle fucks show on Discord.
     def self.nsfw?
       self[NSFW] == 1
     end
 
-    # @return [Boolean] whether the trivia counts across all saves instead of per save
+    # Reads the Statistics option.
+    #
+    # @return [Boolean] Whether the trivia counts across all saves instead of per save.
     def self.all_saves?
       self[ALL_SAVES] == 1
     end
 
-    # @return [Boolean] whether Discord shows what spoils Part 3
+    # Reads the Spoilers option.
+    #
+    # @return [Boolean] Whether Discord shows what spoils Part 3.
     def self.spoilers?
       self[SPOILERS] == 1
     end
 
-    # @return [Boolean] whether the picture follows the story instead of being the app icon
+    # Reads the Activity Image option.
+    #
+    # @return [Boolean] Whether the picture follows the story instead of being the app icon.
     def self.dynamic_picture?
       self[PICTURE] == 1
     end
 
-    # @return [String, nil] the art asset the Shown Image option picks, nil for the app icon
+    # Reads the Shown Image option.
+    #
+    # @return [String, nil] The art asset the Shown Image option picks, nil for the app icon.
     def self.fixed_picture
       FIXED_PICTURES[self[SHOWN_PICTURE]]
     end
 
-    # @return [Boolean] whether the dynamic picture shows Ilias and Alice sealed
+    # Reads the Ilias / Alice option.
+    #
+    # @return [Boolean] Whether the dynamic picture shows Ilias and Alice sealed.
     def self.sealed_sides?
       self[SEALED_SIDES] == 1
     end
 
-    # @return [Boolean] whether the dynamic picture shows a route's logo over its heroines
+    # Reads the Routes option.
+    #
+    # @return [Boolean] Whether the dynamic picture shows a route's logo over its heroines.
     def self.layered_routes?
       self[LAYERED_ROUTES] == 1
     end
 
-    # @return [Boolean] whether the title screen tells of a newer release of the mod
+    # Reads the Update Check option.
+    #
+    # @return [Boolean] Whether the title screen tells of a newer release of the mod.
     def self.update_check?
       self[UPDATE_CHECK] == 1
     end
 
-    # @param key [Symbol] the option
-    # @return [Integer] its value, the menu's default until it was changed
+    # Reads an option's value.
+    #
+    # @param key [Symbol] The option.
+    # @return [Integer] Its value, the menu's default until it was changed.
     def self.[](key)
       values.fetch(key) { NWConst::Config::DEFAULT[key] }
     end
 
-    # Keeps the options of the loaded save and FILE in step. Called before every publish.
+    # Keeps the options of the loaded save and FILE in step, before every publish.
     #
     # Loading a save, starting a new game or returning to the title brings a new $game_system.conf,
-    # which gets the stored options. Any other difference was made in the menu and gets stored.
+    # which gets the stored options, so any other difference was made in the menu and gets stored.
     def self.sync
       return unless $game_system
       conf = $game_system.conf
@@ -553,7 +578,7 @@ module MGQ_Discord
 
     # Writes options to FILE, replacing their lines or appending them. Every other line stays as it is.
     #
-    # @param keys [Array<Symbol>] the options to write
+    # @param keys [Array<Symbol>] The options to write.
     def self.write(keys)
       lines = File.open(MGQ_Discord.path(FILE), "rb") { |file| file.read }.each_line.to_a rescue []
       newline = lines.first.to_s.end_with?("\r\n") ? "\r\n" : "\n"
@@ -586,7 +611,7 @@ module MGQ_Discord
 
     # The stored options, read from FILE once.
     #
-    # @return [Hash{Symbol => Integer}] the values by option
+    # @return [Hash{Symbol => Integer}] The values by option.
     def self.values
       @values ||= begin
         File.open(MGQ_Discord.path(FILE), "rb") { |file| file.read }.each_line.each_with_object({}) do |line, stored|
@@ -600,8 +625,8 @@ module MGQ_Discord
 
     # Reads the key of a line in FILE, compared without regard to case.
     #
-    # @param line [String] the line
-    # @return [String, nil] the key in lower case, nil for a comment, a section header or a line without one
+    # @param line [String] The line.
+    # @return [String, nil] The key in lower case, nil for a comment, a section header or a line without one.
     def self.name_of(line)
       line = line.strip
       return nil if line.start_with?("#", ";", "[")
@@ -616,8 +641,8 @@ module MGQ_Discord
   module NumberFormat
     # Groups the thousands with commas: 1234567 becomes "1,234,567".
     #
-    # @param number [Integer] the number
-    # @return [String] the grouped number
+    # @param number [Integer] The number.
+    # @return [String] The grouped number.
     def self.grouped(number)
       number.to_i.to_s.reverse.scan(/\d{1,3}/).join(",").reverse
     end
@@ -626,8 +651,8 @@ module MGQ_Discord
     #
     # give_unit comes from the game's LargeNumberConversion plugin.
     #
-    # @param number [Integer] the number
-    # @return [String] the shortened number
+    # @param number [Integer] The number.
+    # @return [String] The shortened number.
     def self.large(number)
       number = number.to_i
       number >= 10**6 && number.respond_to?(:give_unit) ? number.give_unit : grouped(number)
@@ -650,7 +675,9 @@ module MGQ_Discord
 
     # Jobs and races an actor has taken to their maximum level.
     class Mastery < Struct.new(:jobs, :races)
-      # @return [Integer] jobs and races together
+      # Counts the jobs and races mastered.
+      #
+      # @return [Integer] Jobs and races together.
       def total
         jobs + races
       end
@@ -660,7 +687,7 @@ module MGQ_Discord
     #
     # The game has no mouse support, so the mouse never counts.
     #
-    # @return [Boolean]
+    # @return [Boolean] Whether a button is held down.
     def self.input?
       BUTTONS.any? { |button| Input.press?(button) }
     end
@@ -669,7 +696,7 @@ module MGQ_Discord
     #
     # Before one is, the game holds placeholders: an empty party, no gold, map 0.
     #
-    # @return [Boolean]
+    # @return [Boolean] Whether a save is loaded.
     def self.save_loaded?
       $game_map.map_id > 0
     rescue
@@ -678,8 +705,8 @@ module MGQ_Discord
 
     # Reads a switch by its name in the editor, so no id is hard-coded.
     #
-    # @param name [String] the name of the switch
-    # @return [Boolean, nil] the switch, nil when no switch has that name
+    # @param name [String] The name of the switch.
+    # @return [Boolean, nil] The switch, nil when no switch has that name.
     def self.switch_on?(name)
       id = $data_system.switches.index(name)
       id && $game_switches[id]
@@ -687,16 +714,16 @@ module MGQ_Discord
 
     # Finds every switch with a name in the editor, for names the game gives to a whole row of them.
     #
-    # @param name [String] the name of the switches
-    # @return [Array<Integer>] their ids, none when no switch has that name
+    # @param name [String] The name of the switches.
+    # @return [Array<Integer>] Their ids, none when no switch has that name.
     def self.switches_named(name)
       $data_system.switches.each_index.select { |id| $data_system.switches[id] == name }
     end
 
     # Reads a variable by its name in the editor, so no id is hard-coded.
     #
-    # @param name [String] the name of the variable
-    # @return [Integer] the value, 0 when no variable has that name
+    # @param name [String] The name of the variable.
+    # @return [Integer] The value, 0 when no variable has that name.
     def self.variable(name)
       id = $data_system.variables.index(name)
       id ? $game_variables[id].to_i : 0
@@ -706,7 +733,7 @@ module MGQ_Discord
     #
     # Its floors are named after their biome, so only the game's own flag tells.
     #
-    # @return [Boolean]
+    # @return [Boolean] Whether the party is in the labyrinth.
     def self.in_labyrinth?
       switch_on?("Within Chaos Labyrinth") || variable("Within Chaos Labyrinth") > 0
     rescue
@@ -717,7 +744,7 @@ module MGQ_Discord
     #
     # The labyrinth's outdoor floors use the world map's field tilesets too.
     #
-    # @return [Boolean]
+    # @return [Boolean] Whether the party is on the world map.
     def self.on_world_map?
       $game_map.overworld? && !in_labyrinth?
     rescue
@@ -729,7 +756,7 @@ module MGQ_Discord
     # The world map's name is untranslated kanji, so a menu opened there stays "travel" rather
     # than naming the map.
     #
-    # @return [String] "title", "battle", "request", "defeat_scene", "battlefuck", "travel", "map" or "menu"
+    # @return [String] "title", "battle", "request", "defeat_scene", "battlefuck", "travel", "map" or "menu".
     def self.scene
       scene = SceneManager.scene
       return "title" if scene.nil?
@@ -750,7 +777,7 @@ module MGQ_Discord
     # Names the screen open in a menu, by the game's own class name, which DiscordPresence.dll
     # turns into what the player is doing there.
     #
-    # @return [String] the class name, such as "Scene_Shop", or "" when unknown
+    # @return [String] The class name, such as "Scene_Shop", or "" when unknown.
     def self.screen
       MGQ_Discord.text_of { SceneManager.scene.class.name }
     end
@@ -759,7 +786,7 @@ module MGQ_Discord
     #
     # RPG::BGM.last is the game's own record of the music started last, emptied when it stops.
     #
-    # @return [Boolean]
+    # @return [Boolean] Whether the camp music plays.
     def self.camping?
       File.basename(RPG::BGM.last.name.to_s, ".*").casecmp(CAMP_BGM) == 0
     rescue
@@ -768,7 +795,7 @@ module MGQ_Discord
 
     # Tells how the party crosses the world map.
     #
-    # @return [String] "air", "sea" or "foot"
+    # @return [String] "air", "sea" or "foot".
     def self.vehicle
       player = $game_player
       return "air" if player.in_airship?
@@ -782,7 +809,7 @@ module MGQ_Discord
     #
     # Many maps leave their display name blank, which falls back to the name in the editor.
     #
-    # @return [String] the name, or "" when there is none
+    # @return [String] The name, or "" when there is none.
     def self.area
       name = MGQ_Discord.text_of { $game_map.display_name }
       name = MGQ_Discord.text_of { $data_mapinfos[$game_map.map_id].name } if name.empty?
@@ -793,7 +820,7 @@ module MGQ_Discord
     #
     # Normal and Carnage runs count their floors in the same variable.
     #
-    # @return [Labyrinth, nil] the progress, nil outside the labyrinth
+    # @return [Labyrinth, nil] The progress, nil outside the labyrinth.
     def self.labyrinth
       return nil unless save_loaded? && in_labyrinth?
 
@@ -808,8 +835,8 @@ module MGQ_Discord
     #
     # A job or race whose level in level_list reached its max_lv counts as mastered.
     #
-    # @param actor [Game_Actor] the actor
-    # @return [Mastery] the mastered jobs and races
+    # @param actor [Game_Actor] The actor.
+    # @return [Mastery] The mastered jobs and races.
     def self.mastery(actor)
       mastery = Mastery.new(0, 0)
 
@@ -838,13 +865,15 @@ module MGQ_Discord
 
     # Counts a novel scene that just started, if it is a request. Called from the Game_Novel#setup hook.
     #
-    # @param event_id [Integer] the common event the scene plays
+    # @param event_id [Integer] The common event the scene plays.
     def self.started(event_id)
       character = character_of(event_id)
       SaveStats.add_for(:requests, character) if character
     end
 
-    # @return [String, nil] who plays the running request, nil while none runs
+    # Names the character of the running request.
+    #
+    # @return [String, nil] Who plays the running request, nil while none runs.
     def self.current
       $game_novel && $game_novel.running? ? character_of($game_novel.event_id) : nil
     end
@@ -854,8 +883,8 @@ module MGQ_Discord
     # The Recollection Room replays requests through the same novel scenes, with the game's
     # LIBRARY_H_MEMORY switch on.
     #
-    # @param event_id [Integer] the common event a novel scene plays
-    # @return [String, nil] the character, nil for any other scene and for a replay
+    # @param event_id [Integer] The common event a novel scene plays.
+    # @return [String, nil] The character, nil for any other scene and for a replay.
     def self.character_of(event_id)
       return nil if $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
 
@@ -867,7 +896,7 @@ module MGQ_Discord
     # A request is named after the companion who plays it, falling back to the Recollection Room's
     # entry without the form in brackets: "Alice (Small)" and "Alice (Adult)" both count as Alice.
     #
-    # @return [Hash{Integer => String}] the characters by common event
+    # @return [Hash{Integer => String}] The characters by common event.
     def self.characters
       @characters ||= NWConst::Library::H_SCENE_ITEMS.values.each_with_object({}) do |character, names|
         entry = character[:name].to_s.sub(/\s*[(（].*\z/m, "")
@@ -880,12 +909,12 @@ module MGQ_Discord
 
     # Names the companion a request belongs to.
     #
-    # Most requests unlock at a companion's affection, which the game keeps in variable
-    # ACTOR_REL_BASE + her actor id. The name comes from the database, since looking her up in
-    # $game_actors would add her to the save.
+    # The name comes from the database, since looking her up in $game_actors would add her to the
+    # save.
     #
-    # @param item [Hash] the request's entry in the Recollection Room
-    # @return [String, nil] the companion's name, nil when the request unlocks otherwise
+    # @param item [Hash] The request's entry in the Recollection Room, unlocked at a companion's
+    #   affection in variable ACTOR_REL_BASE + her actor id for most requests.
+    # @return [String, nil] The companion's name, nil when the request unlocks otherwise.
     def self.companion_of(item)
       condition = item[:condition] || {}
       return nil unless condition[:type] == 1
@@ -900,10 +929,9 @@ module MGQ_Discord
   # the NSFW option, only showing them depends on it.
   module DefeatScenes
     # Counts the defeat scene BattleManager just set up, unless it is a replay or was skipped.
-    # Called from the BattleManager.change_novel_scene hook.
     #
-    # The Labyrinth of Chaos plays LOSE_EVENT_BASE itself for all its monsters, which has no scene
-    # of her own.
+    # The Labyrinth of Chaos plays LOSE_EVENT_BASE for all its monsters, which is no monster girl's
+    # scene.
     def self.started
       return if BattleManager.memory_battle? || $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
 
@@ -917,11 +945,11 @@ module MGQ_Discord
 
     # Finds the monster girl who won the battle.
     #
-    # 3.x records her when the battle starts. 2.x does not, and names her by the event's offset from
-    # LOSE_EVENT_BASE, like its own encyclopedia does.
+    # 2.x does not record her when the battle starts, as 3.x does, but names her by the event's
+    # offset from LOSE_EVENT_BASE, like its own encyclopedia.
     #
-    # @param event_id [Integer] the common event of the defeat scene
-    # @return [RPG::Enemy, nil] the monster girl, nil when there is none
+    # @param event_id [Integer] The common event of the defeat scene.
+    # @return [RPG::Enemy, nil] The monster girl, nil when there is none.
     def self.winner(event_id)
       enemy_id = $game_temp.respond_to?(:lose_event_enemy_id) ? $game_temp.lose_event_enemy_id : event_id - NWConst::Common::LOSE_EVENT_BASE
       $data_enemies[enemy_id]
@@ -933,7 +961,9 @@ module MGQ_Discord
       @running = nil
     end
 
-    # @return [String, nil] the monster girl of the running defeat scene, nil while none runs
+    # Names the monster girl of the running defeat scene.
+    #
+    # @return [String, nil] The monster girl of the running defeat scene, nil while none runs.
     def self.current
       event_id, monster = @running
       monster if event_id && $game_novel && $game_novel.running? && $game_novel.event_id == event_id
@@ -943,8 +973,8 @@ module MGQ_Discord
     #
     # Skipping replaces the novel's event list with a copy that starts after the scene.
     #
-    # @param event_id [Integer] the common event of the defeat scene
-    # @return [Boolean]
+    # @param event_id [Integer] The common event of the defeat scene.
+    # @return [Boolean] Whether the scene was skipped.
     def self.skipped?(event_id)
       !$game_novel.interpreter.instance_variable_get(:@list).equal?($data_common_events[event_id].list)
     end
@@ -959,9 +989,9 @@ module MGQ_Discord
     # Remembers the battle fuck an interpreter is about to play. Called from the
     # Game_Interpreter#command_117 hook.
     #
-    # @param interpreter [Game_Interpreter] the interpreter calling the common event
-    # @param event_id [Integer] the common event it calls
-    # @return [Boolean] whether the common event starts a battle fuck
+    # @param interpreter [Game_Interpreter] The interpreter calling the common event.
+    # @param event_id [Integer] The common event it calls.
+    # @return [Boolean] Whether the common event starts a battle fuck.
     def self.starting(interpreter, event_id)
       return false if $game_switches[NWConst::Sw::LIBRARY_H_MEMORY]
 
@@ -981,7 +1011,7 @@ module MGQ_Discord
     # Loading a save or going back to the title abandons the interpreter without returning from the
     # common event, which the new $game_map and the stopped interpreter give away.
     #
-    # @return [String, nil] the battlefucker, nil while none runs
+    # @return [String, nil] The battlefucker, nil while none runs.
     def self.current
       battlefucker, interpreter, map = @running
       battlefucker if map && map.equal?($game_map) && interpreter.running?
@@ -990,7 +1020,7 @@ module MGQ_Discord
     # Battlefuckers by the common events starting their battle fucks, read from the Recollection
     # Room once, without the form in brackets: "Sara (Human)" counts as Sara.
     #
-    # @return [Hash{Integer => String}] the battlefuckers by common event
+    # @return [Hash{Integer => String}] The battlefuckers by common event.
     def self.battlefuckers
       @battlefuckers ||= NWConst::Library::H_SCENE_ITEMS.values.each_with_object({}) do |character, names|
         name = character[:name].to_s.sub(/\s*[(（].*\z/m, "")
@@ -1017,11 +1047,11 @@ module MGQ_Discord
     # Luka's name, as the name boxes write it.
     LUKA = "Luka"
 
-    # Remembers who speaks in a message the game just queued. Called from the Game_Message#add hook.
+    # Remembers who speaks in a message the game just queued.
     #
     # Luka speaks in most conversations, so he never replaces the one he is talking to.
     #
-    # @param text [String] one line of the message
+    # @param text [String] One line of the message.
     def self.heard(text)
       name = speaker_in(text)
       interpreter = running_interpreter
@@ -1032,10 +1062,10 @@ module MGQ_Discord
 
     # Names who the player is talking to.
     #
-    # A conversation lasts as long as the event that started it, so the pauses between its messages
-    # count too. The event's list tells it apart from a later event on the same interpreter.
+    # A conversation lasts as long as the event that started it, whose list tells it apart from a
+    # later event on the same interpreter, so the pauses between its messages count too.
     #
-    # @return [String, nil] the last speaker other than Luka, nil outside a conversation
+    # @return [String, nil] The last speaker other than Luka, nil outside a conversation.
     def self.current
       name, interpreter, list = @speaker
       name if interpreter && interpreter.equal?(running_interpreter) &&
@@ -1046,7 +1076,7 @@ module MGQ_Discord
     #
     # Parallel events run on interpreters of their own, and battles on the troop's.
     #
-    # @return [Game_Interpreter, nil] the interpreter, nil while it runs no event
+    # @return [Game_Interpreter, nil] The interpreter, nil while it runs no event.
     def self.running_interpreter
       scene = SceneManager.scene
       interpreter = if scene.is_a?(Scene_Novel) then $game_novel.interpreter
@@ -1057,8 +1087,8 @@ module MGQ_Discord
 
     # Reads the name in a line's name box.
     #
-    # @param text [String] one line of a message
-    # @return [String, nil] the name, nil when the line has no name box
+    # @param text [String] One line of a message.
+    # @return [String, nil] The name, nil when the line has no name box.
     def self.speaker_in(text)
       match = NAME_BOX.match(text.to_s)
       return nil unless match
@@ -1084,10 +1114,10 @@ module MGQ_Discord
     # Decision ends Part 2.
     PART_STARTS = [[3, 40], [2, 20], [1, 0]]
 
-    # Route of the final chapter, by the variable that counts its progress: Chaos, Destroyer (of
-    # Heaven, the heaven route), Judgment (of the Monster Realm, the demon realm route). The Great
-    # Decision starts the counter of the route chosen, and a route that is not being played holds 0.
-    # 2.x has none of them.
+    # Route of the final chapter, by the variable that counts its progress.
+    #
+    # The Great Decision starts the counter of the route chosen, so a route not being played holds 0,
+    # and 2.x has none of them.
     ROUTES = {
       "混沌ルート進行度" => "chaos",
       "天界ルート進行度" => "destroyer",
@@ -1117,8 +1147,8 @@ module MGQ_Discord
 
     # Names the art asset for the current point of the story.
     #
-    # @return [String, nil] the collab during the Collaboration Scenario, the route in the final
-    #   chapter, else the side, each in the form the options pick, nil before the side is chosen
+    # @return [String, nil] The collab during the Collaboration Scenario, the route in the final
+    #   chapter, else the side, each in the form the options pick, nil before the side is chosen.
     def self.picture
       return COLLAB if collab_act
 
@@ -1134,7 +1164,7 @@ module MGQ_Discord
     # The end of Part 2 closes an unfinished Collaboration Scenario by filling in its last act, so
     # only its maps tell that it is being played.
     #
-    # @return [Integer, nil] the act, 1 to 12, nil outside the Collaboration Scenario
+    # @return [Integer, nil] The act, 1 to 12, nil outside the Collaboration Scenario.
     def self.collab_act
       return nil unless top_folder($game_map.map_id) == COLLAB_FOLDER
 
@@ -1146,8 +1176,8 @@ module MGQ_Discord
     #
     # Each block of map folders has a tree of its own, whose parent ids count from the block's start.
     #
-    # @param map_id [Integer] the map
-    # @return [Integer] the top folder's map id, the map itself when it has no parent
+    # @param map_id [Integer] The map.
+    # @return [Integer] The top folder's map id, the map itself when it has no parent.
     def self.top_folder(map_id)
       block = map_id / MAPS_PER_BLOCK * MAPS_PER_BLOCK
 
@@ -1158,19 +1188,25 @@ module MGQ_Discord
       map_id
     end
 
-    # @return [Integer] the part the story is in, 1 to 3
+    # Reads the part the story is in.
+    #
+    # @return [Integer] The part the story is in, 1 to 3.
     def self.part
       progress = GameState.variable(PROGRESS)
       PART_STARTS.find { |_, start| progress >= start }[0]
     end
 
-    # @return [String, nil] the side this playthrough chose, nil before the choice
+    # Reads the side this playthrough chose.
+    #
+    # @return [String, nil] The side this playthrough chose, nil before the choice.
     def self.side
       switch = SIDES.keys.find { |name| GameState.switch_on?(name) }
       SIDES[switch]
     end
 
-    # @return [String, nil] the route of the final chapter being played, nil while none is
+    # Reads the route of the final chapter being played.
+    #
+    # @return [String, nil] The route of the final chapter being played, nil while none is.
     def self.route
       variable = ROUTES.keys.find { |name| GameState.variable(name) > 0 }
       ROUTES[variable]
@@ -1179,7 +1215,7 @@ module MGQ_Discord
     # Reports whether Discord leaves out what spoils Part 3, which it does while Part 3 is played
     # unless the Spoilers option shows it.
     #
-    # @return [Boolean]
+    # @return [Boolean] Whether spoilers are left out.
     def self.hides_spoilers?
       !Options.spoilers? && part == 3
     end
@@ -1208,8 +1244,9 @@ module MGQ_Discord
     SPIRITS = ["Sylph", "Gnome", "Undine", "Salamander"]
 
     # Ores that unlock forging in Parts 1 and 2, by their item ids, weakest first: Iron, Gold,
-    # Mithril, Crystal, Dragon Scale, Orichalcum, Rainbow Crystal, Meteorite. The blacksmiths forge
-    # an ore's equipment while the party holds it, and forging never uses it up. 2.x has no Meteorite.
+    # Mithril, Crystal, Dragon Scale, Orichalcum, Rainbow Crystal and Meteorite, which 2.x lacks.
+    #
+    # The blacksmiths forge an ore's equipment while the party holds it, and forging never uses it up.
     FORGING_ORES = [151, 152, 153, 154, 155, 156, 157, 158]
 
     # Monster queens who join for good in Part 2, by their actor ids, the same in 2.x and 3.x: the Cow
@@ -1247,10 +1284,9 @@ module MGQ_Discord
 
     # The values that currently apply.
     #
-    # Read at most every RECOMPUTE_SECONDS, and at once when another save is loaded. A reader that
-    # fails leaves out only its own values.
+    # A reader that fails leaves out only its own values.
     #
-    # @return [Hash{String => Object}] the values by key, none before a save is loaded
+    # @return [Hash{String => Object}] The values by key, none before a save is loaded.
     def self.values
       return {} unless GameState.save_loaded?
 
@@ -1268,15 +1304,15 @@ module MGQ_Discord
 
     # Remembers an item an actor just used. Called from the Game_Battler#item_apply hook.
     #
-    # @param item [RPG::Item] the item
-    # @param target [Game_Battler] the one it was used on
+    # @param item [RPG::Item] The item.
+    # @param target [Game_Battler] The one it was used on.
     def self.item_used(item, target)
       @item_use = ItemUse.new(item.name.to_s, target.name.to_s, Time.now.to_i)
     end
 
     # The party: members down, companions recruited and gold carried.
     #
-    # @return [Hash{String => Integer}] the values
+    # @return [Hash{String => Integer}] The values.
     def self.party
       {
         "dead_members" => $game_party.battle_members.count { |actor| actor.dead? },
@@ -1289,7 +1325,7 @@ module MGQ_Discord
     #
     # The game reads affection from $game_global_system, which all saves share.
     #
-    # @return [Hash{String => Object}] names and affection by rank, from 0
+    # @return [Hash{String => Object}] Names and affection by rank, from 0.
     def self.affection
       ranked = companions.map { |actor| [actor.name, actor.actor.love.to_i] }
                          .select { |_, love| love > 0 }
@@ -1308,14 +1344,14 @@ module MGQ_Discord
     # Read from the permanent roster, since include_members returns only the temporary party
     # during story sections like the Chaos domain.
     #
-    # @return [Array<Game_Actor>] the companions
+    # @return [Array<Game_Actor>] The companions.
     def self.companions
       $game_party.instance_variable_get(:@include_actors).map { |id| $game_actors[id] }.reject { |actor| actor.luca? }
     end
 
     # Battles fought, difficulty, playtime and the deepest Labyrinth of Chaos floor.
     #
-    # @return [Hash{String => Integer}] the values
+    # @return [Hash{String => Integer}] The values.
     def self.progress
       {
         "battles"          => $game_system.battle_count,
@@ -1327,7 +1363,7 @@ module MGQ_Discord
 
     # The item an actor used last, on whom and when.
     #
-    # @return [Hash{String => Object}, nil] the values, nil before the first use this session
+    # @return [Hash{String => Object}, nil] The values, nil before the first use this session.
     def self.last_item
       use = @item_use
       use && { "item_used" => use.item, "item_target" => use.target, "item_used_at" => use.used_at }
@@ -1337,8 +1373,8 @@ module MGQ_Discord
     #
     # RPG::BGM.last is the game's own record of the music started last, emptied when it stops.
     #
-    # @return [Hash{String => String}, nil] the title, nil when no music plays or the jukebox does
-    #   not know the track
+    # @return [Hash{String => String}, nil] The title, nil when no music plays or the jukebox does
+    #   not know the track.
     def self.track
       title = track_titles[File.basename(RPG::BGM.last.name.to_s, ".*").downcase]
       title && { "track" => title }
@@ -1346,7 +1382,7 @@ module MGQ_Discord
 
     # Track names by BGM file name, read from the music room once.
     #
-    # @return [Hash{String => String}] the names by lower-case file name
+    # @return [Hash{String => String}] The names by lower-case file name.
     def self.track_titles
       @track_titles ||= NWConst::Library::BGM_SCENE_ITEMS.values.each_with_object({}) do |item, titles|
         titles[item[:file].to_s.downcase] = item[:name].to_s
@@ -1355,7 +1391,7 @@ module MGQ_Discord
 
     # The actors in the active party with the most mastered jobs and races, up to TOP_MASTER_COUNT.
     #
-    # @return [Hash{String => Object}] names, jobs and races by rank, from 0
+    # @return [Hash{String => Object}] Names, jobs and races by rank, from 0.
     def self.masters
       ranked = $game_party.battle_members.map { |actor| [actor, GameState.mastery(actor)] }
                           .select { |_, mastery| mastery.total > 0 }
@@ -1372,7 +1408,7 @@ module MGQ_Discord
 
     # Who in the active party leads in each stat.
     #
-    # @return [Hash{String => String}] the stat's name, its leader and the value by stat, from 0
+    # @return [Hash{String => String}] The stat's name, its leader and the value by stat, from 0.
     def self.top_stats
       (0...PARAM_COUNT).each_with_object({}) do |param_id, values|
         best = $game_party.battle_members.max_by { |actor| actor.param(param_id) }
@@ -1387,7 +1423,7 @@ module MGQ_Discord
     # Defeats, escapes, wipeouts, syntheses, gold spent, the biggest hit and battle fucks won, in
     # this save or all saves.
     #
-    # @return [Hash{String => Object}] the values
+    # @return [Hash{String => Object}] The values.
     def self.statistics
       values = {
         "defeated"        => Statistics[:defeat],
@@ -1404,7 +1440,7 @@ module MGQ_Discord
 
     # Requests made and defeat scenes seen in this save, in total and who the most.
     #
-    # @return [Hash{String => Object}] the values
+    # @return [Hash{String => Object}] The values.
     def self.nsfw_counts
       values = { "requests" => SaveStats[:requests], "rapes" => SaveStats[:rapes] }
 
@@ -1421,7 +1457,7 @@ module MGQ_Discord
     # The game keeps them in $game_library, which all saves share, and leaves out the ones in
     # NO_USE_MEDAL, like its own Library does.
     #
-    # @return [Hash{String => Integer}] the earned and the total
+    # @return [Hash{String => Integer}] The earned and the total.
     def self.medals
       valid = NWConst::Library::MEDAL_DATA.keys - NWConst::Library::NO_USE_MEDAL
       { "medals" => valid.count { |id| $game_library.has_medal?(id) }, "medals_total" => valid.size }
@@ -1429,21 +1465,21 @@ module MGQ_Discord
 
     # How many of the four spirits have joined the party.
     #
-    # @return [Hash{String => Integer}] the recruited and the total
+    # @return [Hash{String => Integer}] The recruited and the total.
     def self.spirits
       { "spirits" => recruited_count(spirit_ids), "spirits_total" => spirit_ids.size }
     end
 
     # The actor ids of the SPIRITS, looked up once.
     #
-    # @return [Array<Integer>] the ids, the first actor of each name
+    # @return [Array<Integer>] The ids, the first actor of each name.
     def self.spirit_ids
       @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && actor.name == name } }.compact
     end
 
     # How many of the monster queens have joined the party.
     #
-    # @return [Hash{String => Integer}] the recruited and the total
+    # @return [Hash{String => Integer}] The recruited and the total.
     def self.queens
       { "queens" => recruited_count(MONSTER_QUEENS), "queens_total" => MONSTER_QUEENS.size }
     end
@@ -1452,8 +1488,8 @@ module MGQ_Discord
     #
     # Read from the permanent roster, like companions.
     #
-    # @param ids [Array<Integer>] the actor ids
-    # @return [Integer] how many of them joined
+    # @param ids [Array<Integer>] The actor ids.
+    # @return [Integer] How many of them joined.
     def self.recruited_count(ids)
       roster = $game_party.instance_variable_get(:@include_actors)
       ids.count { |id| roster.include?(id) }
@@ -1461,7 +1497,7 @@ module MGQ_Discord
 
     # The best ore the party holds for forging, the one found last.
     #
-    # @return [Hash{String => String}, nil] the ore's name, nil before the first ore
+    # @return [Hash{String => String}, nil] The ore's name, nil before the first ore.
     def self.ore
       ore = FORGING_ORES.reverse.map { |id| $data_items[id] }.find { |item| item && $game_party.has_item?(item) }
       ore && { "ore" => ore.name }
@@ -1469,7 +1505,7 @@ module MGQ_Discord
 
     # Whether Luka sided with the pirates or the marines at the Navy Headquarters.
     #
-    # @return [Hash{String => String}, nil] "pirates" or "marines", nil before the choice
+    # @return [Hash{String => String}, nil] "pirates" or "marines", nil before the choice.
     def self.naval_side
       switch = NAVAL_SIDES.keys.find { |name| GameState.switch_on?(name) }
       switch && { "naval_side" => NAVAL_SIDES[switch] }
@@ -1477,7 +1513,7 @@ module MGQ_Discord
 
     # How many routes of the final chapter this playthrough has cleared.
     #
-    # @return [Hash{String => Integer}] the cleared and the total
+    # @return [Hash{String => Integer}] The cleared and the total.
     def self.routes_cleared
       cleared = ROUTE_CLEARS.count { |name| GameState.switch_on?(name) }
       { "routes_cleared" => cleared, "routes_total" => ROUTE_CLEARS.size }
@@ -1485,7 +1521,7 @@ module MGQ_Discord
 
     # How many of Randolph's hiding places this playthrough has found.
     #
-    # @return [Hash{String => Integer}] the found and the total, which is 0 on 2.x
+    # @return [Hash{String => Integer}] The found and the total, which is 0 on 2.x.
     def self.randolphs
       found = randolph_switches.count { |id| $game_switches[id] }
       { "randolphs" => found, "randolphs_total" => randolph_switches.size }
@@ -1493,15 +1529,15 @@ module MGQ_Discord
 
     # The switches recording each Randolph found, looked up once.
     #
-    # @return [Array<Integer>] the switch ids, none on 2.x
+    # @return [Array<Integer>] The switch ids, none on 2.x.
     def self.randolph_switches
       @randolph_switches ||= GameState.switches_named(RANDOLPH_FOUND)
     end
 
     # How many of the Phenomena of Ruin the Chaos route has defeated.
     #
-    # @return [Hash{String => Integer}, nil] the defeated and the total, nil before the Chaos
-    #   route's prologue or on 2.x
+    # @return [Hash{String => Integer}, nil] The defeated and the total, nil before the Chaos
+    #   route's prologue or on 2.x.
     def self.phenomena
       left = GameState.variable(RUIN_LEFT)
       return nil if left <= 0 && !GameState.switch_on?(RUIN_ALL_DEFEATED)
@@ -1523,8 +1559,10 @@ module MGQ_Discord
       :best_hit   => :party_damage_record_actor,
     }
 
-    # @param key [Symbol] the SaveStats counter
-    # @return [Integer] its count, from $game_library across all saves when the option says so
+    # Reads a statistic, per save or across all saves as the Statistics option says.
+    #
+    # @param key [Symbol] The SaveStats counter.
+    # @return [Integer] Its count, from $game_library across all saves when the option says so.
     def self.[](key)
       all_saves = ALL_SAVES[key]
       Options.all_saves? && all_saves ? $game_library.send(all_saves).to_i : SaveStats[key]
@@ -1533,7 +1571,7 @@ module MGQ_Discord
     # The game counts battle fucks won per save itself, so unlike the others this count covers the
     # time before the mod was installed too.
     #
-    # @return [Integer] the battle fucks won, from $game_library across all saves when the option says so
+    # @return [Integer] The battle fucks won, from $game_library across all saves when the option says so.
     def self.battlefucks_won
       Options.all_saves? ? $game_library.battlefuck_win.to_i : $game_variables[NWConst::Var::BATTLEFUCKER_DEFEAT].to_i
     end
@@ -1543,7 +1581,7 @@ module MGQ_Discord
   # the defeat scenes.
   #
   # Kept in $game_system, so the game saves, loads, copies and backs them up with everything else,
-  # and a new game starts them at 0. The game ignores them when a save is loaded without the mod.
+  # and ignores them when a save is loaded without the mod.
   module SaveStats
     # Instance variable of $game_system that holds the counters.
     VARIABLE = :@mgq_discord_stats
@@ -1554,60 +1592,74 @@ module MGQ_Discord
     # The counters the earlier versions kept.
     LEGACY_KEYS = [:defeat, :escape, :lose, :synthesize, :gold_spent, :best_hit]
 
-    # @param key [Symbol] the counter
-    # @return [Integer] its value, 0 until it counted something
+    # Reads a per-save counter.
+    #
+    # @param key [Symbol] The counter.
+    # @return [Integer] Its value, 0 until it counted something.
     def self.[](key)
       counts[key] || 0
     end
 
-    # @param key [Symbol] the counter
-    # @param amount [Integer] what to add
+    # Adds to a per-save counter.
+    #
+    # @param key [Symbol] The counter.
+    # @param amount [Integer] What to add.
     def self.add(key, amount)
       counts[key] = self[key] + amount.to_i
     end
 
-    # @param key [Symbol] the counter
-    # @param value [Integer] a new candidate for the highest value
+    # Keeps the highest value a per-save counter was offered.
+    #
+    # @param key [Symbol] The counter.
+    # @param value [Integer] A new candidate for the highest value.
     def self.keep_highest(key, value)
       counts[key] = [self[key], value.to_i].max
     end
 
     # Counts one, in total and for a character.
     #
-    # @param key [Symbol] the counter
-    # @param character [String] the character
+    # @param key [Symbol] The counter.
+    # @param character [String] The character.
     def self.add_for(key, character)
       add(key, 1)
       tally(key)[character] = count_for(key, character) + 1
     end
 
-    # @param key [Symbol] the counter
-    # @param character [String] the character
-    # @return [Integer] the count for them, 0 until the first
+    # Reads a per-save counter for one character.
+    #
+    # @param key [Symbol] The counter.
+    # @param character [String] The character.
+    # @return [Integer] The count for them, 0 until the first.
     def self.count_for(key, character)
       tally(key)[character] || 0
     end
 
-    # @param key [Symbol] the counter
-    # @return [Array(String, Integer), nil] the character with the highest count and that count, nil before the first
+    # Finds the character a per-save counter counted most.
+    #
+    # @param key [Symbol] The counter.
+    # @return [Array(String, Integer), nil] The character with the highest count and that count, nil before the first.
     def self.top(key)
       tally(key).max_by { |_, count| count }
     end
 
-    # @param key [Symbol] the counter
-    # @return [Hash{String => Integer}] its counts by character
+    # Reads a per-save counter for every character.
+    #
+    # @param key [Symbol] The counter.
+    # @return [Hash{String => Integer}] Its counts by character.
     def self.tally(key)
       stored[:tallies][key] ||= {}
     end
 
-    # @return [Hash{Symbol => Integer}] the totals by counter
+    # Reads every per-save counter.
+    #
+    # @return [Hash{Symbol => Integer}] The totals by counter.
     def self.counts
       stored[:counts]
     end
 
     # The counters of the loaded save, added to it on first use.
     #
-    # @return [Hash] :counts with the totals, :tallies with the counts per character
+    # @return [Hash] :counts with the totals, :tallies with the counts per character.
     def self.stored
       $game_system.instance_variable_get(VARIABLE) ||
         $game_system.instance_variable_set(VARIABLE, { :counts => {}, :tallies => {} })
@@ -1615,10 +1667,9 @@ module MGQ_Discord
 
     # Takes over the counters an earlier version kept in LEGACY_DIR for a save that was just loaded.
     #
-    # Runs until the save holds counters of its own. A file whose fingerprint does not match was
-    # written for another save in the same slot and is ignored.
+    # A file whose fingerprint does not match was written for another save in the same slot.
     #
-    # @param index [Integer] the save slot
+    # @param index [Integer] The save slot.
     def self.import_legacy(index)
       return if $game_system.instance_variable_get(VARIABLE)
 
@@ -1643,8 +1694,8 @@ module MGQ_Discord
 
     # Builds the status.
     #
-    # @param scene [String] what the game is showing, see GameState.scene
-    # @return [String] the key=value lines
+    # @param scene [String] What the game is showing, see GameState.scene.
+    # @return [String] The key=value lines.
     def self.build(scene)
       return HIDDEN unless Options.presence?
 
@@ -1754,7 +1805,7 @@ module MGQ_Discord
 
     # Draws the notice.
     #
-    # @param version [String] the newer release's version
+    # @param version [String] The newer release's version.
     def self.show(version)
       @sprite = Sprite.new
       @sprite.bitmap = Bitmap.new(Graphics.width, LINE_HEIGHT * LINES.size)
@@ -1779,23 +1830,25 @@ module MGQ_Discord
     # Bytes the DLL may write a join secret or the player's name into, its terminating null included.
     TEXT_SIZE = 256
 
-    # @return [Boolean] whether the presence runs, so the calls reach Discord
+    # Tells whether the calls reach Discord.
+    #
+    # @return [Boolean] Whether the presence runs, so the calls reach Discord.
     def self.available?
       ENABLED && Presence.installed?
     end
 
     # Reports that the player hosts and waits for a friend, whom Discord can invite.
     #
-    # @param party [String] names the party, the same for both players
-    # @param join_secret [String] what a friend who joins gets, at most 128 characters
+    # @param party [String] Names the party, the same for both players.
+    # @param join_secret [String] What a friend who joins gets, at most 128 characters.
     def self.hosting(party, join_secret)
       report("hosting", party, join_secret, "")
     end
 
     # Reports that the player plays with a friend.
     #
-    # @param party [String] names the party, the same for both players
-    # @param friend [String] the friend's name
+    # @param party [String] Names the party, the same for both players.
+    # @param friend [String] The friend's name.
     def self.connected(party, friend)
       report("connected", party, "", friend)
     end
@@ -1805,13 +1858,17 @@ module MGQ_Discord
       report("", "", "", "")
     end
 
-    # @return [String, nil] the join secret of an invite the player accepted in Discord, handed out once
+    # Takes the join secret of an invite the player accepted in Discord.
+    #
+    # @return [String, nil] The join secret of an invite the player accepted in Discord, handed out once.
     def self.take_invite
       text = read('presence_take_invite')
       text.empty? ? nil : text
     end
 
-    # @return [String, nil] the player's name on Discord, nil until Discord told it
+    # Reads the player's name on Discord.
+    #
+    # @return [String, nil] The player's name on Discord, nil until Discord told it.
     def self.player_name
       name = read('presence_player_name')
       name.empty? ? nil : name
@@ -1819,14 +1876,16 @@ module MGQ_Discord
 
     # Adds fields to every status, which DiscordPresence.dll turns into what Discord shows.
     #
-    # @yieldparam scene [String] what the game is showing, see GameState.scene
-    # @yieldreturn [Hash, nil] field names and values
+    # @yieldparam scene [String] What the game is showing, see GameState.scene.
+    # @yieldreturn [Hash, nil] Field names and values.
     def self.add_status(&source)
       (@sources ||= []) << source
     end
 
-    # @param scene [String] what the game is showing, see GameState.scene
-    # @return [Hash] the fields every source adds, a failing source left out
+    # Collects the fields the registered sources add to the status.
+    #
+    # @param scene [String] What the game is showing, see GameState.scene.
+    # @return [Hash] The fields every source adds, a failing source left out.
     def self.status_fields(scene)
       (@sources || []).inject({}) do |fields, source|
         begin
@@ -1838,10 +1897,12 @@ module MGQ_Discord
       end
     end
 
-    # @param kind [String] "hosting", "connected" or "" for none
-    # @param party [String] names the party
-    # @param join_secret [String] what a friend who joins gets
-    # @param friend [String] the friend's name
+    # Hands the DLL the connection another mod reports.
+    #
+    # @param kind [String] "hosting", "connected" or "" for none.
+    # @param party [String] Names the party.
+    # @param join_secret [String] What a friend who joins gets.
+    # @param friend [String] The friend's name.
     def self.report(kind, party, join_secret, friend)
       return unless available?
 
@@ -1850,8 +1911,10 @@ module MGQ_Discord
       Log.write("bridge report failed: #{e.class}: #{e.message}")
     end
 
-    # @param name [String] an export that writes a text into a buffer
-    # @return [String] the text, "" when there is none
+    # Reads a text an export writes into a buffer.
+    #
+    # @param name [String] An export that writes a text into a buffer.
+    # @return [String] The text, "" when there is none.
     def self.read(name)
       return "" unless available?
 
@@ -1873,7 +1936,9 @@ module MGQ_Discord
     # Bytes the DLL may write a version into, its terminating null included.
     VERSION_SIZE = 32
 
-    # @return [Boolean] whether the DLL is in the mod folder
+    # Tells whether the DLL is installed.
+    #
+    # @return [Boolean] Whether the DLL is in the mod folder.
     def self.installed?
       File.exist?(MGQ_Discord.path(DLL))
     end
@@ -1885,28 +1950,32 @@ module MGQ_Discord
 
     # Hands the DLL the latest status. Returns at once, the DLL does the rest on its own thread.
     #
-    # @param status [String] the key=value lines
+    # @param status [String] The key=value lines.
     def self.update(status)
       function('presence_update', 'p').call(status + "\0")
     end
 
     # Has the DLL ask GitHub for a newer release on a thread of its own. The DLL ignores a second call.
     #
-    # @return [Integer] 1 when the DLL started asking, 0 when it failed
+    # @return [Integer] 1 when the DLL started asking, 0 when it failed.
     def self.check_for_update
       function('presence_check_for_update', 'v').call
     end
 
-    # @return [String] the newer release's version the DLL found, "" while it knows of none
+    # Reads the version of a newer release, once the DLL found one.
+    #
+    # @return [String] The newer release's version the DLL found, "" while it knows of none.
     def self.newer_version
       buffer = "\0" * VERSION_SIZE
       length = function('presence_newer_version', 'pl').call(buffer, buffer.size)
       buffer[0, length]
     end
 
-    # @param name [String] the exported function
-    # @param arguments [String] its arguments, in Win32API notation
-    # @return [Win32API] the function, loaded once
+    # Loads an export of the DLL.
+    #
+    # @param name [String] The exported function.
+    # @param arguments [String] Its arguments, in Win32API notation.
+    # @return [Win32API] The function, loaded once.
     def self.function(name, arguments)
       @functions ||= {}
       @functions[name] ||= Win32API.new(MGQ_Discord.path(DLL), name, arguments, 'l')
@@ -1948,11 +2017,15 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("config window hooks FAILED: #{e.class}: #{e.message}")
   end
 
-  # Graphics.update runs every frame in every scene, so unlike a per-scene hook it cannot be missed.
   begin
     module Graphics
       class << self
         alias mgq_discord_update update
+
+        # Draws the frame, then runs the presence's tick.
+        #
+        # Graphics.update runs every frame in every scene, so unlike a per-scene hook it cannot be
+        # missed.
         def update
           mgq_discord_update
           MGQ_Discord.tick
@@ -1963,10 +2036,11 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("Graphics hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # The title screen takes its sprites off when it ends, the update notice with them.
   begin
     class Scene_Title
       alias mgq_discord_terminate terminate
+
+      # Ends the title screen and takes the update notice off with its sprites.
       def terminate
         mgq_discord_terminate
       ensure
@@ -1977,10 +2051,18 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("title hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # Every item use, in menus and in battle, passes item_apply once per target.
   begin
     class Game_Battler
       alias mgq_discord_item_apply item_apply
+
+      # Applies an item or skill, then counts an item a party member used.
+      #
+      # Every item use, in menus and in battle, passes here once per target.
+      #
+      # @param user [Game_Battler] Who uses it.
+      # @param item [RPG::UsableItem] The item or skill.
+      # @param args [Array] The game's further arguments.
+      # @return [Object] The original's result.
       def item_apply(user, item, *args)
         result = mgq_discord_item_apply(user, item, *args)
         begin
@@ -1994,10 +2076,17 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("item_apply hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # Requests and defeat scenes play as novel scenes, and the Recollection Room replays them the same way.
   begin
     class Game_Novel
       alias mgq_discord_setup setup
+
+      # Sets up a novel scene, then forgets the last defeat scene and notes a request that starts.
+      #
+      # Requests and defeat scenes play as novel scenes, and the Recollection Room replays them the
+      # same way.
+      #
+      # @param event_id [Integer] The common event the scene plays.
+      # @return [Object] The original's result.
       def setup(event_id)
         result = mgq_discord_setup(event_id)
         MGQ_Discord::DefeatScenes.forget rescue nil
@@ -2009,10 +2098,17 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("novel hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # Every line a message shows passes add, the speaker's name box included, on the map and in novel scenes.
   begin
     class Game_Message
       alias mgq_discord_add add
+
+      # Adds a line to the message, then notes who speaks.
+      #
+      # Every line a message shows passes here, the speaker's name box included, on the map and in
+      # novel scenes.
+      #
+      # @param text [String] The line.
+      # @return [Object] The original's result.
       def add(text)
         result = mgq_discord_add(text)
         MGQ_Discord::Conversations.heard(text) rescue nil
@@ -2023,10 +2119,16 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("message hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # A map event calls the common event of a battle fuck, which returns once the battle fuck is over.
   begin
     class Game_Interpreter
       alias mgq_discord_command_117 command_117
+
+      # Calls a common event, and notes a battle fuck while it runs.
+      #
+      # A map event calls the common event of a battle fuck, which returns once the battle fuck is
+      # over.
+      #
+      # @return [Object] The original's result.
       def command_117
         started = MGQ_Discord::Battlefucks.starting(self, @params[0]) rescue false
         mgq_discord_command_117
@@ -2038,11 +2140,15 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("battle fuck hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # A lost battle sets up its defeat scene here, after asking whether to skip it.
   begin
     module BattleManager
       class << self
         alias mgq_discord_change_novel_scene change_novel_scene
+
+        # Sets up a lost battle's defeat scene, after asking whether to skip it, then notes it.
+        #
+        # @param args [Array] The game's arguments.
+        # @return [Object] The original's result.
         def change_novel_scene(*args)
           result = mgq_discord_change_novel_scene(*args)
           MGQ_Discord::DefeatScenes.started rescue nil
@@ -2054,17 +2160,25 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("defeat scene hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # Saving leaves the mod's options out of the save file, and loading takes over the per-save
-  # counters an earlier version kept for the save.
   begin
     module DataManager
       class << self
         alias mgq_discord_save_game_without_rescue save_game_without_rescue
+
+        # Saves the game with the mod's options left out of the save file.
+        #
+        # @param index [Integer] The save slot.
+        # @return [Object] The original's result.
         def save_game_without_rescue(index)
           MGQ_Discord::Options.left_out_of_save { mgq_discord_save_game_without_rescue(index) }
         end
 
         alias mgq_discord_load_game_without_rescue load_game_without_rescue
+
+        # Loads a save, then takes over the per-save counters an earlier version kept for it.
+        #
+        # @param index [Integer] The save slot.
+        # @return [Object] The original's result.
         def load_game_without_rescue(index)
           result = mgq_discord_load_game_without_rescue(index)
           begin
@@ -2080,11 +2194,17 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("save/load hooks FAILED: #{e.class}: #{e.message}")
   end
 
-  # Autosaves bypass save_game_without_rescue.
   begin
     module DataManager
       class << self
         alias mgq_discord_auto_save_game_without_rescue auto_save_game_without_rescue
+
+        # Autosaves with the mod's options left out of the save file.
+        #
+        # Autosaves bypass save_game_without_rescue.
+        #
+        # @param index [Integer] The save slot.
+        # @return [Object] The original's result.
         def auto_save_game_without_rescue(index)
           MGQ_Discord::Options.left_out_of_save { mgq_discord_auto_save_game_without_rescue(index) }
         end
@@ -2094,11 +2214,17 @@ if MGQ_Discord.hookable?
     MGQ_Discord::Log.write("autosave hook FAILED: #{e.class}: #{e.message}")
   end
 
-  # The backup save bypasses both.
   begin
     module DataManager
       class << self
         alias mgq_discord_save_game_backup_without_rescue save_game_backup_without_rescue
+
+        # Writes the backup save with the mod's options left out of it.
+        #
+        # The backup save bypasses save_game_without_rescue and the autosave.
+        #
+        # @param args [Array] The game's arguments.
+        # @return [Object] The original's result.
         def save_game_backup_without_rescue(*args)
           MGQ_Discord::Options.left_out_of_save { mgq_discord_save_game_backup_without_rescue(*args) }
         end

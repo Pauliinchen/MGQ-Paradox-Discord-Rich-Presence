@@ -160,8 +160,7 @@ internal sealed class PresenceLoop
     /// Hands over the game's latest status.
     /// </summary>
     /// <remarks>
-    /// Called on the game's own thread, so it only stores the text. Everything else happens on the
-    /// loop's thread.
+    /// Called on the game's own thread, so it only stores the text for the loop's thread.
     /// </remarks>
     /// <param name="status">The <c>key=value</c> lines Discord_RPC.rb built.</param>
     public static void Submit(string status) => Volatile.Write(ref _latestStatus, status);
@@ -170,7 +169,7 @@ internal sealed class PresenceLoop
     /// Runs the loop until the game ends.
     /// </summary>
     /// <remarks>
-    /// Catches everything. An exception escaping this thread would end the whole game.
+    /// Catches everything, since an exception escaping this thread would end the whole game.
     /// </remarks>
     private static void Run()
     {
