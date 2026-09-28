@@ -2,7 +2,7 @@
 //  ActivityBuilderTests.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-28: Covered a friend battle, a mirror match and the friend battle screen on the first line
+//      Paulinchen  2026-09-28: Covered a PvP battle, a mirror match and the PvP battle screen on the first line
 //                            - Covered the second line of a connection with a friend
 //      Paulinchen  2026-09-27: Covered the menu screens
 //                            - Created
@@ -78,7 +78,7 @@ public sealed class ActivityBuilderTests
     [InlineData("Scene_EquipStoneItem", "Iliasville - Setting gems . . .")]
     [InlineData("Scene_Poker", "Iliasville - Playing poker at the casino . . .")]
     [InlineData("Scene_Library", "Iliasville - Browsing the Library . . .")]
-    [InlineData("Scene_FriendLobby", "Iliasville - Setting up a friend battle . . .")]
+    [InlineData("Scene_PvpLobby", "Iliasville - Setting up a PvP battle . . .")]
     [InlineData("Scene_Menu", "Iliasville - In menu . . .")]
     [InlineData("", "Iliasville - In menu . . .")]
     public void Details_NameTheMenuScreen(string screen, string expected) =>
@@ -95,12 +95,12 @@ public sealed class ActivityBuilderTests
     }
 
     /// <summary>
-    /// Asserts that a friend battle names whose team the player fights instead of the map.
+    /// Asserts that a PvP battle names whose team the player fights instead of the map.
     /// </summary>
     [Fact]
-    public void Details_NameTheFriendInAFriendBattle() =>
-        Assert.Equal("Friend battle against Guest's team!",
-                     Build(Status(("scene", "battle"), ("area", "Iliasville"), ("friend_battle_with", "Guest"))).Details);
+    public void Details_NameTheFriendInAPvpBattle() =>
+        Assert.Equal("PvP battle against Guest's team!",
+                     Build(Status(("scene", "battle"), ("area", "Iliasville"), ("pvp_battle_with", "Guest"))).Details);
 
     /// <summary>
     /// Asserts that a mirror match says the player fights their own team.
@@ -108,7 +108,7 @@ public sealed class ActivityBuilderTests
     [Fact]
     public void Details_ShowAMirrorMatch() =>
         Assert.Equal("Fighting their own team in a mirror match!",
-                     Build(Status(("scene", "battle"), ("area", "Iliasville"), ("friend_battle", "mirror"))).Details);
+                     Build(Status(("scene", "battle"), ("area", "Iliasville"), ("pvp_battle", "mirror"))).Details);
 
     /// <summary>
     /// Asserts that a named menu screen replaces the Pocket Castle's own line, and idle still wins

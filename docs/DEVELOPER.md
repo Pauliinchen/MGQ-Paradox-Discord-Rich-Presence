@@ -146,7 +146,7 @@ They appended a block (`# >>> MGQ Discord RPC` … `# <<< MGQ Discord RPC`) to `
 | `idle` | Neither; the second line shows the trivia again. |
 | `take_invite` | The join secret of an invite the player accepted in Discord, handed out once, or `nil`. |
 | `player_name` | The player's name on Discord, or `nil` until Discord told it. |
-| `add_status { \|scene\| ... }` | Adds the Hash the block returns to every status `StatusText.build` hands the DLL. A block that raises is logged and left out. The Multiplayer mod adds `friend_battle_with` and `friend_battle=mirror` for the first line this way. |
+| `add_status { \|scene\| ... }` | Adds the Hash the block returns to every status `StatusText.build` hands the DLL. A block that raises is logged and left out. The Multiplayer mod adds `pvp_battle_with` and `pvp_battle=mirror` for the first line this way. |
 
 The DLL keeps the reported connection in `Connection` (`presence_set_connection`). A report without a party, or hosting without a join secret of at most 128 characters (Discord's limit), counts as none. `PresenceLoop.WithConnection` puts it into the activity; Discord puts the party's size behind the second line. Both games name the party the same, so Discord sees them in the same party.
 

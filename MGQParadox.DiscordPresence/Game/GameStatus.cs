@@ -2,7 +2,7 @@
 //  GameStatus.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-28: Read whose team the player fights in a friend battle
+//      Paulinchen  2026-09-28: Read whose team the player fights in a PvP battle
 //                            - Read whether the player fights their own team in a mirror match
 //      Paulinchen  2026-09-27: Read the medals earned
 //                            - Read the screen open in a menu
@@ -159,14 +159,14 @@ internal sealed class GameStatus
     public string ConversationPartner => Value("talking_to");
 
     /// <summary>
-    /// The friend whose team the player fights in a friend battle, empty outside one.
+    /// The friend whose team the player fights in a PvP battle, empty outside one.
     /// </summary>
-    public string FriendBattleOpponent => Value("friend_battle_with");
+    public string PvpBattleOpponent => Value("pvp_battle_with");
 
     /// <summary>
     /// Whether the player fights their own team in a mirror match.
     /// </summary>
-    public bool IsInMirrorMatch => Value("friend_battle") == "mirror";
+    public bool IsInMirrorMatch => Value("pvp_battle") == "mirror";
 
     /// <summary>
     /// The Discord application's art asset to show as the picture, empty for the default picture.

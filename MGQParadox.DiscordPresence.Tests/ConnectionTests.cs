@@ -18,7 +18,7 @@ public sealed class ConnectionTests
     /// <summary>
     /// A join secret as the Multiplayer mod writes one.
     /// </summary>
-    private const string JoinSecret = "mgqfb1;abcdefghjk;47625;203.0.113.7";
+    private const string JoinSecret = "mgqmp1;abcdefghjk;47625;203.0.113.7";
 
     /// <summary>
     /// Asserts that hosting invites: party 1 of 2, the join secret, the banner and the waiting line.

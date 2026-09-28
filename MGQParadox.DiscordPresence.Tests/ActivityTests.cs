@@ -97,11 +97,11 @@ public sealed class ActivityTests
             Details = "Iliasville",
             Buttons = new[] { new ActivityButton("Get the mod", "https://example.com") },
             Party = new ActivityParty("abc", 1, 2),
-            JoinSecret = "mgqfb1;abcdefghjk;47625;203.0.113.7",
+            JoinSecret = "mgqmp1;abcdefghjk;47625;203.0.113.7",
         };
 
         Assert.Equal("{\"details\":\"Iliasville\",\"party\":{\"id\":\"abc\",\"size\":[1,2]}," +
-                     "\"secrets\":{\"join\":\"mgqfb1;abcdefghjk;47625;203.0.113.7\"}}",
+                     "\"secrets\":{\"join\":\"mgqmp1;abcdefghjk;47625;203.0.113.7\"}}",
                      activity.ToJson());
     }
 

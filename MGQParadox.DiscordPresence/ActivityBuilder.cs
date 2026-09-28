@@ -2,7 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-28: Named a friend battle, a mirror match and the friend battle screen on the first line
+//      Paulinchen  2026-09-28: Named a PvP battle, a mirror match and the PvP battle screen on the first line
 //                            - Showed a connection with a friend on the second line: waiting for them, or playing with them
 //      Paulinchen  2026-09-27: Named what the player does in a menu screen, the Pocket Castle's too
 //                            - Showed the trivia TriviaBuilder writes, and took the time from the caller
@@ -171,7 +171,7 @@ internal static class ActivityBuilder
         ["Scene_Slot"] = "Playing the slots at the casino . . .",
         ["Scene_CasinoPrize"] = "Trading in casino coins . . .",
         ["Scene_Save"] = "Saving . . .",
-        ["Scene_FriendLobby"] = "Setting up a friend battle . . .",
+        ["Scene_PvpLobby"] = "Setting up a PvP battle . . .",
     };
 
     /// <summary>
@@ -247,9 +247,9 @@ internal static class ActivityBuilder
     /// <returns>The first line.</returns>
     private static string DetailsOf(GameStatus status, int pocketCastleIndex, DateTimeOffset now)
     {
-        if (status.FriendBattleOpponent.Length > 0)
+        if (status.PvpBattleOpponent.Length > 0)
         {
-            return $"Friend battle against {status.FriendBattleOpponent}'s team!";
+            return $"PvP battle against {status.PvpBattleOpponent}'s team!";
         }
 
         if (status.IsInMirrorMatch)

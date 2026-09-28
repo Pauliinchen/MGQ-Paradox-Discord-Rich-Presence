@@ -44,11 +44,11 @@ public sealed class DiscordDispatchTests
     [Fact]
     public void TryParse_ReadsTheJoinSecret()
     {
-        var join = DiscordDispatch.TryParse("{\"cmd\":\"DISPATCH\",\"evt\":\"ACTIVITY_JOIN\",\"data\":{\"secret\":\"mgqfb1;abcdefghjk;47625;203.0.113.7\"}}");
+        var join = DiscordDispatch.TryParse("{\"cmd\":\"DISPATCH\",\"evt\":\"ACTIVITY_JOIN\",\"data\":{\"secret\":\"mgqmp1;abcdefghjk;47625;203.0.113.7\"}}");
 
         Assert.NotNull(join);
         Assert.Equal(DiscordDispatch.ActivityJoin, join.Event);
-        Assert.Equal("mgqfb1;abcdefghjk;47625;203.0.113.7", join.Secret);
+        Assert.Equal("mgqmp1;abcdefghjk;47625;203.0.113.7", join.Secret);
     }
 
     /// <summary>
