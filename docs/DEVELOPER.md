@@ -32,6 +32,7 @@ docs/Activities.md                       every line Discord shows, by the releas
 | `Statistics` | The counts the trivia shows: `SaveStats`, or the game's own across all saves when the Statistics option says so. |
 | `SaveStats` | The per-save counters, see [Per-save statistics](#per-save-statistics-savestats). |
 | `StatusText` | The `key=value` status. The keys are shared with `Game/GameStatus.cs`. |
+| `Bridge` | What other mods hand the presence and take from it, see [Other mods](#other-mods). |
 | `Presence` | Calls `DiscordPresence.dll` through `Win32API`. |
 
 The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?` guards them, see [Earlier versions](#earlier-versions).
@@ -40,7 +41,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 
 | Path | What it is |
 |---|---|
-| `Exports.cs` | The functions `Discord_RPC.rb` calls: `presence_start`, `presence_update`, `presence_check_for_update` and `presence_newer_version`. Nothing may throw out of them. |
+| `Exports.cs` | The functions `Discord_RPC.rb` calls: `presence_start`, `presence_update`, `presence_check_for_update` and `presence_newer_version`; and for `Bridge`, `presence_set_connection`, `presence_take_invite` and `presence_player_name`. Nothing may throw out of them. |
 | `UpdateCheck.cs` | Asks GitHub's API for the latest release once per session, on its own thread, and compares it with the DLL's version. Development builds (`0.0.0-dev`) never ask. |
 | `PresenceLoop.cs` | The DLL's own thread: rate limit, trivia rotation, reconnecting to Discord. Holds the Discord application's id (`ClientId`), which players cannot change. |
 | `ActivityBuilder.cs` | Builds the Discord activity: the first line, the tooltip, the picture and the buttons. **All user-visible texts live here and in `TriviaBuilder.cs`.** New or changed ones also go into [Activities.md](Activities.md) under the version they ship in. |
@@ -51,7 +52,10 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `NativeMethods.cs` | Lets the DLL find its own folder. |
 | `Game/GameStatus.cs` | One parsed status, a property per value. `Scene.cs` and `Vehicle.cs` hold its enums. |
 | `Discord/DiscordIpcClient.cs` | Discord's local named-pipe protocol. `Opcode.cs` holds the frame kinds. |
-| `Discord/Activity.cs`, `Discord/ActivityButton.cs`, `Discord/Json.cs` | The activity, its link buttons and its JSON, with Discord's field limits. |
+| `Discord/Activity.cs`, `Discord/ActivityButton.cs`, `Discord/ActivityParty.cs`, `Discord/Json.cs` | The activity, its link buttons, the party a connection invites to and its JSON, with Discord's field limits. |
+| `Discord/DiscordDispatch.cs` | The events Discord sends on its own: `READY` (the user's name), `ACTIVITY_JOIN` (an accepted invite's join secret) and `ACTIVITY_JOIN_REQUEST`. |
+| `Discord/LaunchRegistration.cs` | Points the application's URL scheme `discord-<ClientId>` (`HKCU\Software\Classes`) at the running Game.exe, so accepting an invite starts a closed game. |
+| `Connection.cs`, `ConnectionKind.cs` | The connection with a friend that another mod reports, the invite the player accepted in Discord and the player's name on Discord, see [Other mods](#other-mods). |
 
 **`package/Discord/`:** `Settings.ini` (the options `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides`, `layered_routes` and `update_check`, which the game script reads and writes), the player `README.txt`, and the updater: `Update.bat` runs `Update.ps1` (Windows PowerShell 5.1), which downloads the latest release's zip, extracts it over the game folder and puts the old option values back into the new `Settings.ini`. It reads the installed version from the DLL's `ProductVersion`, so it needs no version file.
 
@@ -80,7 +84,7 @@ Patch/    Discord_RPC.rb
 
 ### Tests
 
-`MGQParadox.DiscordPresence.Tests` covers the DLL without the game or Discord: every trivia line and first line with the texts the presence sends, the tooltip, the activity's JSON and Discord's field limits, parsing the status, the number formats and how the update check tells a newer release. A test builds a status the way the game script publishes it (`StatusFactory.Status`) and passes a fixed time, so idle, the item window and the rotations are reproducible.
+`MGQParadox.DiscordPresence.Tests` covers the DLL without the game or Discord: every trivia line and first line with the texts the presence sends, the tooltip, the activity's JSON and Discord's field limits, parsing the status, the number formats, how the update check tells a newer release, the Discord events, and the activity a connection that another mod reports makes. A test builds a status the way the game script publishes it (`StatusFactory.Status`) and passes a fixed time, so idle, the item window and the rotations are reproducible.
 
 The project targets [Microsoft.Testing.Platform](https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-intro) and builds into an executable, so it runs itself:
 
@@ -131,6 +135,23 @@ They appended a block (`# >>> MGQ Discord RPC` … `# <<< MGQ Discord RPC`) to `
 - **Rate limit:** Discord accepts 5 updates per 20 s. The DLL ticks every 4 s, sends the status on a tick only if it changed, and moves the trivia on every 4th tick (16 s). Sends only happen on ticks, so the first one after a reconnect waits for the next tick too.
 - **F12:** the game's reset only restarts `rgss_main`; `Patch.rb` and with it `Discord_RPC.rb` are evaluated once per start. Should the file be evaluated twice anyway, `MGQ_Discord.hookable?` keeps the hooks from wrapping themselves.
 
+## Other mods
+
+`MGQ_Discord::Bridge` in `Discord_RPC.rb` is all another mod sees of this one, and this mod knows no other. The [Multiplayer mod](https://github.com/Pauliinchen/MGQ-Paradox-Multiplayer-Mod) uses it when this mod is installed. A mod checks `Bridge::VERSION` first, which changes whenever a call's meaning changes. Every call does nothing while the presence is off or the DLL is missing (`available?`).
+
+| Call | What it does |
+|---|---|
+| `hosting(party, join_secret)` | The player waits for a friend: the activity gets a party of 1 of 2, the join secret, the invite banner and `Waiting for a friend` on the second line. |
+| `connected(party, friend)` | The player plays with a friend: a party of 2 of 2 and `Playing with <Friend>` on the second line. |
+| `idle` | Neither; the second line shows the trivia again. |
+| `take_invite` | The join secret of an invite the player accepted in Discord, handed out once, or `nil`. |
+| `player_name` | The player's name on Discord, or `nil` until Discord told it. |
+| `add_status { \|scene\| ... }` | Adds the Hash the block returns to every status `StatusText.build` hands the DLL. A block that raises is logged and left out. |
+
+The DLL keeps the reported connection in `Connection` (`presence_set_connection`). A report without a party, or hosting without a join secret of at most 128 characters (Discord's limit), counts as none. `PresenceLoop.WithConnection` puts it into the activity; Discord puts the party's size behind the second line. Both games name the party the same, so Discord sees them in the same party.
+
+After `READY` the client subscribes to `ACTIVITY_JOIN`, whose join secret waits in `Connection` until `presence_take_invite` takes it, and `ACTIVITY_JOIN_REQUEST`, accepted with `SEND_ACTIVITY_JOIN_INVITE` while hosting. Buttons are left out while a join secret is set. The invite banner is the art asset `invite_cover` (1024 x 576), named as `assets.invite_cover_image`, since the invite image set in the Developer Portal did not reach the invites. The chat's + menu offers the invite only while the activity has the party and join secret, that is while the player hosts.
+
 ## Game data used (Paradox)
 
 | What | Source |
@@ -140,7 +161,7 @@ They appended a block (`# >>> MGQ Discord RPC` … `# <<< MGQ Discord RPC`) to `
 | Battles fought | `$game_system.battle_count` (per save) |
 | Defeats, escapes, wipeouts, synthesis, gold spent, biggest hit | `SaveStats` in `Discord_RPC.rb` (per save; see below). With the Statistics option on *All saves*, `Statistics` reads `$game_library.party_defeat`, `party_escape`, `party_lose`, `party_synthesize`, `purchase_gold` and `party_damage_record_actor` instead, which are shared by all saves. |
 | Difficulty | `$game_variables[NWConst::Var::CURRENT_DIFFICULTY]` (-2..4) |
-| Idle | `Input.press?` on every button, published as `last_input` (Unix seconds); the DLL compares it with its own clock, so a game frozen in the background turns idle too |
+| Idle | `Input.press?` on every button, published as `last_input` (Unix seconds); the DLL compares it with its own clock. The Multiplayer mod, which keeps the game running in the background, has `Input` report no buttons meanwhile, so a game left in the background turns idle |
 | Music playing | `RPG::BGM.last.name`, named through `NWConst::Library::BGM_SCENE_ITEMS` (the jukebox's music room, 227 of the 234 BGM files) |
 | Menu screens | While `GameState.scene` is `menu`, the class name of `SceneManager.scene` (`Scene_Shop`, `Scene_Synthesize`, `Scene_Smith` for reinforcing, `Scene_EquipStone*` for gems, `Scene_Poker`, …), published as `screen`. `ActivityBuilder.ScreenTexts` names the ones with a text of their own; the same classes exist in 2.x. A menu opened on the world map stays `travel` |
 | Medals | `NWConst::Library::MEDAL_DATA` without `NO_USE_MEDAL`, like the game's Library counts them (189 in 2.41, 394 in 3.06); earned ones are `$game_library.has_medal?`, shared by all saves. Published as `medals` and `medals_total` |

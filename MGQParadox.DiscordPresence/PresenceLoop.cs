@@ -2,6 +2,10 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-28: Showed the connection another mod reports on the second line, in a party both games share, with an invite banner
+//                            - Kept Discord's invites for the mod that joins with them, and let friends who ask in while it hosts
+//                            - Logged whether an update is open to invites
+//                            - Registered how Discord starts the game
 //      Paulinchen  2026-09-27: Handed the current time to the activity
 //                            - Fixed the Discord application instead of reading it from Settings.ini
 //                            - Stopped looking up the app icon, the default art asset stands in for it
@@ -39,6 +43,19 @@ internal sealed class PresenceLoop
     /// Ticks each trivia line stays up, 16 seconds.
     /// </summary>
     private const int TicksPerTriviaLine = 4;
+
+    /// <summary>
+    /// Players a connection takes, the host and one guest.
+    /// </summary>
+    private const int MaxPlayers = 2;
+
+    /// <summary>
+    /// The art asset shown as the banner of an invite to play together, 1024 x 576.
+    /// </summary>
+    /// <remarks>
+    /// Set in the activity, since the application's invite image in the Developer Portal did not reach the invites.
+    /// </remarks>
+    private const string InviteCoverAsset = "invite_cover";
 
     /// <summary>
     /// The activity that clears the profile, sent while the player turned the presence off.
@@ -114,6 +131,14 @@ internal sealed class PresenceLoop
     private int _ticks;
 
     /// <summary>
+    /// Creates the loop, taking Discord's invite events.
+    /// </summary>
+    private PresenceLoop()
+    {
+        _discord.Dispatched = Take;
+    }
+
+    /// <summary>
     /// Picks both the trivia and the Pocket Castle line, moving on every <see cref="TicksPerTriviaLine"/> ticks.
     /// </summary>
     private int Rotation => _ticks / TicksPerTriviaLine;
@@ -153,6 +178,7 @@ internal sealed class PresenceLoop
         {
             Log.ClearIfLargerThan(MaxLogBytes);
             Log.Write("--- presence started ---");
+            LaunchRegistration.Register(ClientId);
             new PresenceLoop().Mirror();
         }
         catch (Exception ex)
@@ -206,9 +232,10 @@ internal sealed class PresenceLoop
             return;
         }
 
-        var activity = status.IsHidden
-            ? NoActivity
-            : ActivityBuilder.Build(status, Rotation, Rotation + _pocketCastleOffset, DateTimeOffset.UtcNow).ToJson();
+        var built = status.IsHidden
+            ? null
+            : WithConnection(ActivityBuilder.Build(status, Rotation, Rotation + _pocketCastleOffset, DateTimeOffset.UtcNow), Connection.Current);
+        var activity = built?.ToJson() ?? NoActivity;
 
         if (activity == _lastSentActivity)
         {
@@ -219,7 +246,7 @@ internal sealed class PresenceLoop
         {
             _discord.SetActivity(_processId, activity);
             _lastSentActivity = activity;
-            Log.Write("presence updated");
+            Log.Write(built?.JoinSecret != null ? "presence updated, open to invites" : "presence updated");
         }
         catch (Exception ex)
         {
@@ -255,6 +282,7 @@ internal sealed class PresenceLoop
         if (_discord.Connect())
         {
             _reportedUnreachable = false;
+            Connection.Current.PlayerName = _discord.UserName;
             return true;
         }
 
@@ -265,5 +293,52 @@ internal sealed class PresenceLoop
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Shows the connection with a friend instead of the trivia: waiting for a friend with an invite
+    /// while hosting, playing with them while connected, each with the party Discord shows the size of.
+    /// </summary>
+    /// <param name="activity">The activity the status describes.</param>
+    /// <param name="connection">The connection another mod reported.</param>
+    /// <returns>The same activity, with the connection when there is one.</returns>
+    internal static Activity WithConnection(Activity activity, Connection connection)
+    {
+        if (connection.Hosting is { } hosted)
+        {
+            activity.Party = new ActivityParty(hosted.PartyId, 1, MaxPlayers);
+            activity.JoinSecret = hosted.JoinSecret;
+            activity.InviteCover = InviteCoverAsset;
+            activity.State = ActivityBuilder.WaitingForFriendState;
+        }
+        else if (connection.Connected is { } connected)
+        {
+            activity.Party = new ActivityParty(connected.PartyId, MaxPlayers, MaxPlayers);
+            activity.State = ActivityBuilder.PlayingWith(connected.Friend);
+        }
+
+        return activity;
+    }
+
+    /// <summary>
+    /// Handles an invite event, on the thread that reads Discord's pipe.
+    /// </summary>
+    /// <param name="dispatch">The event.</param>
+    private void Take(DiscordDispatch dispatch)
+    {
+        switch (dispatch.Event)
+        {
+            case DiscordDispatch.ActivityJoin when dispatch.Secret is { } secret:
+                Log.Write(Connection.Current.ReceiveInvite(secret) ? "invite accepted, waiting for the game to join" : "ignored an invite without a usable join secret");
+                break;
+            case DiscordDispatch.ActivityJoinRequest when dispatch.UserId is { } userId:
+                if (Connection.Current.Hosting != null)
+                {
+                    _discord.SendJoinInvite(userId);
+                    Log.Write($"let {dispatch.UserName} in");
+                }
+
+                break;
+        }
     }
 }

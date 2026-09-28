@@ -2,6 +2,7 @@
 //  ActivityTests.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-28: Covered the party, the join secret and the invite banner of a connection with a friend
 //      Paulinchen  2026-09-27: Created
 //
 //----------------------------------------------------------------
@@ -83,6 +84,44 @@ public sealed class ActivityTests
         var json = new Activity { Details = new string('a', 200) }.ToJson();
 
         Assert.Equal($"{{\"details\":\"{new string('a', Activity.MaxTextLength - 1)}…\"}}", json);
+    }
+
+    /// <summary>
+    /// Asserts that a party with a join secret is written, and leaves the buttons out.
+    /// </summary>
+    [Fact]
+    public void ToJson_WritesThePartyAndJoinSecretInsteadOfButtons()
+    {
+        var activity = new Activity
+        {
+            Details = "Iliasville",
+            Buttons = new[] { new ActivityButton("Get the mod", "https://example.com") },
+            Party = new ActivityParty("abc", 1, 2),
+            JoinSecret = "mgqfb1;abcdefghjk;47625;203.0.113.7",
+        };
+
+        Assert.Equal("{\"details\":\"Iliasville\",\"party\":{\"id\":\"abc\",\"size\":[1,2]}," +
+                     "\"secrets\":{\"join\":\"mgqfb1;abcdefghjk;47625;203.0.113.7\"}}",
+                     activity.ToJson());
+    }
+
+    /// <summary>
+    /// Asserts that an invite banner goes into the assets, after the picture and its hover text.
+    /// </summary>
+    [Fact]
+    public void ToJson_WritesTheInviteCoverWithThePicture()
+    {
+        var activity = new Activity
+        {
+            Details = "Iliasville",
+            LargeImage = "default",
+            LargeText = "Part 1",
+            InviteCover = "invite_cover",
+        };
+
+        Assert.Equal("{\"details\":\"Iliasville\",\"assets\":{\"large_image\":\"default\",\"large_text\":\"Part 1\"," +
+                     "\"invite_cover_image\":\"invite_cover\"}}",
+                     activity.ToJson());
     }
 
     /// <summary>

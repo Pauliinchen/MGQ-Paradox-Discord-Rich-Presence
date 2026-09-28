@@ -11,6 +11,23 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
+## Unreleased (Multiplayer mod, `mp-test`)
+
+The Multiplayer mod reports these through `MGQ_Discord::Bridge`.
+
+### Line 2
+
+While connected with a friend, line 2 shows the connection instead of the trivia. Discord adds the party's size behind it.
+
+| Activity | Text |
+|---|---|
+| Hosting | `Waiting for a friend (1 of 2)` |
+| Connected with a friend | `Playing with <Friend> (2 of 2)` |
+
+### Invites
+
+While the player hosts, the activity carries a party (`1 of 2`) and the Multiplayer mod's join code as its join secret, so Discord offers **Ask to Join** and **Invite to play** in a chat's **+** menu. An invite shows the art asset `invite_cover` (the game's logo, 1024 x 576) as its banner. The *Get the mod* button is left out meanwhile.
+
 ## 1.4.0
 
 Trivia lines now belong to a group: *general* lines rotate throughout; a part's lines (Part 1, 2 or 3) only rotate while it is played, after the general ones; a Part 3 route's lines (Destroyer, Judgment, Chaos) only rotate while it is played, after those. Every earlier line is general.

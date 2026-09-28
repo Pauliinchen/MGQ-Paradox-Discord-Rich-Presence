@@ -2,6 +2,7 @@
 //  ActivityBuilderTests.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-28: Covered the second line of a connection with a friend
 //      Paulinchen  2026-09-27: Covered the menu screens
 //                            - Created
 //
@@ -80,6 +81,16 @@ public sealed class ActivityBuilderTests
     [InlineData("", "Iliasville - In menu . . .")]
     public void Details_NameTheMenuScreen(string screen, string expected) =>
         Assert.Equal(expected, Build(Status(("scene", "menu"), ("screen", screen), ("area", "Iliasville"))).Details);
+
+    /// <summary>
+    /// Asserts the second line of a connection with a friend, which Discord follows with the party's size.
+    /// </summary>
+    [Fact]
+    public void ConnectionLines_WaitForAndPlayWithTheFriend()
+    {
+        Assert.Equal("Waiting for a friend", ActivityBuilder.WaitingForFriendState);
+        Assert.Equal("Playing with Guest", ActivityBuilder.PlayingWith("Guest"));
+    }
 
     /// <summary>
     /// Asserts that a named menu screen replaces the Pocket Castle's own line, and idle still wins

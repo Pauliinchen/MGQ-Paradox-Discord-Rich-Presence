@@ -2,6 +2,7 @@
 //  Activity.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-28: Added a party, a join secret and the banner of an invite, which leave the buttons out
 //      Paulinchen  2026-09-27: Added link buttons
 //                            - Shared the longest text Discord accepts, so texts can shorten themselves first
 //      Paulinchen  2026-09-25: Created
@@ -77,6 +78,25 @@ internal sealed class Activity
     public IReadOnlyList<ActivityButton> Buttons { get; set; } = Array.Empty<ActivityButton>();
 
     /// <summary>
+    /// The party the player invites to, <see langword="null"/> while they invite nobody.
+    /// </summary>
+    public ActivityParty? Party { get; set; }
+
+    /// <summary>
+    /// What Discord hands the game of a friend who joins, <see langword="null"/> while nobody can.
+    /// </summary>
+    /// <remarks>
+    /// The buttons are left out while it is set. Whether Discord accepts both at once is untested.
+    /// </remarks>
+    public string? JoinSecret { get; set; }
+
+    /// <summary>
+    /// The art asset shown as the banner of an invite to the party, <see langword="null"/> for the
+    /// application's invite image.
+    /// </summary>
+    public string? InviteCover { get; set; }
+
+    /// <summary>
     /// Writes the activity object of a SET_ACTIVITY command.
     /// </summary>
     /// <remarks>
@@ -97,19 +117,39 @@ internal sealed class Activity
             json.Append(",\"timestamps\":{\"start\":").Append(startedAt).Append('}');
         }
 
+        var assets = new List<string>();
+
         if (!string.IsNullOrEmpty(LargeImage))
         {
-            json.Append(",\"assets\":{\"large_image\":").Append(Json.Quote(LargeImage));
+            assets.Add("\"large_image\":" + Json.Quote(LargeImage));
 
             if (LargeText.Length >= MinTextLength)
             {
-                json.Append(",\"large_text\":").Append(Json.Quote(Fit(LargeText)));
+                assets.Add("\"large_text\":" + Json.Quote(Fit(LargeText)));
             }
-
-            json.Append('}');
         }
 
-        if (Buttons.Count > 0)
+        if (!string.IsNullOrEmpty(InviteCover))
+        {
+            assets.Add("\"invite_cover_image\":" + Json.Quote(InviteCover));
+        }
+
+        if (assets.Count > 0)
+        {
+            json.Append(",\"assets\":{").Append(string.Join(",", assets)).Append('}');
+        }
+
+        if (Party != null)
+        {
+            json.Append(",\"party\":{\"id\":").Append(Json.Quote(Party.Id))
+                .Append(",\"size\":[").Append(Party.Size).Append(',').Append(Party.Max).Append("]}");
+        }
+
+        if (JoinSecret != null)
+        {
+            json.Append(",\"secrets\":{\"join\":").Append(Json.Quote(JoinSecret)).Append('}');
+        }
+        else if (Buttons.Count > 0)
         {
             var buttons = Buttons.Take(MaxButtons).Select(button =>
                 $"{{\"label\":{Json.Quote(Fit(button.Label, MaxButtonLabelLength))},\"url\":{Json.Quote(button.Url)}}}");

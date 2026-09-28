@@ -2,6 +2,8 @@
 //  DiscordIpcClient.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-28: Subscribed to Discord's invite events and passed them on, with the user's name from READY
+//                            - Added accepting a friend's request to join
 //      Paulinchen  2026-09-27: Dropped IDisposable, nothing disposed the client
 //                            - Documented that a null activity clears the profile
 //      Paulinchen  2026-09-25: Created
@@ -85,6 +87,16 @@ internal sealed class DiscordIpcClient
     public bool IsConnected => Volatile.Read(ref _pipe) is { IsConnected: true };
 
     /// <summary>
+    /// The name of the user Discord is logged in as, once READY told it.
+    /// </summary>
+    public string? UserName { get; private set; }
+
+    /// <summary>
+    /// Receives the invite events Discord sends, on the thread that reads the pipe.
+    /// </summary>
+    public Action<DiscordDispatch>? Dispatched { get; set; }
+
+    /// <summary>
     /// Connects to the first Discord that answers.
     /// </summary>
     /// <returns><see langword="true"/> once Discord has confirmed the connection.</returns>
@@ -118,6 +130,18 @@ internal sealed class DiscordIpcClient
     }
 
     /// <summary>
+    /// Lets a friend who asked to join the player's party in.
+    /// </summary>
+    /// <param name="userId">The friend's user id, from their request.</param>
+    public void SendJoinInvite(string userId)
+    {
+        var pipe = Volatile.Read(ref _pipe) ?? throw new InvalidOperationException("Not connected to Discord.");
+
+        Write(pipe, Opcode.Frame,
+            "{\"cmd\":\"SEND_ACTIVITY_JOIN_INVITE\",\"args\":{\"user_id\":" + Json.Quote(userId) + "},\"nonce\":" + Json.Quote(Guid.NewGuid().ToString()) + "}");
+    }
+
+    /// <summary>
     /// Closes the pipe, if one is open.
     /// </summary>
     public void Disconnect() => Close(Interlocked.Exchange(ref _pipe, null));
@@ -143,6 +167,8 @@ internal sealed class DiscordIpcClient
                 return false;
             }
 
+            Subscribe(pipe, DiscordDispatch.ActivityJoin);
+            Subscribe(pipe, DiscordDispatch.ActivityJoinRequest);
             Volatile.Write(ref _pipe, pipe);
             StartDrainThread(pipe);
             Log.Write($"connected and READY on {pipeName}");
@@ -170,7 +196,7 @@ internal sealed class DiscordIpcClient
     /// </remarks>
     /// <param name="pipe">The pipe the handshake was sent on.</param>
     /// <returns><see langword="true"/> once READY arrived.</returns>
-    private static bool AwaitReady(NamedPipeClientStream pipe)
+    private bool AwaitReady(NamedPipeClientStream pipe)
     {
         var deadline = DateTime.UtcNow + ReadyTimeout;
 
@@ -185,12 +211,22 @@ internal sealed class DiscordIpcClient
 
             if (opcode == Opcode.Frame && body.Contains("\"READY\""))
             {
+                UserName = DiscordDispatch.TryParse(body)?.UserName;
                 return true;
             }
         }
 
         return false;
     }
+
+    /// <summary>
+    /// Asks Discord to send an event from now on.
+    /// </summary>
+    /// <param name="pipe">The connected pipe.</param>
+    /// <param name="eventName">The event, such as <see cref="DiscordDispatch.ActivityJoin"/>.</param>
+    private void Subscribe(NamedPipeClientStream pipe, string eventName) =>
+        Write(pipe, Opcode.Frame,
+            "{\"cmd\":\"SUBSCRIBE\",\"evt\":" + Json.Quote(eventName) + ",\"nonce\":" + Json.Quote(Guid.NewGuid().ToString()) + "}");
 
     /// <summary>
     /// Reads everything Discord sends from here on, in the background.
@@ -206,7 +242,8 @@ internal sealed class DiscordIpcClient
     }
 
     /// <summary>
-    /// Answers pings and logs every other frame until the pipe closes, then lets go of it.
+    /// Answers pings, passes events on to <see cref="Dispatched"/> and logs every other frame until
+    /// the pipe closes, then lets go of it.
     /// </summary>
     /// <remarks>
     /// Ends quietly on any failure. An exception escaping a thread would end the whole game.
@@ -226,6 +263,10 @@ internal sealed class DiscordIpcClient
                     case Opcode.Close:
                         Log.Write($"discord closed: {Excerpt(body)}");
                         return;
+                    case Opcode.Frame when DiscordDispatch.TryParse(body) is { } dispatch:
+                        Log.Write($"discord event: {dispatch.Event}");
+                        PassOn(dispatch);
+                        break;
                     default:
                         Log.Write(body.Contains("\"ERROR\"")
                             ? $"discord REJECTED: {Excerpt(body)}"
@@ -245,6 +286,25 @@ internal sealed class DiscordIpcClient
             }
 
             Close(pipe);
+        }
+    }
+
+    /// <summary>
+    /// Hands an event to <see cref="Dispatched"/>.
+    /// </summary>
+    /// <remarks>
+    /// A failing receiver must not end the thread that reads the pipe.
+    /// </remarks>
+    /// <param name="dispatch">The event.</param>
+    private void PassOn(DiscordDispatch dispatch)
+    {
+        try
+        {
+            Dispatched?.Invoke(dispatch);
+        }
+        catch (Exception ex)
+        {
+            Log.Write($"discord event {dispatch.Event} failed: {ex.Message}");
         }
     }
 

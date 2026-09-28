@@ -102,6 +102,16 @@ sealed_sides, layered_routes and update_check), not in your saves.
 Update.bat keeps them, extracting a new download by hand resets them.
 
 
+PLAYING WITH A FRIEND
+---------------------
+With the Multiplayer mod
+(github.com/Pauliinchen/MGQ-Paradox-Multiplayer-Mod) installed as well,
+you can invite a friend through the + in a Discord chat ("Invite to
+play") and accept their invites, and your status shows "Waiting for a
+friend" while you host and "Playing with <Friend>" while you play
+together. The "Get the mod" button leaves your profile while you host.
+
+
 AFTER UPDATING THE TRANSLATION
 ------------------------------
 A translation update replaces Patch\Patch.rb and with it the mod loader,
@@ -151,8 +161,7 @@ TROUBLESHOOTING
   activity sharing is on. Discord can be started before or after the
   game; the status appears within about 15 seconds. Then look at
   Discord\DiscordPresence.log.
-- The status updates at most every 4 seconds (Discord's limit), and not
-  while the game window is in the background - the game pauses then.
+- The status updates at most every 4 seconds (Discord's limit).
 - Discord\InGame.log only appears if something went wrong inside
   the game. Include it when reporting a problem.
 

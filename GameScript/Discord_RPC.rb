@@ -2,6 +2,7 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
+#      Paulinchen  2026-09-28: Let other mods report their connection with a friend, take Discord invites and add status fields
 #      Paulinchen  2026-09-27: Told of a newer release on the title screen, with an Update Check option to turn it off
 #                            - Published the medals earned
 #                            - Published the screen open in a menu
@@ -1705,6 +1706,7 @@ module MGQ_Discord
 
       fields["nsfw"] = 1 if Options.nsfw?
       fields.update(Trivia.values) unless scene == "title"
+      fields.update(Bridge.status_fields(scene))
 
       fields.map { |key, value| "#{key}=#{value.to_s.gsub(/[\r\n]/, ' ')}\n" }.join
     end
@@ -1763,6 +1765,103 @@ module MGQ_Discord
       LINES.each_with_index do |line, index|
         @sprite.bitmap.draw_text(MARGIN, index * LINE_HEIGHT, Graphics.width - 2 * MARGIN, LINE_HEIGHT, format(line, version))
       end
+    end
+  end
+
+  # What other mods, such as the Multiplayer mod, hand the presence: their connection with a friend,
+  # which the activity shows and Discord invites to, and fields of their own for the status; and what
+  # they take from it: invites the player accepted in Discord, and the player's name on Discord. They
+  # check VERSION first, so this mod never needs to know them.
+  module Bridge
+    # Changes whenever a call's meaning changes.
+    VERSION = 1
+
+    # Bytes the DLL may write a join secret or the player's name into, its terminating null included.
+    TEXT_SIZE = 256
+
+    # @return [Boolean] whether the presence runs, so the calls reach Discord
+    def self.available?
+      ENABLED && Presence.installed?
+    end
+
+    # Reports that the player hosts and waits for a friend, whom Discord can invite.
+    #
+    # @param party [String] names the party, the same for both players
+    # @param join_secret [String] what a friend who joins gets, at most 128 characters
+    def self.hosting(party, join_secret)
+      report("hosting", party, join_secret, "")
+    end
+
+    # Reports that the player plays with a friend.
+    #
+    # @param party [String] names the party, the same for both players
+    # @param friend [String] the friend's name
+    def self.connected(party, friend)
+      report("connected", party, "", friend)
+    end
+
+    # Reports that the player neither hosts nor plays with a friend.
+    def self.idle
+      report("", "", "", "")
+    end
+
+    # @return [String, nil] the join secret of an invite the player accepted in Discord, handed out once
+    def self.take_invite
+      text = read('presence_take_invite')
+      text.empty? ? nil : text
+    end
+
+    # @return [String, nil] the player's name on Discord, nil until Discord told it
+    def self.player_name
+      name = read('presence_player_name')
+      name.empty? ? nil : name
+    end
+
+    # Adds fields to every status, which DiscordPresence.dll turns into what Discord shows.
+    #
+    # @yieldparam scene [String] what the game is showing, see GameState.scene
+    # @yieldreturn [Hash, nil] field names and values
+    def self.add_status(&source)
+      (@sources ||= []) << source
+    end
+
+    # @param scene [String] what the game is showing, see GameState.scene
+    # @return [Hash] the fields every source adds, a failing source left out
+    def self.status_fields(scene)
+      (@sources || []).inject({}) do |fields, source|
+        begin
+          fields.merge(source.call(scene) || {})
+        rescue => e
+          Log.write("bridge status source failed: #{e.class}: #{e.message}")
+          fields
+        end
+      end
+    end
+
+    # @param kind [String] "hosting", "connected" or "" for none
+    # @param party [String] names the party
+    # @param join_secret [String] what a friend who joins gets
+    # @param friend [String] the friend's name
+    def self.report(kind, party, join_secret, friend)
+      return unless available?
+
+      Presence.function('presence_set_connection', 'pppp').call(kind + "\0", party.to_s + "\0", join_secret.to_s + "\0", friend.to_s + "\0")
+    rescue => e
+      Log.write("bridge report failed: #{e.class}: #{e.message}")
+    end
+
+    # @param name [String] an export that writes a text into a buffer
+    # @return [String] the text, "" when there is none
+    def self.read(name)
+      return "" unless available?
+
+      buffer = "\0" * TEXT_SIZE
+      length = Presence.function(name, 'pl').call(buffer, buffer.size)
+      # The DLL wrote bytes past Ruby's back, so only a binary string counts them right.
+      length > 0 ? buffer.force_encoding("ASCII-8BIT")[0, length].force_encoding("UTF-8") : ""
+    rescue => e
+      Log.write("bridge read failed: #{e.class}: #{e.message}")
+      ""
     end
   end
 

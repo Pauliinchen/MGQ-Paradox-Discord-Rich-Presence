@@ -2,6 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-28: Showed a connection with a friend on the second line: waiting for them, or playing with them
 //      Paulinchen  2026-09-27: Named what the player does in a menu screen, the Pocket Castle's too
 //                            - Showed the trivia TriviaBuilder writes, and took the time from the caller
 //                            - Added a button that links to the mod's page
@@ -56,6 +57,12 @@ internal static class ActivityBuilder
     /// What the player is shown doing while the camp music plays.
     /// </summary>
     private const string CampText = "Setting up for Camp . . .";
+
+    /// <summary>
+    /// The second line while the player hosts and waits for a friend, which Discord follows with the
+    /// party's size.
+    /// </summary>
+    public const string WaitingForFriendState = "Waiting for a friend";
 
     /// <summary>
     /// Who the player is talking to while spoilers are hidden.
@@ -210,6 +217,14 @@ internal static class ActivityBuilder
             Buttons = Buttons,
         };
     }
+
+    /// <summary>
+    /// Builds the second line while the player is connected with a friend, which Discord follows with
+    /// the party's size.
+    /// </summary>
+    /// <param name="friend">The friend's name.</param>
+    /// <returns>The line.</returns>
+    public static string PlayingWith(string friend) => $"Playing with {friend}";
 
     /// <summary>
     /// Builds the first line: where the player is and what they are doing.
