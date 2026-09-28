@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/GameScript/">
+    <File Path="GameScript/Discord_RPC.rb" />
+  </Folder>
   <Project Path="MGQParadox.DiscordPresence/MGQParadox.DiscordPresence.csproj" />
   <Project Path="MGQParadox.DiscordPresence.Tests/MGQParadox.DiscordPresence.Tests.csproj" />
 </Solution>
