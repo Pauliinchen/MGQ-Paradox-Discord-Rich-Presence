@@ -2,6 +2,7 @@
 //  Log.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Kept the DLL's threads from writing at once
 //      Paulinchen  2026-09-27: Named the DLL as the only writer, the uninstaller is gone
 //      Paulinchen  2026-09-26: Named the uninstaller as the second writer
 //      Paulinchen  2026-09-25: Created
@@ -29,6 +30,14 @@ internal static class Log
     private static string FilePath => ModFolder.PathOf("DiscordPresence.log");
 
     /// <summary>
+    /// Keeps the game thread, the presence loop, the pipe reader and the update check from writing at once.
+    /// </summary>
+    /// <remarks>
+    /// Two writes at once fail with the file in use, which would lose the very line that says what went wrong.
+    /// </remarks>
+    private static readonly object Gate = new();
+
+    /// <summary>
     /// Appends a line, prefixed with the time of day.
     /// </summary>
     /// <param name="message">The line to append.</param>
@@ -38,7 +47,10 @@ internal static class Log
 
         try
         {
-            File.AppendAllText(FilePath, $"{time}  {message}\r\n", Encoding.UTF8);
+            lock (Gate)
+            {
+                File.AppendAllText(FilePath, $"{time}  {message}\r\n", Encoding.UTF8);
+            }
         }
         catch
         {
@@ -53,9 +65,12 @@ internal static class Log
     {
         try
         {
-            if (File.Exists(FilePath) && new FileInfo(FilePath).Length > maxBytes)
+            lock (Gate)
             {
-                File.Delete(FilePath);
+                if (File.Exists(FilePath) && new FileInfo(FilePath).Length > maxBytes)
+                {
+                    File.Delete(FilePath);
+                }
             }
         }
         catch
