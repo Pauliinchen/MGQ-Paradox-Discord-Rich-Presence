@@ -15,6 +15,13 @@ When you add or change an activity, add it under the version it will ship in.
 
 The Multiplayer mod reports these through `MGQ_Discord::Bridge`.
 
+### Line 1
+
+| Activity | Text |
+|---|---|
+| Friend battle | `Friend battle against <Friend>'s team!` |
+| Mirror match | `Fighting their own team in a mirror match!` |
+
 ### Line 2
 
 While connected with a friend, line 2 shows the connection instead of the trivia. Discord adds the party's size behind it.
@@ -23,6 +30,12 @@ While connected with a friend, line 2 shows the connection instead of the trivia
 |---|---|
 | Hosting | `Waiting for a friend (1 of 2)` |
 | Connected with a friend | `Playing with <Friend> (2 of 2)` |
+
+### Menu screens
+
+| Screen | Text |
+|---|---|
+| Friend battle screen | `Setting up a friend battle . . .` |
 
 ### Invites
 
