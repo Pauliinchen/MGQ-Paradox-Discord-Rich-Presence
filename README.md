@@ -54,7 +54,7 @@ Every line, its exact text, when it shows and the release that added it: [Activi
 ## Requirements
 
 - Windows 10 or 11. Linux and Steam Deck (Wine) are untested.
-- Monster Girl Quest! Paradox RPG **2.x or 3.x** (tested on 2.x and 3.06) with the **English translation** installed (the `Patch` folder must exist).
+- Monster Girl Quest! Paradox RPG **2.x or 3.x** (tested on 2.x and 3.06), with or without the **English translation**.
 - The community's **mod loader**: the `Patch.rb` from [*Patch.rb (enable Type 1 mods)*](https://mgq.miraheze.org/wiki/Paradox_mods#Patch.rb_(enable_Type_1_mods)) on the MGQ wiki, put into the `Patch` folder. If you already use other Patch folder mods, you have it.
 - The Discord **desktop app**, with *Settings → Activity Privacy → Share your detected activities* turned on.
 
