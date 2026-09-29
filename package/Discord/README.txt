@@ -55,9 +55,12 @@ Update.bat does so.
 
 OPTIONS
 -------
-The mod adds its options to the game: in the Mod Config Menu if you have
-it installed, in the game's own Config menu otherwise. They are grouped
-under [Discord] Rich Presence, with the others indented below it.
+The mod adds its options to the game: in a mod config menu if you have
+one installed, in the game's own Config menu otherwise. For the
+translation's tabbed options screen, which the community's Mod Config Menu
+no longer works with, there is the Mod Config Remake
+(github.com/Pauliinchen/MGQ-Paradox-Mod-Collection). The options are
+grouped under [Discord] Rich Presence, with the others indented below it.
 
 [Discord] Rich Presence: On (the default) shows what you're doing on
 Discord. Off shows nothing about the game, without uninstalling the mod;

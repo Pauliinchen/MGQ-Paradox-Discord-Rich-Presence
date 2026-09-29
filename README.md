@@ -78,7 +78,7 @@ To update by hand, close the game and extract the new zip over the old one. That
 
 ### Options
 
-The mod adds its options to the game: in the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) when you have it installed, in the game's own Config menu otherwise. They are grouped under **`[Discord] Rich Presence`**; the ones below it are indented, and greyed out in the Mod Config Menu while it is off.
+The mod adds its options to the game: in a mod config menu when you have one installed, in the game's own Config menu otherwise. For the translation's tabbed options screen, which the community's Mod Config Menu (`Patch\0_ModConfigMenu.rb`) no longer works with, there is the [Mod Config Remake](https://github.com/Pauliinchen/MGQ-Paradox-Mod-Collection/tree/main/0_ModConfigRemake). The options are grouped under **`[Discord] Rich Presence`**; the ones below it are indented, and greyed out in a mod config menu while it is off.
 
 **`[Discord] Rich Presence`**
 - **On** (default): Discord shows what you're doing in the game.
