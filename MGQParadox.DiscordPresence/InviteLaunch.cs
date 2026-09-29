@@ -2,7 +2,8 @@
 //  InviteLaunch.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-29: Created
+//      Paulinchen  2026-09-29: Masked join codes of every version, not only the first
+//                            - Created
 //
 //----------------------------------------------------------------
 
@@ -30,9 +31,10 @@ internal sealed class InviteLaunch
     public static readonly TimeSpan ConnectGrace = TimeSpan.FromSeconds(20);
 
     /// <summary>
-    /// How a Multiplayer mod join code starts, which holds the host's addresses and stays out of the log.
+    /// How a Multiplayer mod join code of any version starts, which holds the host's addresses and
+    /// stays out of the log.
     /// </summary>
-    private const string JoinCodePrefix = "mgqmp1";
+    private const string JoinCodePrefix = "mgqmp";
 
     /// <summary>
     /// Guards every field below.

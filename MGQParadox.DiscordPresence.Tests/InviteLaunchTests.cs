@@ -2,7 +2,8 @@
 //  InviteLaunchTests.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-29: Created
+//      Paulinchen  2026-09-29: Covered masking a join code of version 2
+//                            - Created
 //
 //----------------------------------------------------------------
 
@@ -60,6 +61,7 @@ public sealed class InviteLaunchTests
     public void Masked_CutsTheJoinCode()
     {
         Assert.Equal(Link + "join?secret=<join code>", InviteLaunch.Masked(Link + "join?secret=mgqmp1;abcdefghjk;47625;203.0.113.7"));
+        Assert.Equal(Link + "join?secret=<join code>", InviteLaunch.Masked(Link + "join?secret=mgqmp2;abcdefghjkmnpqrs;47625;r1;203.0.113.7"));
         Assert.Equal(Link, InviteLaunch.Masked(Link));
     }
 
