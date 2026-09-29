@@ -39,7 +39,7 @@ While connected with a friend, line 2 shows the connection instead of the trivia
 
 ### Invites
 
-While the player hosts, the activity carries a party (`1 of 2`) and the Multiplayer mod's join code as its join secret, so Discord offers **Ask to Join** and **Invite to play** in a chat's **+** menu. An invite shows the art asset `invite_cover` (the game's logo, 1024 x 576) as its banner. The *Get the mod* button is left out meanwhile.
+While the player hosts, the activity carries a party (`1 of 2`) and the Multiplayer mod's join code as its join secret, so Discord offers **Invite to play** in a chat's **+** menu. A friend's **Ask to Join** is not accepted for the player; the player invites them instead. An invite shows the art asset `invite_cover` (the game's logo, 1024 x 576) as its banner. The *Get the mod* button is left out meanwhile.
 
 ## 1.4.0
 

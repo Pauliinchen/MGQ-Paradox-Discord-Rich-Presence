@@ -3,6 +3,7 @@
 //
 //  Changelog:
 //      Paulinchen  2026-09-29: Noted whether Discord started the game, with the link it used, and whether its join came
+//                            - Stopped letting friends who ask to join in, which moved a hosting friend into the player's party
 //      Paulinchen  2026-09-28: Showed the connection another mod reports on the second line, in a party both games share, with an invite banner
 //                            - Kept Discord's invites for the mod that joins with them, and let friends who ask in while it hosts
 //                            - Logged whether an update is open to invites
@@ -339,13 +340,10 @@ internal sealed class PresenceLoop
                 InviteLaunch.Current.Joined();
                 Log.Write(Connection.Current.ReceiveInvite(secret) ? "invite accepted, waiting for the game to join" : "ignored an invite without a usable join secret");
                 break;
-            case DiscordDispatch.ActivityJoinRequest when dispatch.UserId is { } userId:
-                if (Connection.Current.Hosting != null)
-                {
-                    _discord.SendJoinInvite(userId);
-                    Log.Write($"let {dispatch.UserName} in");
-                }
-
+            // Accepting on the player's behalf moved a friend who hosted too into the player's party,
+            // which ended the friend's hosting, so the player invites them instead.
+            case DiscordDispatch.ActivityJoinRequest:
+                Log.Write($"{dispatch.UserName} asked to join, left to the player to invite");
                 break;
         }
     }

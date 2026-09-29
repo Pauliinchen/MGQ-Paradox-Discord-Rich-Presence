@@ -2,6 +2,7 @@
 //  DiscordIpcClient.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Stopped accepting a friend's request to join, which moved a hosting friend's game into the player's party
 //      Paulinchen  2026-09-28: Subscribed to Discord's invite events and passed them on, with the user's name from READY
 //                            - Added accepting a friend's request to join
 //      Paulinchen  2026-09-27: Dropped IDisposable, nothing disposed the client
@@ -127,18 +128,6 @@ internal sealed class DiscordIpcClient
 
         Write(pipe, Opcode.Frame,
             "{\"cmd\":\"SET_ACTIVITY\",\"args\":{\"pid\":" + processId + ",\"activity\":" + activityJson + "},\"nonce\":" + nonce + "}");
-    }
-
-    /// <summary>
-    /// Lets a friend who asked to join the player's party in.
-    /// </summary>
-    /// <param name="userId">The friend's user id, from their request.</param>
-    public void SendJoinInvite(string userId)
-    {
-        var pipe = Volatile.Read(ref _pipe) ?? throw new InvalidOperationException("Not connected to Discord.");
-
-        Write(pipe, Opcode.Frame,
-            "{\"cmd\":\"SEND_ACTIVITY_JOIN_INVITE\",\"args\":{\"user_id\":" + Json.Quote(userId) + "},\"nonce\":" + Json.Quote(Guid.NewGuid().ToString()) + "}");
     }
 
     /// <summary>
