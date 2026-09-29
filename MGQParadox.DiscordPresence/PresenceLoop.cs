@@ -2,7 +2,8 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-29: Noted whether Discord started the game, with the link it used, and whether its join came
+//      Paulinchen  2026-09-29: Noted the launch before the loop's thread starts, so the title screen never asks too early
+//                            - Noted whether Discord started the game, with the link it used, and whether its join came
 //                            - Stopped letting friends who ask to join in, which moved a hosting friend into the player's party
 //      Paulinchen  2026-09-28: Showed the connection another mod reports on the second line, in a party both games share, with an invite banner
 //                            - Kept Discord's invites for the mod that joins with them, and let friends who ask in while it hosts
@@ -146,8 +147,12 @@ internal sealed class PresenceLoop
     private int Rotation => _ticks / TicksPerTriviaLine;
 
     /// <summary>
-    /// Starts the loop on a background thread, once per game session.
+    /// Notes whether Discord started the game, then starts the loop on a background thread, once per
+    /// game session.
     /// </summary>
+    /// <remarks>
+    /// The launch is noted before the thread starts, since the title screen asks for it right away.
+    /// </remarks>
     public static void Start()
     {
         if (Interlocked.Exchange(ref _started, 1) == 1)
@@ -155,7 +160,8 @@ internal sealed class PresenceLoop
             return;
         }
 
-        new Thread(Run) { IsBackground = true, Name = "DiscordPresence" }.Start();
+        var link = InviteLaunch.Current.Detect(NativeMethods.CommandLine(), ClientId, DateTime.UtcNow);
+        new Thread(() => Run(link)) { IsBackground = true, Name = "DiscordPresence" }.Start();
     }
 
     /// <summary>
@@ -173,7 +179,8 @@ internal sealed class PresenceLoop
     /// <remarks>
     /// Catches everything, since an exception escaping this thread would end the whole game.
     /// </remarks>
-    private static void Run()
+    /// <param name="link">The link Discord started the game with, or <see langword="null"/> when it did not.</param>
+    private static void Run(string? link)
     {
         try
         {
@@ -181,7 +188,7 @@ internal sealed class PresenceLoop
             Log.Write("--- presence started ---");
             LaunchRegistration.Register(ClientId);
 
-            if (InviteLaunch.Current.Detect(NativeMethods.CommandLine(), ClientId, DateTime.UtcNow) is { } link)
+            if (link != null)
             {
                 Log.Write($"started by Discord with {InviteLaunch.Masked(link)}, waiting for its join");
             }

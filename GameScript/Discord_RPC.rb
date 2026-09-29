@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-29: Kept the title screen behind a box while Discord starts the game for an invite, and said when it had ended
+#      Paulinchen  2026-09-29: Looked at the invite state again on the next title screen after a failed first look
+#                            - Kept the title screen behind a box while Discord starts the game for an invite, and said when it had ended
 #      Paulinchen  2026-09-28: Let other mods report their connection with a friend, take Discord invites and add status fields
 #      Paulinchen  2026-09-27: Told of a newer release on the title screen, with an Update Check option to turn it off
 #                            - Published the medals earned
@@ -1859,12 +1860,13 @@ module MGQ_Discord
     # player go on, since without such a mod nothing else happens.
     HANDOFF_FRAMES = 600
 
-    # Opens the box when Discord started the game, the first time the title screen shows.
+    # Opens the box when Discord started the game, the first time the title screen shows. A failed
+    # look at the DLL leaves it to the next title screen.
     def self.open
       return if @done
 
-      @done = true
       @state = Presence.invite_state
+      @done = true
       return if @state == NONE
 
       @window = Window_Base.new((Graphics.width - WIDTH) / 2, (Graphics.height - HEIGHT) / 2, WIDTH, HEIGHT)
