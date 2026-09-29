@@ -2,7 +2,8 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
-#      Paulinchen  2026-09-29: Looked at the invite state again on the next title screen after a failed first look
+#      Paulinchen  2026-09-29: Let the invite box turn from ended to joined when the join comes late
+#                            - Looked at the invite state again on the next title screen after a failed first look
 #                            - Kept the title screen behind a box while Discord starts the game for an invite, and said when it had ended
 #      Paulinchen  2026-09-28: Let other mods report their connection with a friend, take Discord invites and add status fields
 #      Paulinchen  2026-09-27: Told of a newer release on the title screen, with an Update Check option to turn it off
@@ -1886,21 +1887,27 @@ module MGQ_Discord
     # when no other mod took the join. Called every frame while the box is open.
     def self.update
       @frames += 1
+      follow_state if @frames % CHECK_FRAMES == 0
+      return unless @window
 
       if @state == ENDED
         close if Input.trigger?(:C) || Input.trigger?(:B)
-        return
+      elsif @state == JOINED && @frames >= HANDOFF_FRAMES
+        close
       end
+    end
 
-      if @frames % CHECK_FRAMES == 0 && (state = Presence.invite_state) != @state
-        @state = state
-        @frames = 0
-        return close if @state == NONE
+    # Takes the DLL's state when it changed, and closes the box when Discord did not start the game
+    # after all. An invite shown as ended only changes to a join that came late.
+    def self.follow_state
+      state = Presence.invite_state
+      return if state == @state || (@state == ENDED && state != JOINED)
 
-        draw
-      end
+      @state = state
+      @frames = 0
+      return close if @state == NONE
 
-      close if @state == JOINED && @frames >= HANDOFF_FRAMES
+      draw
     end
 
     # Closes the box. Called when the title screen ends too.
