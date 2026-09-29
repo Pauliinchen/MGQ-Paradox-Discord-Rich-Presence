@@ -2,6 +2,7 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Noted whether Discord started the game, with the link it used, and whether its join came
 //      Paulinchen  2026-09-28: Showed the connection another mod reports on the second line, in a party both games share, with an invite banner
 //                            - Kept Discord's invites for the mod that joins with them, and let friends who ask in while it hosts
 //                            - Logged whether an update is open to invites
@@ -178,6 +179,12 @@ internal sealed class PresenceLoop
             Log.ClearIfLargerThan(MaxLogBytes);
             Log.Write("--- presence started ---");
             LaunchRegistration.Register(ClientId);
+
+            if (InviteLaunch.Current.Detect(NativeMethods.CommandLine(), ClientId, DateTime.UtcNow) is { } link)
+            {
+                Log.Write($"started by Discord with {InviteLaunch.Masked(link)}, waiting for its join");
+            }
+
             new PresenceLoop().Mirror();
         }
         catch (Exception ex)
@@ -282,6 +289,7 @@ internal sealed class PresenceLoop
         {
             _reportedUnreachable = false;
             Connection.Current.PlayerName = _discord.UserName;
+            InviteLaunch.Current.Connected(DateTime.UtcNow);
             return true;
         }
 
@@ -328,6 +336,7 @@ internal sealed class PresenceLoop
         switch (dispatch.Event)
         {
             case DiscordDispatch.ActivityJoin when dispatch.Secret is { } secret:
+                InviteLaunch.Current.Joined();
                 Log.Write(Connection.Current.ReceiveInvite(secret) ? "invite accepted, waiting for the game to join" : "ignored an invite without a usable join secret");
                 break;
             case DiscordDispatch.ActivityJoinRequest when dispatch.UserId is { } userId:

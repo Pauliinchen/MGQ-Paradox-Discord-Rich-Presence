@@ -2,6 +2,7 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
+#      Paulinchen  2026-09-29: Kept the title screen behind a box while Discord starts the game for an invite, and said when it had ended
 #      Paulinchen  2026-09-28: Let other mods report their connection with a friend, take Discord invites and add status fields
 #      Paulinchen  2026-09-27: Told of a newer release on the title screen, with an Update Check option to turn it off
 #                            - Published the medals earned
@@ -1819,6 +1820,102 @@ module MGQ_Discord
     end
   end
 
+  # A box on the title screen while Discord starts the game for an invite. It keeps the player from
+  # choosing anything until Discord hands over the join, which another mod such as the Multiplayer mod
+  # joins with, or says that the invite had ended.
+  module InviteBox
+    # Discord did not start the game, as the DLL reports it.
+    NONE = 0
+
+    # Discord started the game, and its join has not come yet.
+    WAITING = 1
+
+    # Discord handed over the join.
+    JOINED = 2
+
+    # No join came in time, so the invite had ended.
+    ENDED = 3
+
+    # What the box says in each state.
+    TEXTS = {
+      WAITING => ["Joining your friend through Discord . . .", "Waiting for Discord to hand over the invite."],
+      JOINED => ["Joining your friend through Discord . . .", "Discord handed over the invite."],
+      ENDED => ["The Discord invite you accepted has ended.", "Ask your friend for a new one. (Enter)"],
+    }
+
+    # Width of the box.
+    WIDTH = 480
+
+    # Height of the box, two lines.
+    HEIGHT = 72
+
+    # Layer above the title screen's windows.
+    Z = 250
+
+    # Frames between two looks at the DLL.
+    CHECK_FRAMES = 10
+
+    # Frames the box waits after the join for another mod to take it, ten seconds, before it lets the
+    # player go on, since without such a mod nothing else happens.
+    HANDOFF_FRAMES = 600
+
+    # Opens the box when Discord started the game, the first time the title screen shows.
+    def self.open
+      return if @done
+
+      @done = true
+      @state = Presence.invite_state
+      return if @state == NONE
+
+      @window = Window_Base.new((Graphics.width - WIDTH) / 2, (Graphics.height - HEIGHT) / 2, WIDTH, HEIGHT)
+      @window.z = Z
+      @frames = 0
+      draw
+    end
+
+    # Tells whether the box keeps the player from choosing anything.
+    #
+    # @return [Boolean] Whether the box is open.
+    def self.blocking?
+      @window ? true : false
+    end
+
+    # Follows the DLL's state, and closes the box once the player read that the invite had ended, or
+    # when no other mod took the join. Called every frame while the box is open.
+    def self.update
+      @frames += 1
+
+      if @state == ENDED
+        close if Input.trigger?(:C) || Input.trigger?(:B)
+        return
+      end
+
+      if @frames % CHECK_FRAMES == 0 && (state = Presence.invite_state) != @state
+        @state = state
+        @frames = 0
+        return close if @state == NONE
+
+        draw
+      end
+
+      close if @state == JOINED && @frames >= HANDOFF_FRAMES
+    end
+
+    # Closes the box. Called when the title screen ends too.
+    def self.close
+      @window.dispose if @window && !@window.disposed?
+      @window = nil
+    end
+
+    # Writes the state's text into the box.
+    def self.draw
+      @window.contents.clear
+      TEXTS.fetch(@state, TEXTS[WAITING]).each_with_index do |line, index|
+        @window.contents.draw_text(0, index * @window.line_height, @window.contents.width, @window.line_height, line, 1)
+      end
+    end
+  end
+
   # What other mods, such as the Multiplayer mod, hand the presence: their connection with a friend,
   # which the activity shows and Discord invites to, and fields of their own for the status; and what
   # they take from it: invites the player accepted in Discord, and the player's name on Discord. They
@@ -1971,6 +2068,13 @@ module MGQ_Discord
       buffer[0, length]
     end
 
+    # Asks the DLL where a game Discord started for an invite stands.
+    #
+    # @return [Integer] One of InviteBox's states, NONE when Discord did not start the game.
+    def self.invite_state
+      function('presence_invite_state', 'v').call
+    end
+
     # Loads an export of the DLL.
     #
     # @param name [String] The exported function.
@@ -2038,13 +2142,43 @@ if MGQ_Discord.hookable?
 
   begin
     class Scene_Title
+      alias mgq_discord_start start
+
+      # Starts the title screen, then opens the invite box when Discord started the game.
+      def start
+        mgq_discord_start
+        begin
+          MGQ_Discord::InviteBox.open if MGQ_Discord::Presence.installed?
+        rescue => e
+          MGQ_Discord::Log.write("invite box failed: #{e.class}: #{e.message}")
+        end
+      end
+
+      alias mgq_discord_update update
+
+      # Updates the title screen, or only the screen and the invite box while the box is open, which
+      # keeps the command window from taking any input.
+      def update
+        return mgq_discord_update unless MGQ_Discord::InviteBox.blocking?
+
+        Graphics.update
+        Input.update
+        begin
+          MGQ_Discord::InviteBox.update
+        rescue => e
+          MGQ_Discord::InviteBox.close
+          MGQ_Discord::Log.write("invite box failed: #{e.class}: #{e.message}")
+        end
+      end
+
       alias mgq_discord_terminate terminate
 
-      # Ends the title screen and takes the update notice off with its sprites.
+      # Ends the title screen and takes the update notice and the invite box off with its sprites.
       def terminate
         mgq_discord_terminate
       ensure
         MGQ_Discord::UpdateNotice.hide rescue nil
+        MGQ_Discord::InviteBox.close rescue nil
       end
     end
   rescue => e

@@ -113,6 +113,9 @@ you can invite a friend through the + in a Discord chat ("Invite to
 play") and accept their invites, and your status shows "Waiting for a
 friend" while you host and "Playing with <Friend>" while you play
 together. The "Get the mod" button leaves your profile while you host.
+When you accept an invite, a box on the title screen keeps you waiting
+until Discord hands it over. An invite ends when your friend stops
+hosting; the box then says so.
 
 
 AFTER UPDATING THE TRANSLATION

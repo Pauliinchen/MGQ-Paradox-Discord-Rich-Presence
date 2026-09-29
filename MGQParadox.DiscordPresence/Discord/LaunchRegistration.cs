@@ -2,6 +2,7 @@
 //  LaunchRegistration.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Passed the link Discord opens on to the game
 //      Paulinchen  2026-09-28: Created
 //
 //----------------------------------------------------------------
@@ -42,9 +43,10 @@ internal static class LaunchRegistration
                 icon.SetValue(null, game);
             }
 
+            // The link Discord opens comes along, so the game can tell that Discord started it.
             using (var command = scheme.CreateSubKey(@"shell\open\command"))
             {
-                command.SetValue(null, $"\"{game}\"");
+                command.SetValue(null, $"\"{game}\" \"%1\"");
             }
 
             Log.Write($"launch registered: {game}");

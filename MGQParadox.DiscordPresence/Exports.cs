@@ -2,6 +2,7 @@
 //  Exports.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Let the game script ask where a game Discord started for an invite stands
 //      Paulinchen  2026-09-28: Let another mod report its connection with a friend, take invites and read the player's name
 //      Paulinchen  2026-09-27: Let the game script start the update check and read the newer release it found
 //      Paulinchen  2026-09-26: Named the game script by its new file name
@@ -25,6 +26,11 @@ namespace MGQParadox.DiscordPresence;
 /// </remarks>
 internal static unsafe class Exports
 {
+    /// <summary>
+    /// Whether the log already says that the invite Discord started the game for had ended.
+    /// </summary>
+    private static bool _inviteEndedLogged;
+
     /// <summary>
     /// Starts the presence. Calling it again does nothing.
     /// </summary>
@@ -113,6 +119,32 @@ internal static unsafe class Exports
         catch (Exception ex)
         {
             Log.Write($"presence_newer_version failed: {ex}");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// Tells where a game Discord started for an invite stands.
+    /// </summary>
+    /// <returns>An <see cref="InviteLaunchState"/> as its number, 0 when it failed.</returns>
+    [UnmanagedCallersOnly(EntryPoint = "presence_invite_state", CallConvs = [typeof(CallConvStdcall)])]
+    public static int InviteState()
+    {
+        try
+        {
+            var state = InviteLaunch.Current.State(DateTime.UtcNow);
+
+            if (state == InviteLaunchState.Ended && !_inviteEndedLogged)
+            {
+                _inviteEndedLogged = true;
+                Log.Write("no join came from Discord, the invite had ended");
+            }
+
+            return (int)state;
+        }
+        catch (Exception ex)
+        {
+            Log.Write($"presence_invite_state failed: {ex}");
             return 0;
         }
     }

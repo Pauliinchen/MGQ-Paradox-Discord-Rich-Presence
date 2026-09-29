@@ -2,6 +2,7 @@
 //  NativeMethods.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Read the game's command line
 //      Paulinchen  2026-09-27: Stopped keeping the Windows error, which nothing read
 //      Paulinchen  2026-09-25: Created
 //
@@ -12,7 +13,7 @@ using System.Runtime.InteropServices;
 namespace MGQParadox.DiscordPresence;
 
 /// <summary>
-/// The Windows functions the DLL needs to find itself.
+/// The Windows functions the DLL needs to find itself and read how the game was started.
 /// </summary>
 internal static unsafe partial class NativeMethods
 {
@@ -51,6 +52,19 @@ internal static unsafe partial class NativeMethods
             return length == 0 ? null : new string(start, 0, (int)length);
         }
     }
+
+    /// <summary>
+    /// Reads the command line the game was started with.
+    /// </summary>
+    /// <returns>The command line, or <see langword="null"/> when Windows cannot tell.</returns>
+    public static string? CommandLine() => Marshal.PtrToStringUni(GetCommandLineW());
+
+    /// <summary>
+    /// Points at the process's command line, which Windows owns.
+    /// </summary>
+    /// <returns>The command line's address.</returns>
+    [LibraryImport("kernel32.dll")]
+    private static partial nint GetCommandLineW();
 
     /// <summary>
     /// Finds a loaded module.
