@@ -108,6 +108,10 @@ The mod adds its options to the game: in a mod config menu when you have one ins
 
 The options under `Activity Image` only show while they apply. The options are the same for every save. They are kept as `presence`, `nsfw`, `all_saves`, `spoilers`, `picture`, `shown_picture`, `sealed_sides`, `layered_routes` and `update_check` in `Discord\Settings.ini`, not in your save files. `Update.bat` keeps them, extracting a new zip by hand resets them.
 
+### Playing with a friend
+
+With the [Multiplayer mod](https://github.com/Pauliinchen/MGQ-Paradox-Multiplayer-Mod) installed as well, you can invite a friend through the **+** in a Discord chat (*Invite to play*) and accept their invites, and your status shows `Waiting for a friend (1 of 2)` while you host and `Playing with <Friend> (2 of 2)` while you play together. The `Get the mod` button leaves your profile while you host.
+
 ### After updating the translation
 
 A translation update replaces `Patch\Patch.rb` and with it the mod loader, so no Patch folder mod is loaded any more. The game keeps working, but your Discord status stops showing. Put the community's `Patch.rb` back into the `Patch` folder.
@@ -143,7 +147,7 @@ The game counts most of the second group only **across all saves combined**. To 
 ## Troubleshooting
 
 - **Nothing shows on Discord:** make sure the mod loader is installed and activity sharing is turned on (see [Requirements](#requirements)). Discord can be started before or after the game; the status appears within about 15 seconds. If it still doesn't, check `Discord\DiscordPresence.log`.
-- **The status updates slowly:** Discord allows 5 updates per 20 seconds, so a new map or fight shows up within about 4 seconds. The game also pauses while its window is in the background, so the status doesn't change then.
+- **The status updates slowly:** Discord allows 5 updates per 20 seconds, so a new map or fight shows up within about 4 seconds. The game also pauses while its window is in the background, so the status doesn't change then, unless another mod such as the Multiplayer mod keeps it running.
 - **`Discord\InGame.log` exists:** it only appears when something went wrong inside the game. Please attach it when [opening an issue](https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence/issues).
 
 ## Building from source

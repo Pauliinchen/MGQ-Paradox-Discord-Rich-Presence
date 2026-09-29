@@ -11,9 +11,9 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
-## Unreleased (Multiplayer mod, `mp-test`)
+## 1.5.0
 
-The Multiplayer mod reports these through `MGQ_Discord::Bridge`.
+Other mods can now report what they add through `MGQ_Discord::Bridge`. The [Multiplayer mod](https://github.com/Pauliinchen/MGQ-Paradox-Multiplayer-Mod) reports these.
 
 ### Line 1
 
