@@ -2,7 +2,8 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-29: Noted the launch before the loop's thread starts, so the title screen never asks too early
+//      Paulinchen  2026-09-29: Counted only an invite the connection took as the launch's join
+//                            - Noted the launch before the loop's thread starts, so the title screen never asks too early
 //                            - Noted whether Discord started the game, with the link it used, and whether its join came
 //                            - Stopped letting friends who ask to join in, which moved a hosting friend into the player's party
 //      Paulinchen  2026-09-28: Showed the connection another mod reports on the second line, in a party both games share, with an invite banner
@@ -344,8 +345,16 @@ internal sealed class PresenceLoop
         switch (dispatch.Event)
         {
             case DiscordDispatch.ActivityJoin when dispatch.Secret is { } secret:
-                InviteLaunch.Current.Joined();
-                Log.Write(Connection.Current.ReceiveInvite(secret) ? "invite accepted, waiting for the game to join" : "ignored an invite without a usable join secret");
+                if (Connection.Current.ReceiveInvite(secret))
+                {
+                    InviteLaunch.Current.Joined();
+                    Log.Write("invite accepted, waiting for the game to join");
+                }
+                else
+                {
+                    Log.Write("ignored an invite without a usable join secret");
+                }
+
                 break;
             // Accepting on the player's behalf moved a friend who hosted too into the player's party,
             // which ended the friend's hosting, so the player invites them instead.
