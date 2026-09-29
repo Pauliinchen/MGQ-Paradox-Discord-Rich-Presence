@@ -31,8 +31,8 @@ internal sealed class InviteLaunch
     public static readonly TimeSpan ConnectGrace = TimeSpan.FromSeconds(20);
 
     /// <summary>
-    /// How a Multiplayer mod join code of any version starts, which holds the host's addresses and
-    /// stays out of the log.
+    /// How a Multiplayer mod join code of any version starts, which lets a game into the host's
+    /// session and stays out of the log.
     /// </summary>
     private const string JoinCodePrefix = "mgqmp";
 
@@ -89,7 +89,7 @@ internal sealed class InviteLaunch
     /// Writes a link for the log, a join code in it masked.
     /// </summary>
     /// <param name="link">The link.</param>
-    /// <returns>The link, cut before a join code with the addresses it holds.</returns>
+    /// <returns>The link, cut before a join code.</returns>
     public static string Masked(string link)
     {
         var start = link.IndexOf(JoinCodePrefix, StringComparison.OrdinalIgnoreCase);

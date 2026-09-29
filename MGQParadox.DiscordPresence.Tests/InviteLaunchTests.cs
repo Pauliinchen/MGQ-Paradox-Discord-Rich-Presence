@@ -2,7 +2,8 @@
 //  InviteLaunchTests.cs
 //
 //  Changelog:
-//      Paulinchen  2026-09-29: Covered masking a join code of version 2
+//      Paulinchen  2026-09-29: Masked version 2 join codes in their final form, token and relay only
+//                            - Covered masking a join code of version 2
 //                            - Created
 //
 //----------------------------------------------------------------
@@ -55,13 +56,13 @@ public sealed class InviteLaunchTests
     }
 
     /// <summary>
-    /// Asserts that a join code in a link, with the addresses it holds, stays out of the log.
+    /// Asserts that a join code in a link, of any version, stays out of the log.
     /// </summary>
     [Fact]
     public void Masked_CutsTheJoinCode()
     {
         Assert.Equal(Link + "join?secret=<join code>", InviteLaunch.Masked(Link + "join?secret=mgqmp1;abcdefghjk;47625;203.0.113.7"));
-        Assert.Equal(Link + "join?secret=<join code>", InviteLaunch.Masked(Link + "join?secret=mgqmp2;abcdefghjkmnpqrs;47625;r1;203.0.113.7"));
+        Assert.Equal(Link + "join?secret=<join code>", InviteLaunch.Masked(Link + "join?secret=mgqmp2;abcdefghjkmnpqrs;r1"));
         Assert.Equal(Link, InviteLaunch.Masked(Link));
     }
 
