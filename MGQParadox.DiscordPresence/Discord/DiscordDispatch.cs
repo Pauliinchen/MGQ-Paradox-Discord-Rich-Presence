@@ -2,6 +2,7 @@
 //  DiscordDispatch.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Dropped the user id, which nothing reads since join requests are no longer accepted
 //      Paulinchen  2026-09-28: Created
 //
 //----------------------------------------------------------------
@@ -16,9 +17,8 @@ namespace MGQParadox.DiscordPresence.Discord;
 /// </summary>
 /// <param name="Event">The event's name, such as <see cref="Ready"/>.</param>
 /// <param name="Secret">The join secret of <see cref="ActivityJoin"/>.</param>
-/// <param name="UserId">The user of <see cref="Ready"/> or <see cref="ActivityJoinRequest"/>.</param>
-/// <param name="UserName">That user's display name, or their user name when they set none.</param>
-internal sealed record DiscordDispatch(string Event, string? Secret, string? UserId, string? UserName)
+/// <param name="UserName">The display name of the user of <see cref="Ready"/> or <see cref="ActivityJoinRequest"/>, or their user name when they set none.</param>
+internal sealed record DiscordDispatch(string Event, string? Secret, string? UserName)
 {
     /// <summary>
     /// The handshake succeeded, naming the user Discord is logged in as.
@@ -65,7 +65,6 @@ internal sealed record DiscordDispatch(string Event, string? Secret, string? Use
             return new DiscordDispatch(
                 name,
                 Text(data, "secret"),
-                Text(user, "id"),
                 Text(user, "global_name") ?? Text(user, "username"));
         }
         catch (JsonException)

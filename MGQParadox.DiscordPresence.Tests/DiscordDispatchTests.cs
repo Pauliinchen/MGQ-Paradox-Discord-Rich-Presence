@@ -2,6 +2,7 @@
 //  DiscordDispatchTests.cs
 //
 //  Changelog:
+//      Paulinchen  2026-09-29: Stopped reading the user id of READY, which the dispatch no longer keeps
 //      Paulinchen  2026-09-28: Created
 //
 //----------------------------------------------------------------
@@ -26,7 +27,6 @@ public sealed class DiscordDispatchTests
 
         Assert.NotNull(ready);
         Assert.Equal(DiscordDispatch.Ready, ready.Event);
-        Assert.Equal("42", ready.UserId);
         Assert.Equal("Guest", ready.UserName);
     }
 
