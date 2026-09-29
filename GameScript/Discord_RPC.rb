@@ -3,6 +3,7 @@
 #
 #  Changelog:
 #      Paulinchen  2026-09-29: Found the mod folder relative to the game's folder, which works in a folder named with characters outside ASCII
+#                            - Read the story, the trivia and who speaks in the untranslated game too
 #                            - Let the invite box turn from ended to joined when the join comes late
 #                            - Looked at the invite state again on the next title screen after a failed first look
 #                            - Kept the title screen behind a box while Discord starts the game for an invite, and said when it had ended
@@ -667,6 +668,26 @@ module MGQ_Discord
     # Value of "Labyrinth of Chaos: Type" during a Carnage run. A Normal run holds 9.
     CARNAGE_TYPE = 10
 
+    # The untranslated game's names of the switches, variables and actors the mod reads by their
+    # translated names.
+    ORIGINAL_NAMES = {
+      "Ilias Chosen"                  => "イリアス選択",
+      "Alice Chosen"                  => "アリス選択",
+      "Overall Events Progress"       => "総合イベント進行度",
+      "Within Chaos Labyrinth"        => "混沌の迷宮内",
+      "Labyrinth of Chaos: Type"      => "混沌迷宮の種類",
+      "Chaos Labyrinth Current LV"    => "混沌の迷宮現在階層",
+      "Labyrinth of Chaos Rare Value" => "混沌の迷宮レア値",
+      "Support Pirates"               => "海賊に荷担",
+      "Support Navy"                  => "海軍に荷担",
+      "Angelic Dominion Route Clear"  => "天界ルートクリア",
+      "Monster Realm Route Clear"     => "魔界ルートクリア",
+      "Sylph"                         => "シルフ",
+      "Gnome"                         => "ノーム",
+      "Undine"                        => "ウンディーネ",
+      "Salamander"                    => "サラマンダー",
+    }.merge(Hash[(1..12).map { |act| ["Collab:C#{act}", "コラボ：C#{act}"] }])
+
     # Jobs and races an actor has taken to their maximum level.
     class Mastery < Struct.new(:jobs, :races)
       # Counts the jobs and races mastered.
@@ -702,7 +723,7 @@ module MGQ_Discord
     # @param name [String] The name of the switch.
     # @return [Boolean, nil] The switch, nil when no switch has that name.
     def self.switch_on?(name)
-      id = $data_system.switches.index(name)
+      id = id_of($data_system.switches, name)
       id && $game_switches[id]
     end
 
@@ -719,8 +740,26 @@ module MGQ_Discord
     # @param name [String] The name of the variable.
     # @return [Integer] The value, 0 when no variable has that name.
     def self.variable(name)
-      id = $data_system.variables.index(name)
+      id = id_of($data_system.variables, name)
       id ? $game_variables[id].to_i : 0
+    end
+
+    # Finds a name in the editor's list of switches or variables, the untranslated game's too.
+    #
+    # @param names [Array<String>] The editor's names, by id.
+    # @param name [String] The translated name.
+    # @return [Integer, nil] The id, nil when neither name is in the list.
+    def self.id_of(names, name)
+      names.index(name) || (ORIGINAL_NAMES[name] && names.index(ORIGINAL_NAMES[name]))
+    end
+
+    # Tells whether a name from the game's data is the translated name or the untranslated game's.
+    #
+    # @param candidate [String] A name from the game's data.
+    # @param name [String] The translated name.
+    # @return [Boolean] Whether it is either.
+    def self.named?(candidate, name)
+      candidate == name || candidate == ORIGINAL_NAMES[name]
     end
 
     # Reports whether the party is inside the Labyrinth of Chaos.
@@ -1032,14 +1071,17 @@ module MGQ_Discord
     # writes in front of a speaker's lines.
     NAME_BOX = /\\n[1-5cr]?<(.+?)>/i
 
+    # The untranslated game's speaker line, the name in brackets opening a message: "【Name】".
+    NAME_LINE = /\A【([^】]+)】/
+
     # What a companion's name box adds after the name: " (Affection:\V[3054])".
     AFFECTION_SUFFIX = /\s*[(（]Affection.*\z/i
 
     # Any other text code left in a name, such as \c[2].
     TEXT_CODE = /\\[a-z]+(\[[^\]]*\])?/i
 
-    # Luka's name, as the name boxes write it.
-    LUKA = "Luka"
+    # Luka's name, as the translation's name boxes and the untranslated game's speaker lines write it.
+    LUKA = ["Luka", "ルカ"]
 
     # Remembers who speaks in a message the game just queued.
     #
@@ -1049,7 +1091,7 @@ module MGQ_Discord
     def self.heard(text)
       name = speaker_in(text)
       interpreter = running_interpreter
-      return if name.nil? || name == LUKA || interpreter.nil?
+      return if name.nil? || LUKA.include?(name) || interpreter.nil?
 
       @speaker = [name, interpreter, interpreter.instance_variable_get(:@list)]
     end
@@ -1079,12 +1121,12 @@ module MGQ_Discord
       interpreter if interpreter && interpreter.running?
     end
 
-    # Reads the name in a line's name box.
+    # Reads the name in a line's name box, or of the untranslated game's speaker line.
     #
     # @param text [String] One line of a message.
-    # @return [String, nil] The name, nil when the line has no name box.
+    # @return [String, nil] The name, nil when the line names no speaker.
     def self.speaker_in(text)
-      match = NAME_BOX.match(text.to_s)
+      match = NAME_BOX.match(text.to_s) || NAME_LINE.match(text.to_s)
       return nil unless match
 
       name = match[1].sub(AFFECTION_SUFFIX, "").gsub(TEXT_CODE, "").strip
@@ -1468,7 +1510,7 @@ module MGQ_Discord
     #
     # @return [Array<Integer>] The ids, the first actor of each name.
     def self.spirit_ids
-      @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && actor.name == name } }.compact
+      @spirit_ids ||= SPIRITS.map { |name| $data_actors.index { |actor| actor && GameState.named?(actor.name, name) } }.compact
     end
 
     # How many of the monster queens have joined the party.
