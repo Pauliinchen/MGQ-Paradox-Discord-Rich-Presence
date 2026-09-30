@@ -11,7 +11,7 @@ using System.Threading;
 namespace MGQParadox.DiscordPresence;
 
 /// <summary>
-/// The connection with a friend that another mod, such as the Multiplayer mod, reports through the
+/// The connection with a friend that another mod, such as Monster Girl Quest! Online, reports through the
 /// game script: whether the player hosts or plays with a friend, which the activity shows, and the
 /// invite the player accepted in Discord, which that mod takes to join.
 /// </summary>

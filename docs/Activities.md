@@ -13,7 +13,7 @@ When you add or change an activity, add it under the version it will ship in.
 
 ## 1.5.0
 
-Other mods can now report what they add through `MGQ_Discord::Bridge`. The [Multiplayer mod](https://github.com/Pauliinchen/MGQ-Paradox-Multiplayer-Mod) reports these.
+Other mods can now report what they add through `MGQ_Discord::Bridge`. The [Multiplayer mod](https://github.com/Pauliinchen/MGQ-Online) reports these.
 
 ### Line 1
 

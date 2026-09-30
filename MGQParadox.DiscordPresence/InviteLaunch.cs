@@ -31,8 +31,8 @@ internal sealed class InviteLaunch
     public static readonly TimeSpan ConnectGrace = TimeSpan.FromSeconds(20);
 
     /// <summary>
-    /// How a Multiplayer mod join code of any version starts, which lets a game into the host's
-    /// session and stays out of the log.
+    /// How a join code of Monster Girl Quest! Online starts, in any version, which lets a game into
+    /// the host's session and stays out of the log.
     /// </summary>
     private const string JoinCodePrefix = "mgqmp";
 

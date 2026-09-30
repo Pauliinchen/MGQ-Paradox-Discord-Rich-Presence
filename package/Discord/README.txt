@@ -107,8 +107,8 @@ Update.bat keeps them, extracting a new download by hand resets them.
 
 PLAYING WITH A FRIEND
 ---------------------
-With the Multiplayer mod
-(github.com/Pauliinchen/MGQ-Paradox-Multiplayer-Mod) installed as well,
+With Monster Girl Quest! Online
+(github.com/Pauliinchen/MGQ-Online) installed as well,
 you can invite a friend through the + in a Discord chat ("Invite to
 play") and accept their invites, and your status shows "Waiting for a
 friend" while you host and "Playing with <Friend>" while you play

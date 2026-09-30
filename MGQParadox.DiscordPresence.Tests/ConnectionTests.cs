@@ -16,7 +16,7 @@ namespace MGQParadox.DiscordPresence.Tests;
 public sealed class ConnectionTests
 {
     /// <summary>
-    /// A join secret as the Multiplayer mod writes one.
+    /// A join secret as Monster Girl Quest! Online writes one.
     /// </summary>
     private const string JoinSecret = "mgqmp1;abcdefghjk;47625;203.0.113.7";
 

@@ -1856,8 +1856,8 @@ module MGQ_Discord
   end
 
   # A box on the title screen while Discord starts the game for an invite. It keeps the player from
-  # choosing anything until Discord hands over the join, which another mod such as the Multiplayer mod
-  # joins with, or says that the invite had ended.
+  # choosing anything until Discord hands over the join, which another mod such as Monster Girl
+  # Quest! Online joins with, or says that the invite had ended.
   module InviteBox
     # Discord did not start the game, as the DLL reports it.
     NONE = 0
@@ -1958,7 +1958,7 @@ module MGQ_Discord
     end
   end
 
-  # What other mods, such as the Multiplayer mod, hand the presence: their connection with a friend,
+  # What other mods, such as Monster Girl Quest! Online, hand the presence: their connection with a friend,
   # which the activity shows and Discord invites to, and fields of their own for the status; and what
   # they take from it: invites the player accepted in Discord, and the player's name on Discord. They
   # check VERSION first, so this mod never needs to know them.

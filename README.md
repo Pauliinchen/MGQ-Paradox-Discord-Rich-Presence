@@ -110,7 +110,7 @@ The options under `Activity Image` only show while they apply. The options are t
 
 ### Playing with a friend
 
-With the [Multiplayer mod](https://github.com/Pauliinchen/MGQ-Paradox-Multiplayer-Mod) installed as well, you can invite a friend through the **+** in a Discord chat (*Invite to play*) and accept their invites, and your status shows `Waiting for a friend (1 of 2)` while you host and `Playing with <Friend> (2 of 2)` while you play together. The `Get the mod` button leaves your profile while you host. When you accept an invite, a box on the title screen keeps you waiting until Discord hands it over. An invite ends when your friend stops hosting; the box then says so.
+With [Monster Girl Quest! Online](https://github.com/Pauliinchen/MGQ-Online) installed as well, you can invite a friend through the **+** in a Discord chat (*Invite to play*) and accept their invites, and your status shows `Waiting for a friend (1 of 2)` while you host and `Playing with <Friend> (2 of 2)` while you play together. The `Get the mod` button leaves your profile while you host. When you accept an invite, a box on the title screen keeps you waiting until Discord hands it over. An invite ends when your friend stops hosting; the box then says so.
 
 ### After updating the translation
 
@@ -147,7 +147,7 @@ The game counts most of the second group only **across all saves combined**. To 
 ## Troubleshooting
 
 - **Nothing shows on Discord:** make sure the mod loader is installed and activity sharing is turned on (see [Requirements](#requirements)). Discord can be started before or after the game; the status appears within about 15 seconds. If it still doesn't, check `Discord\DiscordPresence.log`.
-- **The status updates slowly:** Discord allows 5 updates per 20 seconds, so a new map or fight shows up within about 4 seconds. The game also pauses while its window is in the background, so the status doesn't change then, unless another mod such as the Multiplayer mod keeps it running.
+- **The status updates slowly:** Discord allows 5 updates per 20 seconds, so a new map or fight shows up within about 4 seconds. The game also pauses while its window is in the background, so the status doesn't change then, unless another mod such as Monster Girl Quest! Online keeps it running.
 - **`Discord\InGame.log` exists:** it only appears when something went wrong inside the game. Please attach it when [opening an issue](https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence/issues).
 
 ## Building from source
