@@ -2,6 +2,7 @@
 //  GameStatus.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-01: Read the party of a Monster Girl Quest! Online world and its size
 //      Paulinchen  2026-09-28: Read whose team the player fights in a PvP battle
 //                            - Read whether the player fights their own team in a mirror match
 //      Paulinchen  2026-09-27: Read the medals earned
@@ -167,6 +168,21 @@ internal sealed class GameStatus
     /// Whether the player fights their own team in a mirror match.
     /// </summary>
     public bool IsInMirrorMatch => Value("pvp_battle") == "mirror";
+
+    /// <summary>
+    /// The party the player plays in, in a world of Monster Girl Quest! Online, empty outside one.
+    /// </summary>
+    public string WorldParty => Value("mp_party");
+
+    /// <summary>
+    /// The players of the party in a world, 0 outside one.
+    /// </summary>
+    public long WorldPartySize => Number("mp_party_size") ?? 0;
+
+    /// <summary>
+    /// The players a party in a world holds at most, 0 outside one.
+    /// </summary>
+    public long WorldPartyMax => Number("mp_party_max") ?? 0;
 
     /// <summary>
     /// The Discord application's art asset to show as the picture, empty for the default picture.

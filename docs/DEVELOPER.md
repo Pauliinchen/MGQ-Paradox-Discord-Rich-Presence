@@ -149,7 +149,7 @@ They appended a block (`# >>> MGQ Discord RPC` … `# <<< MGQ Discord RPC`) to `
 | `idle` | Neither; the second line shows the trivia again. |
 | `take_invite` | The join secret of an invite the player accepted in Discord, handed out once, or `nil`. |
 | `player_name` | The player's name on Discord, or `nil` until Discord told it. |
-| `add_status { \|scene\| ... }` | Adds the Hash the block returns to every status `StatusText.build` hands the DLL. A block that raises is logged and left out. Monster Girl Quest! Online adds `pvp_battle_with` and `pvp_battle=mirror` for the first line this way. |
+| `add_status { \|scene\| ... }` | Adds the Hash the block returns to every status `StatusText.build` hands the DLL. A block that raises is logged and left out. Monster Girl Quest! Online adds `pvp_battle_with` and `pvp_battle=mirror` for the first line this way, and `mp_party`, `mp_party_size` and `mp_party_max` for the party of its worlds, which Discord shows the size of ("(2 of 4)"). |
 
 The DLL keeps the reported connection in `Connection` (`presence_set_connection`). A report without a party, or hosting without a join secret of at most 128 characters (Discord's limit), counts as none. `PresenceLoop.WithConnection` puts it into the activity; Discord puts the party's size behind the second line. Both games name the party the same, so Discord sees them in the same party.
 

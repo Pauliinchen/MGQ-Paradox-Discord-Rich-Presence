@@ -2,6 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-01: Gave Discord the party of a Monster Girl Quest! Online world, which it shows the size of
 //      Paulinchen  2026-09-28: Named a PvP battle, a mirror match and the PvP battle screen on the first line
 //                            - Showed a connection with a friend on the second line: waiting for them, or playing with them
 //      Paulinchen  2026-09-27: Named what the player does in a menu screen, the Pocket Castle's too
@@ -222,8 +223,20 @@ internal static class ActivityBuilder
             LargeImage = status.Picture.Length > 0 ? status.Picture : DefaultPicture,
             LargeText = TooltipOf(status),
             Buttons = Buttons,
+            Party = WorldPartyOf(status),
         };
     }
+
+    /// <summary>
+    /// Builds the party the player plays in, in a world of Monster Girl Quest! Online, which Discord
+    /// shows the size of, such as "(2 of 4)".
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>The party, <see langword="null"/> outside a party of two or more.</returns>
+    private static ActivityParty? WorldPartyOf(GameStatus status) =>
+        status.WorldParty.Length > 0 && status.WorldPartySize >= 2 && status.WorldPartyMax >= status.WorldPartySize
+            ? new ActivityParty(status.WorldParty, (int)status.WorldPartySize, (int)status.WorldPartyMax)
+            : null;
 
     /// <summary>
     /// Builds the second line while the player is connected with a friend, which Discord follows with

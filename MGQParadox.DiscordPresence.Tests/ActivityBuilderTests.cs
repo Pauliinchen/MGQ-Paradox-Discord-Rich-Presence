@@ -2,6 +2,7 @@
 //  ActivityBuilderTests.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-01: Covered the party of a Monster Girl Quest! Online world
 //      Paulinchen  2026-09-28: Covered a PvP battle, a mirror match and the PvP battle screen on the first line
 //                            - Covered the second line of a connection with a friend
 //      Paulinchen  2026-09-27: Covered the menu screens
@@ -109,6 +110,25 @@ public sealed class ActivityBuilderTests
     public void Details_ShowAMirrorMatch() =>
         Assert.Equal("Fighting their own team in a mirror match!",
                      Build(Status(("scene", "battle"), ("area", "Iliasville"), ("pvp_battle", "mirror"))).Details);
+
+    /// <summary>
+    /// Asserts that a party in a world of Monster Girl Quest! Online becomes the party Discord shows
+    /// the size of.
+    /// </summary>
+    [Fact]
+    public void Party_ShowsTheWorldPartysSize() =>
+        Assert.Equal(new ActivityParty("abc123", 2, 4),
+                     Build(Status(("area", "Iliasville"), ("mp_party", "abc123"), ("mp_party_size", 2), ("mp_party_max", 4))).Party);
+
+    /// <summary>
+    /// Asserts that a player alone, or outside a world, has no party.
+    /// </summary>
+    [Fact]
+    public void Party_IsLeftOutAlone()
+    {
+        Assert.Null(Build(Status(("area", "Iliasville"), ("mp_party", "abc123"), ("mp_party_size", 1), ("mp_party_max", 4))).Party);
+        Assert.Null(Build(Status(("area", "Iliasville"))).Party);
+    }
 
     /// <summary>
     /// Asserts that a named menu screen replaces the Pocket Castle's own line, and idle still wins
