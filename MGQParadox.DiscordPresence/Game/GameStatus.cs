@@ -2,6 +2,7 @@
 //  GameStatus.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-02: Read the world of Monster Girl Quest! Online the player plays in, its players and its seats
 //      Paulinchen  2026-10-01: Read the party of a Monster Girl Quest! Online world and its size
 //      Paulinchen  2026-09-28: Read whose team the player fights in a PvP battle
 //                            - Read whether the player fights their own team in a mirror match
@@ -183,6 +184,26 @@ internal sealed class GameStatus
     /// The players a party in a world holds at most, 0 outside one.
     /// </summary>
     public long WorldPartyMax => Number("mp_party_max") ?? 0;
+
+    /// <summary>
+    /// The name of the world of Monster Girl Quest! Online the player plays in, empty outside one.
+    /// </summary>
+    public string WorldName => Value("mp_world");
+
+    /// <summary>
+    /// Names the world the player plays in, the same in every game in it, empty outside one.
+    /// </summary>
+    public string WorldId => Value("mp_world_id");
+
+    /// <summary>
+    /// The players in the world, the player included, 0 outside one.
+    /// </summary>
+    public long WorldSize => Number("mp_world_size") ?? 0;
+
+    /// <summary>
+    /// The players the world seats at once, 0 outside one.
+    /// </summary>
+    public long WorldMax => Number("mp_world_max") ?? 0;
 
     /// <summary>
     /// The Discord application's art asset to show as the picture, empty for the default picture.

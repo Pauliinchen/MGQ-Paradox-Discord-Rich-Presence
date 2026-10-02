@@ -11,6 +11,17 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
+## 1.6.0
+
+### Line 2
+
+In a world of [Monster Girl Quest! Online](https://github.com/Pauliinchen/MGQ-Online), line 2 shows the world instead of the trivia. Discord adds the size behind it. While the player is in a party of two or more, the world and the party take turns every 16 seconds, like the trivia. A connection with a friend still comes first.
+
+| Activity | Text |
+|---|---|
+| In a world | `Playing on World <World> (<Players> of <Max Players>)` |
+| In a party in a world | `Currently in a Party! (<Players> of 4)` |
+
 ## 1.5.0
 
 Other mods can now report what they add through `MGQ_Discord::Bridge`. The [Multiplayer mod](https://github.com/Pauliinchen/MGQ-Online) reports these.

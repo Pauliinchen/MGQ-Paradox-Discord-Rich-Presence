@@ -2,6 +2,7 @@
 //  ActivityBuilderTests.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-02: Covered the world of Monster Girl Quest! Online on the second line, taking turns with the party
 //      Paulinchen  2026-10-01: Covered the party of a Monster Girl Quest! Online world
 //      Paulinchen  2026-09-28: Covered a PvP battle, a mirror match and the PvP battle screen on the first line
 //                            - Covered the second line of a connection with a friend
@@ -112,22 +113,44 @@ public sealed class ActivityBuilderTests
                      Build(Status(("scene", "battle"), ("area", "Iliasville"), ("pvp_battle", "mirror"))).Details);
 
     /// <summary>
-    /// Asserts that a party in a world of Monster Girl Quest! Online becomes the party Discord shows
-    /// the size of.
+    /// Asserts that a world of Monster Girl Quest! Online replaces the trivia with its name, which
+    /// Discord follows with its players, and stays while the player is in no party of two or more.
     /// </summary>
-    [Fact]
-    public void Party_ShowsTheWorldPartysSize() =>
-        Assert.Equal(new ActivityParty("abc123", 2, 4),
-                     Build(Status(("area", "Iliasville"), ("mp_party", "abc123"), ("mp_party_size", 2), ("mp_party_max", 4))).Party);
+    /// <param name="triviaIndex">Which trivia line it is the turn of.</param>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    public void State_ShowsTheWorldOutsideAParty(int triviaIndex)
+    {
+        var activity = Build(InWorld(partySize: 1), triviaIndex);
+
+        Assert.Equal("Playing on World Valley", activity.State);
+        Assert.Equal(new ActivityParty("w1", 3, 8), activity.Party);
+    }
 
     /// <summary>
-    /// Asserts that a player alone, or outside a world, has no party.
+    /// Asserts that the world takes turns with the player's party of two or more, each with its own size.
     /// </summary>
     [Fact]
-    public void Party_IsLeftOutAlone()
+    public void State_TakesTurnsBetweenTheWorldAndTheParty()
     {
-        Assert.Null(Build(Status(("area", "Iliasville"), ("mp_party", "abc123"), ("mp_party_size", 1), ("mp_party_max", 4))).Party);
-        Assert.Null(Build(Status(("area", "Iliasville"))).Party);
+        var status = InWorld(partySize: 2);
+
+        Assert.Equal(("Playing on World Valley", new ActivityParty("w1", 3, 8)), StateAndParty(Build(status, triviaIndex: 0)));
+        Assert.Equal(("Currently in a Party!", new ActivityParty("abc123", 2, 4)), StateAndParty(Build(status, triviaIndex: 1)));
+        Assert.Equal(("Playing on World Valley", new ActivityParty("w1", 3, 8)), StateAndParty(Build(status, triviaIndex: 2)));
+    }
+
+    /// <summary>
+    /// Asserts that outside a world the trivia shows, without a party.
+    /// </summary>
+    [Fact]
+    public void State_ShowsTheTriviaOutsideAWorld()
+    {
+        var activity = Build(Status(("battles", 7)));
+
+        Assert.Equal("Has fought 7 battles!", activity.State);
+        Assert.Null(activity.Party);
     }
 
     /// <summary>
@@ -315,6 +338,23 @@ public sealed class ActivityBuilderTests
         Assert.Equal("Currently carrying 100 gold!", Build(status, triviaIndex: 1).State);
         Assert.Equal("Has fought 7 battles!", Build(status, triviaIndex: 2).State);
     }
+
+    /// <summary>
+    /// Builds the status of a player in a world of Monster Girl Quest! Online with 3 of its 8 players
+    /// in it, and in a party of 4 at most.
+    /// </summary>
+    /// <param name="partySize">The players of the party, the player included.</param>
+    /// <returns>The status.</returns>
+    private static GameStatus InWorld(int partySize) =>
+        Status(("area", "Iliasville"), ("battles", 7), ("mp_world", "Valley"), ("mp_world_id", "w1"), ("mp_world_size", 3), ("mp_world_max", 8),
+               ("mp_party", "abc123"), ("mp_party_size", partySize), ("mp_party_max", 4));
+
+    /// <summary>
+    /// Reads the second line of an activity with the party Discord follows it with.
+    /// </summary>
+    /// <param name="activity">The activity.</param>
+    /// <returns>The line and the party.</returns>
+    private static (string?, ActivityParty?) StateAndParty(Activity activity) => (activity.State, activity.Party);
 
     /// <summary>
     /// Builds the activity of a status at <see cref="StatusFactory.Now"/>.

@@ -2,6 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-02: Showed the world of Monster Girl Quest! Online and its players on the second line, taking turns with the player's party
 //      Paulinchen  2026-10-01: Gave Discord the party of a Monster Girl Quest! Online world, which it shows the size of
 //      Paulinchen  2026-09-28: Named a PvP battle, a mirror match and the PvP battle screen on the first line
 //                            - Showed a connection with a friend on the second line: waiting for them, or playing with them
@@ -65,6 +66,12 @@ internal static class ActivityBuilder
     /// party's size.
     /// </summary>
     public const string WaitingForFriendState = "Waiting for a friend";
+
+    /// <summary>
+    /// The second line while the player plays in a party in a world of Monster Girl Quest! Online,
+    /// which Discord follows with the party's size.
+    /// </summary>
+    private const string InPartyState = "Currently in a Party!";
 
     /// <summary>
     /// What the player is shown doing in a mirror match.
@@ -215,27 +222,55 @@ internal static class ActivityBuilder
             };
         }
 
+        var worldLine = WorldLineOf(status, triviaIndex);
+
         return new Activity
         {
             Details = DetailsOf(status, pocketCastleIndex, now),
-            State = TriviaAt(TriviaBuilder.LinesOf(status, now), triviaIndex),
+            State = worldLine?.State ?? TriviaAt(TriviaBuilder.LinesOf(status, now), triviaIndex),
             StartedAt = status.StartedAt,
             LargeImage = status.Picture.Length > 0 ? status.Picture : DefaultPicture,
             LargeText = TooltipOf(status),
             Buttons = Buttons,
-            Party = WorldPartyOf(status),
+            Party = worldLine?.Party,
         };
     }
 
     /// <summary>
-    /// Builds the party the player plays in, in a world of Monster Girl Quest! Online, which Discord
-    /// shows the size of, such as "(2 of 4)".
+    /// Builds the second line in a world of Monster Girl Quest! Online instead of the trivia, with the
+    /// party Discord follows it with the size of: the world, taking turns with the player's party
+    /// while they play in one of two or more.
     /// </summary>
     /// <param name="status">The status the game published.</param>
-    /// <returns>The party, <see langword="null"/> outside a party of two or more.</returns>
-    private static ActivityParty? WorldPartyOf(GameStatus status) =>
-        status.WorldParty.Length > 0 && status.WorldPartySize >= 2 && status.WorldPartyMax >= status.WorldPartySize
-            ? new ActivityParty(status.WorldParty, (int)status.WorldPartySize, (int)status.WorldPartyMax)
+    /// <param name="index">Which line to show, wrapping around.</param>
+    /// <returns>The line and its party, <see langword="null"/> outside a world.</returns>
+    private static (string State, ActivityParty Party)? WorldLineOf(GameStatus status, int index)
+    {
+        var lines = new List<(string State, ActivityParty Party)>();
+
+        if (status.WorldName.Length > 0 && PartyOf(status.WorldId, status.WorldSize, status.WorldMax) is { } world)
+        {
+            lines.Add(($"Playing on World {status.WorldName}", world));
+        }
+
+        if (status.WorldPartySize >= 2 && PartyOf(status.WorldParty, status.WorldPartySize, status.WorldPartyMax) is { } party)
+        {
+            lines.Add((InPartyState, party));
+        }
+
+        return lines.Count > 0 ? lines[index % lines.Count] : null;
+    }
+
+    /// <summary>
+    /// Builds a party Discord shows the size of, such as "(2 of 4)".
+    /// </summary>
+    /// <param name="id">Names the party, the same in every game in it.</param>
+    /// <param name="size">How many are in it.</param>
+    /// <param name="max">How many fit in.</param>
+    /// <returns>The party, <see langword="null"/> without a name or with a size that does not fit.</returns>
+    private static ActivityParty? PartyOf(string id, long size, long max) =>
+        id.Length > 0 && size >= 1 && max >= size
+            ? new ActivityParty(id, (int)size, (int)max)
             : null;
 
     /// <summary>
