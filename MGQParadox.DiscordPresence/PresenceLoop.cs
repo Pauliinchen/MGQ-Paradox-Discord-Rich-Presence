@@ -2,6 +2,7 @@
 //  PresenceLoop.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-06: Took the invite banner from ActivityBuilder, which offers invites into a world too
 //      Paulinchen  2026-09-29: Counted only an invite the connection took as the launch's join
 //                            - Noted the launch before the loop's thread starts, so the title screen never asks too early
 //                            - Noted whether Discord started the game, with the link it used, and whether its join came
@@ -52,14 +53,6 @@ internal sealed class PresenceLoop
     /// Players a connection takes, the host and one guest.
     /// </summary>
     private const int MaxPlayers = 2;
-
-    /// <summary>
-    /// The art asset shown as the banner of an invite to play together, 1024 x 576.
-    /// </summary>
-    /// <remarks>
-    /// Set in the activity, since the application's invite image in the Developer Portal did not reach the invites.
-    /// </remarks>
-    private const string InviteCoverAsset = "invite_cover";
 
     /// <summary>
     /// The activity that clears the profile, sent while the player turned the presence off.
@@ -324,7 +317,7 @@ internal sealed class PresenceLoop
         {
             activity.Party = new ActivityParty(hosted.PartyId, 1, MaxPlayers);
             activity.JoinSecret = hosted.JoinSecret;
-            activity.InviteCover = InviteCoverAsset;
+            activity.InviteCover = ActivityBuilder.InviteCover;
             activity.State = ActivityBuilder.WaitingForFriendState;
         }
         else if (connection.Connected is { } connected)

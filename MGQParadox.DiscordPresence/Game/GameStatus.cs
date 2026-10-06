@@ -2,6 +2,7 @@
 //  GameStatus.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-06: Read what lets a friend into the world of Monster Girl Quest! Online the player plays in
 //      Paulinchen  2026-10-02: Read the world of Monster Girl Quest! Online the player plays in, its players and its seats
 //      Paulinchen  2026-10-01: Read the party of a Monster Girl Quest! Online world and its size
 //      Paulinchen  2026-09-28: Read whose team the player fights in a PvP battle
@@ -204,6 +205,12 @@ internal sealed class GameStatus
     /// The players the world seats at once, 0 outside one.
     /// </summary>
     public long WorldMax => Number("mp_world_max") ?? 0;
+
+    /// <summary>
+    /// What lets a friend into the world the player plays in, which a Discord invite carries, empty
+    /// outside one.
+    /// </summary>
+    public string WorldInvite => Value("mp_world_invite");
 
     /// <summary>
     /// The Discord application's art asset to show as the picture, empty for the default picture.

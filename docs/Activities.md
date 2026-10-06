@@ -11,6 +11,12 @@ A Discord profile has four places to fill:
 
 When you add or change an activity, add it under the version it will ship in.
 
+## 1.6.1
+
+### Invites
+
+In a world of [Monster Girl Quest! Online](https://github.com/Pauliinchen/MGQ-Online), the activity carries the world's join secret, so friends can be invited through **Invite to play** in a chat's **+** menu or ask to join from the profile. The invite has the `invite_cover` banner, and the *Get the mod* button is left out meanwhile, since Discord takes either. Discord offers no invite while the party shown on line 2 is full.
+
 ## 1.6.0
 
 ### Line 2
@@ -103,7 +109,7 @@ A menu screen with a text of its own shows it instead of `In menu . . .`, as `<L
 
 | Button | Link | When |
 |---|---|---|
-| `Get the mod` | The mod's GitHub page, with its requirements, installation and download | Always, the title screen included. Discord shows buttons to everyone but the player. |
+| `Get the mod` | The mod's GitHub page, with its requirements, installation and download | Always, the title screen included, unless the activity offers invites. Discord shows buttons to everyone but the player. |
 
 ### Tooltip
 

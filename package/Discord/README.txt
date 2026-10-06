@@ -117,6 +117,11 @@ When you accept an invite, a box on the title screen keeps you waiting
 until Discord hands it over. An invite ends when your friend stops
 hosting; the box then says so.
 
+In one of its worlds, friends can be invited into the world the same
+way, password included: accepting starts their game and enters the
+world from the title screen. The "Get the mod" button leaves your
+profile there too, since Discord shows either the button or invites.
+
 
 AFTER UPDATING THE TRANSLATION
 ------------------------------

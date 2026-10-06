@@ -2,6 +2,7 @@
 //  ActivityBuilderTests.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-06: Covered the invites into a world of Monster Girl Quest! Online
 //      Paulinchen  2026-10-02: Covered the world of Monster Girl Quest! Online on the second line, taking turns with the party
 //      Paulinchen  2026-10-01: Covered the party of a Monster Girl Quest! Online world
 //      Paulinchen  2026-09-28: Covered a PvP battle, a mirror match and the PvP battle screen on the first line
@@ -139,6 +140,35 @@ public sealed class ActivityBuilderTests
         Assert.Equal(("Playing on World Valley", new ActivityParty("w1", 3, 8)), StateAndParty(Build(status, triviaIndex: 0)));
         Assert.Equal(("Currently in a Party!", new ActivityParty("abc123", 2, 4)), StateAndParty(Build(status, triviaIndex: 1)));
         Assert.Equal(("Playing on World Valley", new ActivityParty("w1", 3, 8)), StateAndParty(Build(status, triviaIndex: 2)));
+    }
+
+    /// <summary>
+    /// Asserts that a world the game offers invites into gets the join secret and the invite banner,
+    /// which Discord shows instead of the button.
+    /// </summary>
+    [Fact]
+    public void World_WithAnInvite_IsOpenToInvites()
+    {
+        var activity = Build(Status(("mp_world", "Valley"), ("mp_world_id", "w1"), ("mp_world_size", 3), ("mp_world_max", 8),
+                                    ("mp_world_invite", "mgqmp1;abcdefghjkmnpqrs;r1;8")));
+
+        Assert.Equal("mgqmp1;abcdefghjkmnpqrs;r1;8", activity.JoinSecret);
+        Assert.Equal("invite_cover", activity.InviteCover);
+        Assert.Contains("\"secrets\":{\"join\":\"mgqmp1;abcdefghjkmnpqrs;r1;8\"}", activity.ToJson());
+        Assert.DoesNotContain("\"buttons\"", activity.ToJson());
+    }
+
+    /// <summary>
+    /// Asserts that no invite is offered without a world, without an invite or with one too long for Discord.
+    /// </summary>
+    [Fact]
+    public void World_WithoutAUsableInvite_KeepsTheButton()
+    {
+        Assert.Null(Build(InWorld(partySize: 1)).JoinSecret);
+        Assert.Null(Build(Status(("mp_world_invite", "mgqmp1;abcdefghjkmnpqrs;r1;8"))).JoinSecret);
+        Assert.Null(Build(Status(("mp_world", "Valley"), ("mp_world_id", "w1"), ("mp_world_size", 3), ("mp_world_max", 8),
+                                 ("mp_world_invite", new string('x', Connection.MaxJoinSecretLength + 1)))).JoinSecret);
+        Assert.Contains("\"buttons\"", Build(InWorld(partySize: 1)).ToJson());
     }
 
     /// <summary>

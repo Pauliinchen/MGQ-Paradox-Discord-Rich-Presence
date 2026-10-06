@@ -26,7 +26,7 @@ Shows what you're doing in **Monster Girl Quest! Paradox RPG** on your Discord p
 
 **The picture** is the game's icon, or if you [choose so](#options) Ilias or Alice, whoever you picked, later the route you are on, and the collab's heroes during the Collaboration Scenario.
 
-**A `Get the mod` button** under your status links your friends to this page. Discord doesn't show it to you, only to others.
+**A `Get the mod` button** under your status links your friends to this page. Discord doesn't show it to you, only to others, and leaves it out while your status offers invites.
 
 **Trivia** rotates every 16 seconds:
 
@@ -110,7 +110,7 @@ The options under `Activity Image` only show while they apply. The options are t
 
 ### Playing with a friend
 
-With [Monster Girl Quest! Online](https://github.com/Pauliinchen/MGQ-Online) installed as well, you can invite a friend through the **+** in a Discord chat (*Invite to play*) and accept their invites, and your status shows `Waiting for a friend (1 of 2)` while you host and `Playing with <Friend> (2 of 2)` while you play together. The `Get the mod` button leaves your profile while you host. When you accept an invite, a box on the title screen keeps you waiting until Discord hands it over. An invite ends when your friend stops hosting; the box then says so. In one of its worlds, the second line shows `Playing on World <World> (3 of 8)` instead of the trivia, taking turns with `Currently in a Party! (2 of 4)` while you play in a party.
+With [Monster Girl Quest! Online](https://github.com/Pauliinchen/MGQ-Online) installed as well, you can invite a friend through the **+** in a Discord chat (*Invite to play*) and accept their invites, and your status shows `Waiting for a friend (1 of 2)` while you host and `Playing with <Friend> (2 of 2)` while you play together. The `Get the mod` button leaves your profile while you host. When you accept an invite, a box on the title screen keeps you waiting until Discord hands it over. An invite ends when your friend stops hosting; the box then says so. In one of its worlds, the second line shows `Playing on World <World> (3 of 8)` instead of the trivia, taking turns with `Currently in a Party! (2 of 4)` while you play in a party, and friends can be invited into the world the same way, password included; the `Get the mod` button leaves your profile there too.
 
 ### After updating the translation
 

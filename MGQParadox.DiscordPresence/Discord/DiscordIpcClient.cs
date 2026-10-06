@@ -2,6 +2,7 @@
 //  DiscordIpcClient.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-06: Left join secrets out of the log
 //      Paulinchen  2026-09-29: Stopped accepting a friend's request to join, which moved a hosting friend's game into the player's party
 //      Paulinchen  2026-09-28: Subscribed to Discord's invite events and passed them on, with the user's name from READY
 //                            - Added accepting a friend's request to join
@@ -14,6 +15,7 @@
 using System;
 using System.IO.Pipes;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace MGQParadox.DiscordPresence.Discord;
@@ -57,6 +59,11 @@ internal sealed class DiscordIpcClient
     /// How long Discord gets to confirm the handshake.
     /// </summary>
     private static readonly TimeSpan ReadyTimeout = TimeSpan.FromSeconds(6);
+
+    /// <summary>
+    /// The join secrets in a body, which let their holder into the player's world and so stay out of the log.
+    /// </summary>
+    private static readonly Regex SecretsPattern = new("\"secrets\":\\{[^}]*\\}", RegexOptions.Compiled);
 
     /// <summary>
     /// The Discord application the presence is shown for.
@@ -420,7 +427,7 @@ internal sealed class DiscordIpcClient
     /// <returns>The body on one line, cut off when long.</returns>
     private static string Excerpt(string body)
     {
-        var line = body.Replace("\r", " ").Replace("\n", " ");
+        var line = SecretsPattern.Replace(body.Replace("\r", " ").Replace("\n", " "), "\"secrets\":{...}");
 
         return line.Length > LogExcerptLength ? line.Substring(0, LogExcerptLength) + "..." : line;
     }

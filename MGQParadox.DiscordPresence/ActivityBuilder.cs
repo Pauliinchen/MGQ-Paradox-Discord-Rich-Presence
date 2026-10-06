@@ -2,6 +2,7 @@
 //  ActivityBuilder.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-06: Offered Discord's invites into the world of Monster Girl Quest! Online the player plays in, instead of the button
 //      Paulinchen  2026-10-02: Showed the world of Monster Girl Quest! Online and its players on the second line, taking turns with the player's party
 //      Paulinchen  2026-10-01: Gave Discord the party of a Monster Girl Quest! Online world, which it shows the size of
 //      Paulinchen  2026-09-28: Named a PvP battle, a mirror match and the PvP battle screen on the first line
@@ -72,6 +73,14 @@ internal static class ActivityBuilder
     /// which Discord follows with the party's size.
     /// </summary>
     private const string InPartyState = "Currently in a Party!";
+
+    /// <summary>
+    /// The art asset shown as the banner of an invite to play together, 1024 x 576.
+    /// </summary>
+    /// <remarks>
+    /// Set in the activity, since the application's invite image in the Developer Portal did not reach the invites.
+    /// </remarks>
+    public const string InviteCover = "invite_cover";
 
     /// <summary>
     /// What the player is shown doing in a mirror match.
@@ -223,6 +232,7 @@ internal static class ActivityBuilder
         }
 
         var worldLine = WorldLineOf(status, triviaIndex);
+        var invite = worldLine != null ? WorldInviteOf(status) : null;
 
         return new Activity
         {
@@ -233,8 +243,19 @@ internal static class ActivityBuilder
             LargeText = TooltipOf(status),
             Buttons = Buttons,
             Party = worldLine?.Party,
+            JoinSecret = invite,
+            InviteCover = invite != null ? InviteCover : null,
         };
     }
+
+    /// <summary>
+    /// Reads what lets a friend into the player's world, which Discord's invites carry as the join
+    /// secret.
+    /// </summary>
+    /// <param name="status">The status the game published.</param>
+    /// <returns>The join secret, <see langword="null"/> without one or with one too long for Discord.</returns>
+    private static string? WorldInviteOf(GameStatus status) =>
+        status.WorldInvite.Length is > 0 and <= Connection.MaxJoinSecretLength ? status.WorldInvite : null;
 
     /// <summary>
     /// Builds the second line in a world of Monster Girl Quest! Online instead of the trivia, with the
