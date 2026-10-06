@@ -2,6 +2,7 @@
 //  Log.cs
 //
 //  Changelog:
+//      Paulinchen  2026-10-06: Wrote the log into the game folder's Logs folder
 //      Paulinchen  2026-09-29: Kept the DLL's threads from writing at once
 //      Paulinchen  2026-09-27: Named the DLL as the only writer, the uninstaller is gone
 //      Paulinchen  2026-09-26: Named the uninstaller as the second writer
@@ -17,7 +18,7 @@ using System.Text;
 namespace MGQParadox.DiscordPresence;
 
 /// <summary>
-/// DiscordPresence.log in the mod folder, written by the DLL.
+/// DiscordPresence.log in the game folder's Logs folder, written by the DLL.
 /// </summary>
 /// <remarks>
 /// Never throws, since a failing log must not take down the code writing it, least of all the game.
@@ -27,7 +28,7 @@ internal static class Log
     /// <summary>
     /// Full path of the log file.
     /// </summary>
-    private static string FilePath => ModFolder.PathOf("DiscordPresence.log");
+    private static string FilePath => ModFolder.LogPathOf("DiscordPresence.log");
 
     /// <summary>
     /// Keeps the game thread, the presence loop, the pipe reader and the update check from writing at once.
@@ -49,6 +50,7 @@ internal static class Log
         {
             lock (Gate)
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
                 File.AppendAllText(FilePath, $"{time}  {message}\r\n", Encoding.UTF8);
             }
         }

@@ -146,9 +146,9 @@ The game counts most of the second group only **across all saves combined**. To 
 
 ## Troubleshooting
 
-- **Nothing shows on Discord:** make sure the mod loader is installed and activity sharing is turned on (see [Requirements](#requirements)). Discord can be started before or after the game; the status appears within about 15 seconds. If it still doesn't, check `Discord\DiscordPresence.log`.
+- **Nothing shows on Discord:** make sure the mod loader is installed and activity sharing is turned on (see [Requirements](#requirements)). Discord can be started before or after the game; the status appears within about 15 seconds. If it still doesn't, check `Logs\DiscordPresence.log` in the game folder.
 - **The status updates slowly:** Discord allows 5 updates per 20 seconds, so a new map or fight shows up within about 4 seconds. The game also pauses while its window is in the background, so the status doesn't change then, unless another mod such as Monster Girl Quest! Online keeps it running.
-- **`Discord\InGame.log` exists:** it only appears when something went wrong inside the game. Please attach it when [opening an issue](https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence/issues).
+- **`Logs\Discord InGame.log` exists:** it only appears when something went wrong inside the game. Please attach it when [opening an issue](https://github.com/Pauliinchen/MGQ-Paradox-Discord-Rich-Presence/issues).
 
 ## Building from source
 

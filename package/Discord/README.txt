@@ -166,10 +166,10 @@ TROUBLESHOOTING
 - Nothing on Discord: check that the mod loader is installed and that
   activity sharing is on. Discord can be started before or after the
   game; the status appears within about 15 seconds. Then look at
-  Discord\DiscordPresence.log.
+  Logs\DiscordPresence.log in the game folder.
 - The status updates at most every 4 seconds (Discord's limit).
-- Discord\InGame.log only appears if something went wrong inside
-  the game. Include it when reporting a problem.
+- Logs\Discord InGame.log only appears if something went wrong
+  inside the game. Include it when reporting a problem.
 
 
 CREDITS

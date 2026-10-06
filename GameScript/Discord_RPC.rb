@@ -2,6 +2,7 @@
 #  Discord_RPC.rb
 #
 #  Changelog:
+#      Paulinchen  2026-10-06: Wrote the in-game log as Discord InGame.log into the game folder's Logs folder
 #      Paulinchen  2026-09-29: Found the mod folder relative to the game's folder, which works in a folder named with characters outside ASCII
 #                            - Read the story, the trivia and who speaks in the untranslated game too
 #                            - Let the invite box turn from ended to joined when the join comes late
@@ -58,11 +59,14 @@ module MGQ_Discord
   # Turns the mod off without uninstalling it.
   ENABLED = true
 
-  # Logs every published status to InGame.log.
+  # Logs every published status to Discord InGame.log.
   DEBUG = false
 
-  # Folder next to Game.exe that holds everything the mod reads or writes.
+  # Folder next to Game.exe that holds everything the mod reads or writes but its logs.
   MOD_DIR = "Discord"
+
+  # Folder next to Game.exe that holds the logs, shared with the user's other mods.
+  LOG_DIR = "Logs"
 
   # Frames between two publishes, half a second at 60 frames per second.
   PUBLISH_INTERVAL = 30
@@ -187,6 +191,16 @@ module MGQ_Discord
     "#{MOD_DIR}\\#{name}"
   end
 
+  # Builds the path of a log file in LOG_DIR, the way path builds one in the mod folder, and makes
+  # the folder when it is missing.
+  #
+  # @param name [String] The log's file name.
+  # @return [String] The path.
+  def self.log_path(name)
+    Dir.mkdir(LOG_DIR) unless File.directory?(LOG_DIR)
+    "#{LOG_DIR}\\#{name}"
+  end
+
   # Reads a value from the game as text.
   #
   # At the title screen $game_map exists but holds no map, so even display_name raises.
@@ -200,7 +214,7 @@ module MGQ_Discord
     ""
   end
 
-  # Discord/InGame.log, which only appears when something went wrong inside the game.
+  # Logs/Discord InGame.log, which only appears when something went wrong inside the game.
   module Log
     # Lines written per session at most, an error repeating every frame would flood the file.
     MAX_LINES = 60
@@ -214,7 +228,7 @@ module MGQ_Discord
       return if @lines >= MAX_LINES
       @lines += 1
 
-      File.open(MGQ_Discord.path("InGame.log"), "ab") { |file| file.write("#{Time.now}  #{message}\n") }
+      File.open(MGQ_Discord.log_path("Discord InGame.log"), "ab") { |file| file.write("#{Time.now}  #{message}\n") }
     rescue
     end
   end

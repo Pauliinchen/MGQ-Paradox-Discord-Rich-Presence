@@ -19,7 +19,7 @@ docs/Activities.md                       every line Discord shows, by the releas
 
 | Module | What it is |
 |---|---|
-| `Log` | `InGame.log`, capped per session. |
+| `Log` | `Logs/Discord InGame.log` in the game folder, capped per session. |
 | `Options` | The mod's options in the game's menus, see [Options](#options). |
 | `NumberFormat` | The game's large-number style (`give_unit`), which only the game can write. |
 | `GameState` | Everything read from the game: scene, area, vehicle, Labyrinth of Chaos, mastery. |
@@ -48,7 +48,7 @@ The game hooks follow the module at the end of the file. `MGQ_Discord.hookable?`
 | `TriviaBuilder.cs` | Writes the trivia, one method per line. `Lines` lists them in rotation order, each with the parts (`Parts`) or the route (`Route`) it belongs to; a line without either shows throughout. `IsSpoiler` lines stay out while spoilers are hidden, `IsNsfw` lines while the NSFW option is off. |
 | `NumberFormat.cs` | Thousands separators, counted nouns and ordinals. |
 | `ModFolder.cs` | The `Discord` folder, which the game script finds the DLL in. |
-| `Log.cs` | `DiscordPresence.log` in that folder. |
+| `Log.cs` | `DiscordPresence.log` in the game folder's `Logs` folder, one above it. |
 | `NativeMethods.cs` | Lets the DLL find its own folder. |
 | `Game/GameStatus.cs` | One parsed status, a property per value. `Scene.cs` and `Vehicle.cs` hold its enums. |
 | `Discord/DiscordIpcClient.cs` | Discord's local named-pipe protocol. `Opcode.cs` holds the frame kinds. |
@@ -81,7 +81,7 @@ Patch/    Discord_RPC.rb
 - **Every publish replaces `Shipping/`.** Close the game before copying it over an install: `DiscordPresence.dll` is locked while the game runs.
 - **Visual Studio:** open the `.slnx`. The shipped files appear in the DLL project under `Shipped`.
 - **Game folder for testing:** it needs the community's mod loader (see [How it hooks in](#how-it-hooks-in)). Then every change only needs a publish, a copy and a game restart.
-- **Logs:** `DiscordPresence.log` (the DLL) and `InGame.log` (in-game errors). Set `DEBUG = true` in `Discord_RPC.rb` to log every status write.
+- **Logs:** `DiscordPresence.log` (the DLL) and `Discord InGame.log` (in-game errors), both in the game folder's `Logs` folder, which every mod writes its logs to. Set `DEBUG = true` in `Discord_RPC.rb` to log every status write.
 
 ### Tests
 
@@ -121,7 +121,7 @@ The mod requires the community's mod loader, a replacement `Patch.rb` from [*Pat
 
 They appended a block (`# >>> MGQ Discord RPC` … `# <<< MGQ Discord RPC`) to `Patch.rb` that loads `Discord/rpc.rb`, and shipped `DiscordPatcher.bat` next to `Game.exe`. Their hooks use the same alias names, so loaded next to `Discord_RPC.rb`, each hook would call itself until the stack overflows.
 
-- **At start-up** `MGQ_Discord.hookable?` deletes `Discord/rpc.rb`. The block runs *after* the mod loader, which sits above it in `Patch.rb`, so on the very first start after extracting the new zip it already finds nothing to load. The hooks are skipped (and `InGame.log` says why) when `Graphics` already has `mgq_discord_update`, from another copy of this script or an earlier version, or when `rpc.rb` cannot be deleted *and* `Patch.rb` still holds the block that would load it. A leftover `rpc.rb` with no block to load it only gets a log line.
+- **At start-up** `MGQ_Discord.hookable?` deletes `Discord/rpc.rb`. The block runs *after* the mod loader, which sits above it in `Patch.rb`, so on the very first start after extracting the new zip it already finds nothing to load. The hooks are skipped (and `Discord InGame.log` says why) when `Graphics` already has `mgq_discord_update`, from another copy of this script or an earlier version, or when `rpc.rb` cannot be deleted *and* `Patch.rb` still holds the block that would load it. A leftover `rpc.rb` with no block to load it only gets a log line.
 - **The block itself stays** in `Patch.rb`, with nothing left to load, until the next translation update or a fresh download of the community's `Patch.rb` replaces the file. The mod never writes `Patch.rb`, so there is no uninstaller: uninstalling is deleting `Patch/Discord_RPC.rb` and `Discord/`.
 
 ## Runtime
